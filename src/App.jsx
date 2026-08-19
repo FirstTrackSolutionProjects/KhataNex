@@ -18,9 +18,9 @@ import Services from "./pages/Services";
 import RefundCancellation from "./pages/RefundCancellation";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
-import FAQ from "./Pages/FAQ";
-import DigitalKhata from "./Pages/DigitalKhata";
-import CustomerManagement from "./Pages/CustomerManagement";
+import FAQ from "./pages/FAQ";
+import DigitalKhata from "./pages/DigitalKhata";
+import CustomerManagement from "./pages/CustomerManagement";
 
 
 // =====================================
