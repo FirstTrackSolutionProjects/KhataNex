@@ -207,97 +207,151 @@ const Navbar = () => {
       </div>
 
       {/* =========================================
-          MOBILE MENU
-      ========================================== */}
-      {isMenuOpen && (
-        <div className="border-t border-white/10 bg-emerald-800 px-4 py-4 shadow-lg md:hidden">
+    MOBILE MENU
+========================================== */}
+{isMenuOpen && (
+ <div
+ className="
+   absolute right-0 top-full z-50
+   w-1/2
+   min-w-[250px]
+   border-t border-white/10
+   bg-emerald-800
+   px-4 py-4
+   shadow-xl
+   md:hidden
+ "
+>
 
-          <div className="flex flex-col gap-1">
+    {/* Mobile Navigation */}
+    <div className="flex flex-col gap-1">
 
-            {/* Home */}
-            <Link
-              to="/"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Home
-            </Link>
+      <Link
+        to="/"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Home
+      </Link>
 
-            {/* Dashboard */}
-            <Link
-              to="/dashboard"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Dashboard
-            </Link>
+      <Link
+        to="/dashboard"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Dashboard
+      </Link>
 
-            {/* Customers */}
-            <Link
-              to="/customers"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Customers
-            </Link>
+      <Link
+        to="/customers"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Customers
+      </Link>
 
-            {/* Khata */}
-            <Link
-              to="/khata"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Khata
-            </Link>
+      <Link
+        to="/khata"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Khata
+      </Link>
 
-            {/* Payments */}
-            <Link
-              to="/payments"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Payments
-            </Link>
+      <Link
+        to="/payments"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Payments
+      </Link>
 
-            {/* Reports */}
-            <Link
-              to="/reports"
-              onClick={() => setIsMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Reports
-            </Link>
+      <Link
+        to="/reports"
+        onClick={() => setIsMenuOpen(false)}
+        className="
+          rounded-lg px-4 py-2.5
+          text-sm font-semibold text-slate-200
+          transition-all duration-200
+          hover:bg-slate-800
+          hover:text-cyan-400
+        "
+      >
+        Reports
+      </Link>
 
-          </div>
+    </div>
 
-          {/* =====================================
-              MOBILE PROFILE
-          ====================================== */}
-          <div className="mt-4 border-t border-white/10 pt-4">
+    {/* Divider */}
+    <div className="my-3 border-t border-slate-800" />
 
-            <div className="flex items-center gap-3 rounded-xl bg-white/10 px-3 py-3">
+    {/* Profile */}
+    <div
+      className="
+        flex items-center gap-3
+        rounded-xl
+        border border-slate-800
+        bg-slate-900
+        px-3 py-2.5
+      "
+    >
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-emerald-700">
-                <User size={19} />
-              </div>
+      <div
+        className="
+          flex h-9 w-9 shrink-0
+          items-center justify-center
+          rounded-full
+          bg-cyan-500
+          text-white
+        "
+      >
+        <User size={18} />
+      </div>
 
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Admin
-                </p>
+      <div>
+        <p className="text-sm font-semibold text-white">
+          Admin
+        </p>
 
-                <p className="text-xs text-emerald-100">
-                  Business Owner
-                </p>
-              </div>
+        <p className="text-xs text-slate-400">
+          Business Owner
+        </p>
+      </div>
 
-            </div>
+    </div>
 
-          </div>
-
-        </div>
-      )}
-
+  </div>
+)}
     </nav>
   );
 };
