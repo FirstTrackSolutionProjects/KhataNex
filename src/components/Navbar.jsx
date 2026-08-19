@@ -46,10 +46,9 @@ const Navbar = () => {
 
           {/* Brand Name */}
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-white">
-              KHATANEX
-            </h1>
-
+          <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+            KHATANEX
+          </h1>
             <p className="hidden text-[10px] font-medium text-emerald-100 sm:block">
               Smart Khata. Simple Business.
             </p>

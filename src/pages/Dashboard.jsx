@@ -51,29 +51,36 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50">
 
+      {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
+      {/* Main Content */}
       <div className="lg:pl-64">
 
-        {/* Topbar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
+        {/* =========================================
+            TOPBAR
+        ========================================== */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-6">
 
-          <div className="flex items-center gap-3">
+          {/* Left */}
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
 
+            {/* Mobile Menu */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+              className="shrink-0 rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+              aria-label="Open menu"
             >
               <Menu size={22} />
             </button>
 
-            <div>
-              <h1 className="text-lg font-bold">
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-bold text-slate-900 sm:text-lg">
                 Dashboard
               </h1>
 
@@ -84,50 +91,71 @@ const Dashboard = () => {
 
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
 
-            <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+            {/* Search */}
+            <button
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+              aria-label="Search"
+            >
               <Search size={19} />
             </button>
 
-            <button className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+            {/* Notification */}
+            <button
+              className="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+              aria-label="Notifications"
+            >
               <Bell size={19} />
+
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            <div className="ml-2 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-700">
+            {/* Profile */}
+            <div className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 sm:ml-2 sm:h-9 sm:w-9">
               A
             </div>
 
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        {/* =========================================
+            MAIN
+        ========================================== */}
+        <main className="w-full p-3 sm:p-6 lg:p-8">
 
-          {/* Welcome */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* =====================================
+              WELCOME SECTION
+          ====================================== */}
+          <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
 
-            <div>
-              <h2 className="text-2xl font-bold">
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
                 Good Morning, Admin 👋
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm leading-5 text-slate-500">
                 Here's what's happening with your business today.
               </p>
             </div>
 
-            <Button
-              icon={Plus}
-              onClick={() => {}}
-            >
-              Add Transaction
-            </Button>
+            {/* Add Transaction */}
+            <div className="w-full sm:w-auto">
+              <Button
+                icon={Plus}
+                onClick={() => {}}
+              >
+                Add Transaction
+              </Button>
+            </div>
 
           </div>
 
-          {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {/* =====================================
+              STATS
+          ====================================== */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
 
             <StatCard
               title="Total Balance"
@@ -167,16 +195,21 @@ const Dashboard = () => {
 
           </div>
 
-          {/* Content */}
-          <div className="mt-6 grid gap-6 xl:grid-cols-3">
+          {/* =====================================
+              CONTENT
+          ====================================== */}
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 xl:grid-cols-3">
 
-            {/* Transactions */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 xl:col-span-2">
+            {/* =================================
+                RECENT TRANSACTIONS
+            ================================== */}
+            <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 xl:col-span-2">
 
-              <div className="flex items-center justify-between">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3">
 
-                <div>
-                  <h3 className="font-bold">
+                <div className="min-w-0">
+                  <h3 className="truncate font-bold text-slate-900">
                     Recent Transactions
                   </h3>
 
@@ -185,14 +218,17 @@ const Dashboard = () => {
                   </p>
                 </div>
 
-                <button className="flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                <button
+                  className="flex shrink-0 items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700 sm:text-sm"
+                >
                   View All
                   <Eye size={15} />
                 </button>
 
               </div>
 
-              <div className="mt-5 space-y-3">
+              {/* Transactions */}
+              <div className="mt-4 space-y-3 sm:mt-5">
 
                 {transactions.map((transaction, index) => (
                   <TransactionCard
@@ -205,10 +241,12 @@ const Dashboard = () => {
 
             </div>
 
-            {/* Quick Actions */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            {/* =================================
+                QUICK ACTIONS
+            ================================== */}
+            <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
 
-              <h3 className="font-bold">
+              <h3 className="font-bold text-slate-900">
                 Quick Actions
               </h3>
 
@@ -216,44 +254,60 @@ const Dashboard = () => {
                 Frequently used actions
               </p>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3">
 
-                <button className="rounded-xl border border-slate-200 p-4 text-left transition hover:border-emerald-200 hover:bg-emerald-50">
+                {/* Add Customer */}
+                <button
+                  className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-200 hover:bg-emerald-50 sm:p-4"
+                >
                   <Plus
-                    size={20}
+                    size={19}
                     className="text-emerald-600"
                   />
-                  <p className="mt-3 text-sm font-semibold">
+
+                  <p className="mt-2 text-xs font-semibold text-slate-800 sm:mt-3 sm:text-sm">
                     Add Customer
                   </p>
                 </button>
 
-                <button className="rounded-xl border border-slate-200 p-4 text-left transition hover:border-emerald-200 hover:bg-emerald-50">
+                {/* Add Payment */}
+                <button
+                  className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-200 hover:bg-emerald-50 sm:p-4"
+                >
                   <Wallet
-                    size={20}
+                    size={19}
                     className="text-emerald-600"
                   />
-                  <p className="mt-3 text-sm font-semibold">
+
+                  <p className="mt-2 text-xs font-semibold text-slate-800 sm:mt-3 sm:text-sm">
                     Add Payment
                   </p>
                 </button>
 
-                <button className="rounded-xl border border-slate-200 p-4 text-left transition hover:border-emerald-200 hover:bg-emerald-50">
+                {/* Credit Entry */}
+                <button
+                  className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-200 hover:bg-emerald-50 sm:p-4"
+                >
                   <ArrowDownToLine
-                    size={20}
+                    size={19}
                     className="text-emerald-600"
                   />
-                  <p className="mt-3 text-sm font-semibold">
+
+                  <p className="mt-2 text-xs font-semibold text-slate-800 sm:mt-3 sm:text-sm">
                     Credit Entry
                   </p>
                 </button>
 
-                <button className="rounded-xl border border-slate-200 p-4 text-left transition hover:border-emerald-200 hover:bg-emerald-50">
+                {/* Debit Entry */}
+                <button
+                  className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-red-200 hover:bg-red-50 sm:p-4"
+                >
                   <ArrowUpFromLine
-                    size={20}
+                    size={19}
                     className="text-red-500"
                   />
-                  <p className="mt-3 text-sm font-semibold">
+
+                  <p className="mt-2 text-xs font-semibold text-slate-800 sm:mt-3 sm:text-sm">
                     Debit Entry
                   </p>
                 </button>
