@@ -13,8 +13,7 @@ import {
   X,
 } from "lucide-react";
 
-const Sidebar = ({ isOpen = true, onClose }) => {
-
+const Sidebar = ({ isOpen = false, onClose }) => {
   const menuItems = [
     {
       name: "Dashboard",
@@ -55,67 +54,116 @@ const Sidebar = ({ isOpen = true, onClose }) => {
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isOpen && onClose && (
-        <div
-          onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-        />
-      )}
+      {/* =========================================
+          MOBILE OVERLAY
+      ========================================== */}
+      <div
+        onClick={onClose}
+        className={`
+          fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-[1px]
+          transition-opacity duration-300 lg:hidden
+          ${isOpen ? "visible opacity-100" : "invisible opacity-0"}
+        `}
+      />
 
+      {/* =========================================
+          SIDEBAR
+      ========================================== */}
       <aside
         className={`
-          fixed left-0 top-0 z-50 flex h-screen w-64
-          flex-col border-r border-slate-200 bg-white
-          transition-transform duration-300
+          fixed left-0 top-0 z-50
+          flex h-screen w-[280px] flex-col
+          border-r border-slate-200 bg-white
+          shadow-xl
+          transition-transform duration-300 ease-in-out
+
+          lg:w-64
           lg:translate-x-0
+          lg:shadow-none
+
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
 
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5">
+        {/* =====================================
+            LOGO / HEADER
+        ====================================== */}
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-slate-200 px-5">
 
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 font-bold text-white">
-              K
+          <NavLink
+            to="/"
+            onClick={onClose}
+            className="flex items-center gap-3"
+          >
+
+            {/* Logo */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-purple-700 shadow-sm">
+              <img
+                src="/images/Logo.jpeg"
+                alt="KHATANEX Logo"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            
+
+            {/* Brand */}
+            <div>
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+              KHATANEX
+             </h1>
+
+              <p className="text-[9px] font-medium text-slate-400">
+                Smart Khata. Simple Business.
+              </p>
             </div>
 
-            <span className="text-lg font-bold text-slate-900">
-              KHATANEX
-            </span>
-          </div>
+          </NavLink>
 
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
-            >
-              <X size={20} />
-            </button>
-          )}
+          {/* Mobile Close Button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              rounded-lg p-2
+              text-slate-500
+              transition
+              hover:bg-slate-100
+              hover:text-slate-800
+              lg:hidden
+            "
+            aria-label="Close sidebar"
+          >
+            <X size={21} />
+          </button>
 
         </div>
 
-        {/* Business */}
-        <div className="mx-4 mt-5 rounded-xl bg-emerald-50 p-3">
-          <p className="text-xs font-medium text-emerald-600">
-            BUSINESS
+        {/* =====================================
+            BUSINESS CARD
+        ====================================== */}
+        <div className="mx-4 mt-5 shrink-0 rounded-2xl bg-emerald-50 p-4">
+
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+            Business
           </p>
 
-          <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+          <p className="mt-1 truncate text-base font-semibold text-slate-900">
             My Business Store
           </p>
 
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500">
             Owner Account
           </p>
+
         </div>
 
-        {/* Navigation */}
-        <nav className="mt-6 flex-1 overflow-y-auto px-3">
+        {/* =====================================
+            NAVIGATION
+        ====================================== */}
+        <nav className="mt-6 flex-1 overflow-y-auto px-3 pb-4">
 
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          {/* Main Menu */}
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Main Menu
           </p>
 
@@ -131,17 +179,25 @@ const Sidebar = ({ isOpen = true, onClose }) => {
                   onClick={onClose}
                   className={({ isActive }) =>
                     `
-                    flex items-center gap-3 rounded-lg px-3 py-2.5
-                    text-sm font-medium transition
+                    group flex items-center gap-3
+                    rounded-xl px-3 py-3
+                    text-sm font-semibold
+                    transition-all duration-200
+
                     ${
                       isActive
-                        ? "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                         : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
                     }
                     `
                   }
                 >
-                  <Icon size={19} />
+                  <Icon
+                    size={20}
+                    strokeWidth={1.9}
+                    className="shrink-0"
+                  />
+
                   <span>{item.name}</span>
                 </NavLink>
               );
@@ -149,9 +205,11 @@ const Sidebar = ({ isOpen = true, onClose }) => {
 
           </div>
 
-          <div className="my-5 border-t border-slate-200" />
+          {/* Divider */}
+          <div className="my-6 border-t border-slate-200" />
 
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          {/* Account */}
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Account
           </p>
 
@@ -160,30 +218,50 @@ const Sidebar = ({ isOpen = true, onClose }) => {
             onClick={onClose}
             className={({ isActive }) =>
               `
-              flex items-center gap-3 rounded-lg px-3 py-2.5
-              text-sm font-medium transition
+              flex items-center gap-3
+              rounded-xl px-3 py-3
+              text-sm font-semibold
+              transition-all duration-200
+
               ${
                 isActive
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
               }
               `
             }
           >
-            <Settings size={19} />
-            Settings
+            <Settings
+              size={20}
+              strokeWidth={1.9}
+            />
+
+            <span>Settings</span>
           </NavLink>
 
         </nav>
 
-        {/* Logout */}
-        <div className="border-t border-slate-200 p-3">
+        {/* =====================================
+            LOGOUT
+        ====================================== */}
+        <div className="shrink-0 border-t border-slate-200 p-3">
 
           <button
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            type="button"
+            className="
+              flex w-full items-center gap-3
+              rounded-xl px-3 py-3
+              text-sm font-semibold text-red-600
+              transition
+              hover:bg-red-50
+            "
           >
-            <LogOut size={19} />
-            Logout
+            <LogOut
+              size={20}
+              strokeWidth={1.9}
+            />
+
+            <span>Logout</span>
           </button>
 
         </div>

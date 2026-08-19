@@ -1,19 +1,37 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// ===============================
+// =====================================
 // Components
-// ===============================
+// =====================================
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Sidebar from "./components/Sidebar";
-
-// ===============================
-// Pages
-// ===============================
+import ScrollToTop from "./components/ScrollToTop";
+// =====================================
+// Public Pages
+// =====================================
 import Home from "./pages/Home";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
+import Contact from "./pages/Contact";
+import Services from "./pages/Services";
+import RefundCancellation from "./Pages/RefundCancellation";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
+import TermsOfUse from "./Pages/TermsOfUse";
+import FAQ from "./Pages/FAQ";
+import DigitalKhata from "./Pages/DigitalKhata";
+import CustomerManagement from "./Pages/CustomerManagement";
+
+
+// =====================================
+// Authentication
+// =====================================
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+
+// =====================================
+// Dashboard Pages
+// =====================================
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import CustomerDetails from "./pages/CustomerDetails";
@@ -25,229 +43,356 @@ import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 
-// ===============================
+// =====================================
 // Dashboard Layout
-// ===============================
+// =====================================
 const DashboardLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
+      {children}
+    </div>
+  );
+};
 
-        {/* Dashboard Content */}
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+// =====================================
+// Public Layout
+// =====================================
+const PublicLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-white text-slate-900">
+      <Navbar />
+
+      <main>
+        {children}
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+// =====================================
+// 404 Page
+// =====================================
+const NotFound = () => {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
+      <div className="text-center">
+
+        <h1 className="text-8xl font-extrabold text-emerald-600">
+          404
+        </h1>
+
+        <h2 className="mt-4 text-2xl font-bold text-slate-800">
+          Page Not Found
+        </h2>
+
+        <p className="mt-2 text-slate-500">
+          The page you are looking for does not exist.
+        </p>
+
+        <a
+          href="/"
+          className="
+            mt-6 inline-flex items-center justify-center
+            rounded-xl bg-emerald-600
+            px-6 py-3
+            font-semibold text-white
+            transition
+            hover:bg-emerald-700
+          "
+        >
+          Go to Home
+        </a>
+
       </div>
     </div>
   );
 };
 
-// ===============================
+// =====================================
 // App
-// ===============================
+// =====================================
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <ScrollToTop />
+      <Routes>
 
-        <Routes>
+        {/* =====================================
+            PUBLIC WEBSITE
+        ===================================== */}
 
-          {/* =====================================
-              PUBLIC WEBSITE
-          ===================================== */}
+        {/* Home */}
+        <Route path="/" element={
+            <PublicLayout>
+              <Home />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="/"
-            element={
-              <>
-                <Navbar />
-                <Home />
-                <Footer />
-              </>
-            }
-          />
+        {/* About */}
+        <Route
+          path="/about"
+          element={
+            <PublicLayout>
+              <About />
+            </PublicLayout>
+          }
+        />
 
-          {/* =====================================
-              AUTHENTICATION
-          ===================================== */}
+        {/* Blog */}
+        <Route
+          path="/blog"
+          element={
+            <PublicLayout>
+              <Blog />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
+        {/* Contact */}
+        <Route
+          path="/contact"
+          element={
+            <PublicLayout>
+              <Contact />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="/signup"
-            element={<Signup />}
-          />
+        {/* Services */}
+        <Route
+          path="/services"
+          element={
+            <PublicLayout>
+              <Services />
+            </PublicLayout>
+          }
+        />
 
-          {/* =====================================
-              DASHBOARD
-          ===================================== */}
+        
+{/* =====================================
+    LEGAL & SUPPORT PAGES
+===================================== */}
 
-          <Route
-            path="/dashboard"
-            element={
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
-            }
-          />
+{/* Refund & Cancellation */}
+<Route
+  path="/refund-cancellation"
+  element={
+    <PublicLayout>
+      <RefundCancellation />
+    </PublicLayout>
+  }
+/>
 
-          {/* =====================================
-              CUSTOMERS
-          ===================================== */}
+{/* Terms Of Use */}
+<Route
+path="/terms-of-use"
+element={
+  <PublicLayout>
+    <TermsOfUse />
+  </PublicLayout>
+}
+/>
 
-          <Route
-            path="/customers"
-            element={
-              <DashboardLayout>
-                <Customers />
-              </DashboardLayout>
-            }
-          />
+{/* Privacy Policy */}
+<Route
+  path="/privacy-policy"
+  element={
+    <PublicLayout>
+      <PrivacyPolicy />
+    </PublicLayout>
+  }
+/>
 
-          <Route
-            path="/customers/:id"
-            element={
-              <DashboardLayout>
-                <CustomerDetails />
-              </DashboardLayout>
-            }
-          />
+{/* FAQ */}
+<Route
+  path="/faq"
+  element={
+    <PublicLayout>
+      <FAQ />
+    </PublicLayout>
+  }
+/>
 
-          {/* =====================================
-              KHATA
-          ===================================== */}
+{/* =====================================
+    FEATURES
+===================================== */}
 
-          <Route
-            path="/khata"
-            element={
-              <DashboardLayout>
-                <Khata />
-              </DashboardLayout>
-            }
-          />
+{/* Digital Khata */}
+<Route
+  path="/digital-khata"
+  element={
+    <PublicLayout>
+      <DigitalKhata />
+    </PublicLayout>
+  }
+/>
 
-          {/* =====================================
-              PAYMENTS
-          ===================================== */}
+{/* Customer Management */}
+<Route
+  path="/customer-management"
+  element={
+    <PublicLayout>
+      <CustomerManagement />
+    </PublicLayout>
+  }
+/>
 
-          <Route
-            path="/payments"
-            element={
-              <DashboardLayout>
-                <Payments />
-              </DashboardLayout>
-            }
-          />
 
-          {/* =====================================
-              INVOICES
-          ===================================== */}
+        {/* =====================================
+            AUTHENTICATION
+        ===================================== */}
 
-          <Route
-            path="/invoices"
-            element={
-              <DashboardLayout>
-                <Invoices />
-              </DashboardLayout>
-            }
-          />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-          {/* =====================================
-              INVENTORY
-          ===================================== */}
+        <Route
+          path="/signup"
+          element={<Signup />}
+        />
 
-          <Route
-            path="/inventory"
-            element={
-              <DashboardLayout>
-                <Inventory />
-              </DashboardLayout>
-            }
-          />
+        {/* =====================================
+            DASHBOARD
+        ===================================== */}
 
-          {/* =====================================
-              REPORTS
-          ===================================== */}
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          }
+        />
 
-          <Route
-            path="/reports"
-            element={
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
-            }
-          />
+        {/* =====================================
+            CUSTOMERS
+        ===================================== */}
 
-          {/* =====================================
-              PROFILE
-          ===================================== */}
+        <Route
+          path="/customers"
+          element={
+            <DashboardLayout>
+              <Customers />
+            </DashboardLayout>
+          }
+        />
 
-          <Route
-            path="/profile"
-            element={
-              <DashboardLayout>
-                <Profile />
-              </DashboardLayout>
-            }
-          />
+        {/* Customer Details */}
+        <Route
+          path="/customers/:id"
+          element={
+            <DashboardLayout>
+              <CustomerDetails />
+            </DashboardLayout>
+          }
+        />
 
-          {/* =====================================
-              SETTINGS
-          ===================================== */}
+        {/* =====================================
+            KHATA
+        ===================================== */}
 
-          <Route
-            path="/settings"
-            element={
-              <DashboardLayout>
-                <Settings />
-              </DashboardLayout>
-            }
-          />
+        <Route
+          path="/khata"
+          element={
+            <DashboardLayout>
+              <Khata />
+            </DashboardLayout>
+          }
+        />
 
-          {/* =====================================
-              404 PAGE
-          ===================================== */}
+        {/* =====================================
+            PAYMENTS
+        ===================================== */}
 
-          <Route
-            path="*"
-            element={
-              <div className="min-h-screen flex items-center justify-center bg-slate-50 px-6">
-                <div className="text-center">
+        <Route
+          path="/payments"
+          element={
+            <DashboardLayout>
+              <Payments />
+            </DashboardLayout>
+          }
+        />
 
-                  <div className="mb-6">
-                    <h1 className="text-8xl font-extrabold text-blue-600">
-                      404
-                    </h1>
-                  </div>
+        {/* =====================================
+            INVOICES
+        ===================================== */}
 
-                  <h2 className="text-2xl font-bold text-slate-800">
-                    Page Not Found
-                  </h2>
+        <Route
+          path="/invoices"
+          element={
+            <DashboardLayout>
+              <Invoices />
+            </DashboardLayout>
+          }
+        />
 
-                  <p className="mt-2 text-slate-500">
-                    The page you are looking for does not exist.
-                  </p>
+        {/* =====================================
+            INVENTORY
+        ===================================== */}
 
-                  <a
-                    href="/"
-                    className="inline-flex items-center justify-center mt-6 px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                  >
-                    Go to Home
-                  </a>
+        <Route
+          path="/inventory"
+          element={
+            <DashboardLayout>
+              <Inventory />
+            </DashboardLayout>
+          }
+        />
 
-                </div>
-              </div>
-            }
-          />
+        {/* =====================================
+            REPORTS
+        ===================================== */}
 
-        </Routes>
+        <Route
+          path="/reports"
+          element={
+            <DashboardLayout>
+              <Reports />
+            </DashboardLayout>
+          }
+        />
 
-      </div>
+        {/* =====================================
+            PROFILE
+        ===================================== */}
+
+        <Route
+          path="/profile"
+          element={
+            <DashboardLayout>
+              <Profile />
+            </DashboardLayout>
+          }
+        />
+
+        {/* =====================================
+            SETTINGS
+        ===================================== */}
+
+        <Route
+          path="/settings"
+          element={
+            <DashboardLayout>
+              <Settings />
+            </DashboardLayout>
+          }
+        />
+
+        {/* =====================================
+            404
+        ===================================== */}
+
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
+
+      </Routes>
+
     </BrowserRouter>
   );
 }
