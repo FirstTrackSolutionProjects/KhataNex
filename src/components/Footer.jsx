@@ -14,6 +14,7 @@ import {
   FaTwitter,
   FaLinkedinIn,
 } from "react-icons/fa";
+import ChatBox from "./ChatBox";
 
 const Footer = () => {
   return (
@@ -464,7 +465,15 @@ const Footer = () => {
         </div>
 
       </div>
-
+      
+      {/* =========================================
+          CHATBOX
+      ========================================= */}
+      <div className="mt-12 border-t border-slate-800 pt-8">
+        <div className="mx-auto max-w-3xl">
+          <ChatBox />
+        </div>
+      </div>
 
       {/* =========================================
           BOTTOM FOOTER
@@ -535,7 +544,8 @@ const Footer = () => {
         </div>
 
       </div>
-
+    
+     
     </footer>
   );
 };
