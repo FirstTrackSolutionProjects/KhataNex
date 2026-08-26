@@ -14,7 +14,7 @@ import {
   FaTwitter,
   FaLinkedinIn,
 } from "react-icons/fa";
-import ChatBox from "./ChatBox";
+import ChatBox from "./Chatbox";
 
 const Footer = () => {
   return (
