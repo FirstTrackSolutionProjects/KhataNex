@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+
 import {
   Mail,
   Phone,
@@ -465,15 +466,22 @@ const Footer = () => {
         </div>
 
       </div>
-      
+
       {/* =========================================
-          CHATBOX
-      ========================================= */}
-      <div className="mt-12 border-t border-slate-800 pt-8">
-        <div className="mx-auto max-w-3xl">
-          <ChatBox />
-        </div>
+    CHATBOX - FOOTER RIGHT SIDE
+========================================= */}
+<div className="border-t border-slate-800">
+  <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+
+    <div className="flex w-full justify-end">
+      <div className="w-full sm:w-auto">
+        <ChatBox />
       </div>
+    </div>
+
+  </div>
+</div>
+      
 
       {/* =========================================
           BOTTOM FOOTER
@@ -544,6 +552,7 @@ const Footer = () => {
         </div>
 
       </div>
+
     
      
     </footer>

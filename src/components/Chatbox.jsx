@@ -645,7 +645,7 @@ export default function Chatbox() {
           CHAT BUTTON
       ================================================= */}
 
-    <div className="w-full">
+<div className="fixed bottom-4 right-4 z-[9999] sm:bottom-6 sm:right-6">
 
         {!open && (
 
@@ -678,25 +678,29 @@ export default function Chatbox() {
 
         {open && (
 
-          <div
-            className="
-              flex
-              h-[500px]
-              w-[calc(100vw-2rem)]
-              max-w-[360px]
-              flex-col
-              overflow-hidden
-              rounded-2xl
-              border
-              border-white/10
-              bg-gradient-to-b
-              from-[#0f172a]
-              via-[#111827]
-              to-[#064e3b]
-              shadow-[0_20px_80px_rgba(0,0,0,0.6)]
-              backdrop-blur-xl
-            "
-          >
+<div 
+className="
+  fixed
+  bottom-6
+  right-6
+  z-[9999]
+  flex
+  h-[500px]
+  w-[360px]
+  max-w-[calc(100vw-2rem)]
+  flex-col
+  overflow-hidden
+  rounded-2xl
+  border
+  border-white/10
+  bg-gradient-to-b
+  from-[#0f172a]
+  via-[#111827]
+  to-[#064e3b]
+  shadow-[0_20px_80px_rgba(0,0,0,0.6)]
+  backdrop-blur-xl
+"
+>
 
             {/* =================================================
                 HEADER
@@ -1148,3 +1152,5 @@ export default function Chatbox() {
     </>
   );
 }
+
+
