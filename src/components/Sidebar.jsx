@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -11,46 +11,33 @@ import {
   Settings,
   LogOut,
   X,
+  Truck,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = ({ isOpen = false, onClose }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const isSuperadmin = user?.role === "superadmin";
+
+  // "Dashboard" is the super admin's overview page only. Everyone else
+  // (user / employee) works from Customers onward — the normal
+  // operational dashboard.
   const menuItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Customers",
-      path: "/customers",
-      icon: Users,
-    },
-    {
-      name: "Khata",
-      path: "/khata",
-      icon: BookOpen,
-    },
-    {
-      name: "Payments",
-      path: "/payments",
-      icon: CreditCard,
-    },
-    {
-      name: "Invoices",
-      path: "/invoices",
-      icon: FileText,
-    },
-    {
-      name: "Inventory",
-      path: "/inventory",
-      icon: Package,
-    },
-    {
-      name: "Reports",
-      path: "/reports",
-      icon: BarChart3,
-    },
+    ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
+    { name: "Customers", path: "/customers", icon: Users },
+    { name: "Khata", path: "/khata", icon: BookOpen },
+    { name: "Payments", path: "/payments", icon: CreditCard },
+    { name: "Invoices", path: "/invoices", icon: FileText },
+    { name: "Inventory", path: "/inventory", icon: Package },
+    { name: "Vehicles", path: "/vehicles", icon: Truck },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <>
@@ -144,15 +131,21 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         <div className="mx-4 mt-5 shrink-0 rounded-2xl bg-emerald-50 p-4">
 
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-            Business
+            {isSuperadmin ? "Super Admin" : "Business"}
           </p>
 
           <p className="mt-1 truncate text-base font-semibold text-slate-900">
-            My Business Store
+            {user?.business_name || user?.name || "My Business Store"}
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">
-            Owner Account
+          <p className="mt-1 text-xs capitalize text-slate-500">
+            {user?.role === "employee"
+              ? user?.employee_role_type
+                ? `Employee · ${user.employee_role_type}`
+                : "Employee"
+              : user?.role === "superadmin"
+              ? "Owner Account"
+              : "Owner Account"}
           </p>
 
         </div>
@@ -214,11 +207,37 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           </p>
 
           <NavLink
-            to="/settings"
+            to="/profile"
             onClick={onClose}
             className={({ isActive }) =>
               `
               flex items-center gap-3
+              rounded-xl px-3 py-3
+              text-sm font-semibold
+              transition-all duration-200
+
+              ${
+                isActive
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+              }
+              `
+            }
+          >
+            <Users
+              size={20}
+              strokeWidth={1.9}
+            />
+
+            <span>Profile</span>
+          </NavLink>
+
+          <NavLink
+            to="/settings"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `
+              mt-1 flex items-center gap-3
               rounded-xl px-3 py-3
               text-sm font-semibold
               transition-all duration-200
@@ -248,6 +267,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
           <button
             type="button"
+            onClick={handleLogout}
             className="
               flex w-full items-center gap-3
               rounded-xl px-3 py-3

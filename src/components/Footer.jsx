@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-
 import {
   Mail,
   Phone,
@@ -15,7 +14,6 @@ import {
   FaTwitter,
   FaLinkedinIn,
 } from "react-icons/fa";
-import ChatBox from "./Chatbox";
 
 const Footer = () => {
   return (
@@ -467,21 +465,6 @@ const Footer = () => {
 
       </div>
 
-      {/* =========================================
-    CHATBOX - FOOTER RIGHT SIDE
-========================================= */}
-<div className="border-t border-slate-800">
-  <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-
-    <div className="flex w-full justify-end">
-      <div className="w-full sm:w-auto">
-        <ChatBox />
-      </div>
-    </div>
-
-  </div>
-</div>
-      
 
       {/* =========================================
           BOTTOM FOOTER
@@ -553,8 +536,6 @@ const Footer = () => {
 
       </div>
 
-    
-     
     </footer>
   );
 };

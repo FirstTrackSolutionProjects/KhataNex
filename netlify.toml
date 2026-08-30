@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA routing fallback (also present in public/_redirects — kept here too
+# since some Netlify setups read netlify.toml first).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

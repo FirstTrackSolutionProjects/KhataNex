@@ -634,7 +634,6 @@ const CustomerManagement = () => {
                     onChange={handleChange}
                     placeholder="Enter customer name"
                     className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    required
                   />
 
                 </div>
@@ -662,7 +661,6 @@ const CustomerManagement = () => {
                     onChange={handleChange}
                     placeholder="+91 XXXXX XXXXX"
                     className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    required
                   />
 
                 </div>

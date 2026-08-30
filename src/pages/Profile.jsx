@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -11,23 +11,53 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
 
 const Profile = () => {
+  const { user, updateProfile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    name: "Admin User",
-    email: "admin@khatanex.com",
-    phone: "+91 98765 43210",
-    business: "My Business Store",
-    address: "Bhubaneswar, Odisha",
+    name: "",
+    phone: "",
+    business_name: "",
+    address: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+        business_name: user.business_name || "",
+        address: user.address || "",
+      });
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage("");
+    setError("");
+    try {
+      await updateProfile(formData);
+      setMessage("Profile updated.");
+    } catch (err) {
+      setError(err.message || "Could not save changes.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -50,13 +80,8 @@ const Profile = () => {
           </button>
 
           <div>
-            <h1 className="text-lg font-bold">
-              Profile
-            </h1>
-
-            <p className="text-xs text-slate-400">
-              Manage your personal and business information
-            </p>
+            <h1 className="text-lg font-bold">Profile</h1>
+            <p className="text-xs text-slate-400">Manage your personal and business information</p>
           </div>
 
         </header>
@@ -71,16 +96,19 @@ const Profile = () => {
               <div className="flex items-center gap-4">
 
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-2xl font-bold text-emerald-700">
-                  A
+                  {(formData.name || user?.email || "U").charAt(0).toUpperCase()}
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-bold">
-                    {formData.name}
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Business Owner
+                  <h2 className="text-xl font-bold">{formData.name || "Your Name"}</h2>
+                  <p className="mt-1 text-sm capitalize text-slate-500">
+                    {user?.role === "employee"
+                      ? user?.employee_role_type
+                        ? `Employee · ${user.employee_role_type}`
+                        : "Employee"
+                      : user?.role === "superadmin"
+                      ? "Super Admin"
+                      : "Business Owner"}
                   </p>
                 </div>
 
@@ -89,18 +117,25 @@ const Profile = () => {
             </div>
 
             {/* Form */}
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+            <form onSubmit={handleSave} className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
 
-              <h2 className="font-bold">
-                Personal Information
-              </h2>
+              <h2 className="font-bold">Personal Information</h2>
+
+              {message && (
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+                  {message}
+                </div>
+              )}
+              {error && (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
 
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Full Name
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Full Name</label>
 
                   <div className="relative">
                     <User
@@ -118,9 +153,7 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Email
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Email</label>
 
                   <div className="relative">
                     <Mail
@@ -129,19 +162,16 @@ const Profile = () => {
                     />
 
                     <input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
+                      value={user?.email || ""}
+                      disabled
+                      title="Email cannot be changed here"
+                      className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-400 outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Phone
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Phone</label>
 
                   <div className="relative">
                     <Phone
@@ -159,9 +189,7 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Business Name
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Business Name</label>
 
                   <div className="relative">
                     <Building2
@@ -170,8 +198,8 @@ const Profile = () => {
                     />
 
                     <input
-                      name="business"
-                      value={formData.business}
+                      name="business_name"
+                      value={formData.business_name}
                       onChange={handleChange}
                       className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
                     />
@@ -179,9 +207,7 @@ const Profile = () => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-medium">
-                    Business Address
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Business Address</label>
 
                   <div className="relative">
                     <MapPin
@@ -202,14 +228,12 @@ const Profile = () => {
               </div>
 
               <div className="mt-6 flex justify-end">
-
-                <Button icon={Save}>
+                <Button icon={Save} type="submit" loading={saving}>
                   Save Changes
                 </Button>
-
               </div>
 
-            </div>
+            </form>
 
           </div>
 

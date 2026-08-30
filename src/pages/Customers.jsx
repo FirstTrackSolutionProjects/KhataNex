@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   Search,
@@ -9,60 +9,62 @@ import {
 import Sidebar from "../components/Sidebar";
 import CustomerCard from "../components/CustomerCard";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
+import api from "../lib/api";
 
 const Customers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const customers = [
-    {
-      id: 1,
-      name: "Rajesh Kumar",
-      phone: "+91 98765 43210",
-      balance: 8500,
-      transactions: 18,
-    },
-    {
-      id: 2,
-      name: "Amit Traders",
-      phone: "+91 91234 56789",
-      balance: 4200,
-      transactions: 12,
-    },
-    {
-      id: 3,
-      name: "Sita Store",
-      phone: "+91 99887 66554",
-      balance: 12800,
-      transactions: 24,
-    },
-    {
-      id: 4,
-      name: "Ramesh Das",
-      phone: "+91 90909 80808",
-      balance: 0,
-      transactions: 9,
-    },
-    {
-      id: 5,
-      name: "Priya Enterprises",
-      phone: "+91 93456 78901",
-      balance: 6700,
-      transactions: 15,
-    },
-    {
-      id: 6,
-      name: "Maa Laxmi Store",
-      phone: "+91 95678 12345",
-      balance: 3500,
-      transactions: 8,
-    },
-  ];
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [form, setForm] = useState({ name: "", phone: "", email: "" });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(search.toLowerCase()) ||
-    customer.phone.includes(search)
+  const loadCustomers = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.get("/api/customers");
+      setCustomers(data.customers || []);
+    } catch (err) {
+      setError(err.message || "Could not load customers.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      (customer.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (customer.phone || "").includes(search)
   );
+
+  const totalReceivable = customers.reduce((sum, c) => sum + Number(c.total_due || 0), 0);
+  const settledCount = customers.filter((c) => Number(c.total_due || 0) <= 0).length;
+
+  const handleAddCustomer = async (e) => {
+    e.preventDefault();
+    setSaveError("");
+    setSaving(true);
+    try {
+      await api.post("/api/customers", form);
+      setShowAddModal(false);
+      setForm({ name: "", phone: "", email: "" });
+      loadCustomers();
+    } catch (err) {
+      setSaveError(err.message || "Could not add customer.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -100,6 +102,7 @@ const Customers = () => {
           <Button
             icon={Plus}
             size="sm"
+            onClick={() => setShowAddModal(true)}
           >
             Add Customer
           </Button>
@@ -107,6 +110,12 @@ const Customers = () => {
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8">
+
+          {error && (
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
           {/* Summary */}
           <div className="grid gap-4 sm:grid-cols-3">
@@ -122,7 +131,7 @@ const Customers = () => {
                     Total Customers
                   </p>
                   <p className="text-2xl font-bold">
-                    248
+                    {loading ? "..." : customers.length}
                   </p>
                 </div>
               </div>
@@ -133,7 +142,7 @@ const Customers = () => {
                 Total Receivable
               </p>
               <p className="mt-2 text-2xl font-bold text-emerald-600">
-                ₹84,500
+                {loading ? "..." : `₹${totalReceivable.toLocaleString("en-IN")}`}
               </p>
             </div>
 
@@ -142,7 +151,7 @@ const Customers = () => {
                 Settled Accounts
               </p>
               <p className="mt-2 text-2xl font-bold">
-                74
+                {loading ? "..." : settledCount}
               </p>
             </div>
 
@@ -171,18 +180,23 @@ const Customers = () => {
           </div>
 
           {/* Customers */}
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {loading ? (
+            <p className="mt-8 text-center text-sm text-slate-400">Loading customers...</p>
+          ) : (
+            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {filteredCustomers.map((customer) => (
+                <CustomerCard
+                  key={customer.id}
+                  id={customer.id}
+                  name={customer.name}
+                  phone={customer.phone}
+                  balance={Number(customer.total_due || 0)}
+                />
+              ))}
+            </div>
+          )}
 
-            {filteredCustomers.map((customer) => (
-              <CustomerCard
-                key={customer.id}
-                {...customer}
-              />
-            ))}
-
-          </div>
-
-          {filteredCustomers.length === 0 && (
+          {!loading && filteredCustomers.length === 0 && (
             <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
               <Users
                 size={35}
@@ -194,7 +208,9 @@ const Customers = () => {
               </h3>
 
               <p className="mt-1 text-sm text-slate-500">
-                Try searching with another name or phone number.
+                {customers.length === 0
+                  ? "Add your first customer to get started."
+                  : "Try searching with another name or phone number."}
               </p>
             </div>
           )}
@@ -202,6 +218,58 @@ const Customers = () => {
         </main>
 
       </div>
+
+      {/* ADD CUSTOMER MODAL */}
+      <Modal open={showAddModal} onClose={() => setShowAddModal(false)} title="Add Customer">
+        <form onSubmit={handleAddCustomer} className="space-y-4">
+          {saveError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+              {saveError}
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Customer name"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="Phone number"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="Used to email invoices (optional)"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+          >
+            {saving ? "Saving..." : "Add Customer"}
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };
