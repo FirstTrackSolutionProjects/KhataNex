@@ -37,6 +37,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+    if (onClose) onClose();
   };
 
   return (
@@ -224,7 +225,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               `
             }
           >
-            <Users
+            <User
               size={20}
               strokeWidth={1.9}
             />
@@ -290,5 +291,8 @@ const Sidebar = ({ isOpen = false, onClose }) => {
     </>
   );
 };
+
+// Add User import
+import { User } from "lucide-react";
 
 export default Sidebar;

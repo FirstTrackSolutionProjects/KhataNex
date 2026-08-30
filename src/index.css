@@ -1,1 +1,162 @@
 @import "tailwindcss";
+
+/* Mobile responsiveness improvements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Better touch targets on mobile */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Prevent horizontal scroll on mobile */
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve mobile scrolling */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Fix for iOS safe areas */
+@supports (padding: max(0px)) {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Better modal overlay on mobile */
+.fixed.inset-0 {
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* Custom responsive breakpoints */
+@media (min-width: 480px) {
+  .xs\:block {
+    display: block !important;
+  }
+  .xs\:hidden {
+    display: none !important;
+  }
+}
+
+/* Mobile font size adjustments */
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.4rem !important;
+  }
+  
+  .text-4xl {
+    font-size: 2rem !important;
+  }
+  
+  .text-5xl {
+    font-size: 2.25rem !important;
+  }
+  
+  .text-6xl {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* Improve table responsiveness on mobile */
+@media (max-width: 640px) {
+  table {
+    font-size: 0.75rem;
+  }
+  
+  table th,
+  table td {
+    padding: 0.5rem 0.5rem !important;
+  }
+}
+
+/* Card improvements for mobile */
+@media (max-width: 640px) {
+  .rounded-2xl {
+    border-radius: 0.75rem !important;
+  }
+  
+  .p-5 {
+    padding: 1rem !important;
+  }
+  
+  .p-6 {
+    padding: 1.25rem !important;
+  }
+}
+
+/* Input improvements on mobile */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+}
+
+/* Desktop responsive fixes - when screen is shrunk on desktop */
+@media (max-width: 1024px) {
+  .navbar-desktop-links {
+    display: none !important;
+  }
+}
+
+/* Better dropdown on small screens */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Ensure brand name shows on all screens */
+@media (max-width: 480px) {
+  .navbar-brand-text {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Profile dropdown improvements */
+.profile-dropdown-trigger {
+  cursor: pointer;
+}

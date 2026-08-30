@@ -12,7 +12,10 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-slate-500">Loading...</p>
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
+          <p className="mt-3 text-sm text-slate-500">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -20,6 +23,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (!user) return <Navigate to="/login" replace />;
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // If user is trying to access a superadmin-only page but isn't superadmin,
+    // redirect to customers which is the normal operational dashboard
     return <Navigate to="/customers" replace />;
   }
 
