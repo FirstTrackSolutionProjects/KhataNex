@@ -737,7 +737,6 @@ const PaymentTracking = () => {
                     value={formData.customer}
                     onChange={handleChange}
                     placeholder="Enter customer name"
-                    required
                     className="
                       w-full rounded-xl
                       border border-slate-200
@@ -775,7 +774,6 @@ const PaymentTracking = () => {
                     onChange={handleChange}
                     placeholder="Enter amount"
                     min="1"
-                    required
                     className="
                       w-full rounded-xl
                       border border-slate-200

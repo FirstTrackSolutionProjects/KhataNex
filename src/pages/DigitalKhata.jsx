@@ -504,7 +504,6 @@ const DigitalKhata = () => {
                   name="customer"
                   value={formData.customer}
                   onChange={handleChange}
-                  required
                   className="
                     w-full rounded-xl
                     border border-slate-200
@@ -555,7 +554,6 @@ const DigitalKhata = () => {
                     value={formData.amount}
                     onChange={handleChange}
                     placeholder="Enter amount"
-                    required
                     min="1"
                     className="
                       w-full rounded-xl
@@ -592,7 +590,6 @@ const DigitalKhata = () => {
                     name="date"
                     value={formData.date}
                     onChange={handleChange}
-                    required
                     className="
                       w-full rounded-xl
                       border border-slate-200

@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 // =====================================
 // Public Pages
 // =====================================
@@ -40,6 +41,7 @@ import Khata from "./pages/Khata";
 import Payments from "./pages/Payments";
 import Invoices from "./pages/Invoices";
 import Inventory from "./pages/Inventory";
+import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -117,62 +119,63 @@ const NotFound = () => {
 function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
+      <AuthProvider>
+        <ScrollToTop />
+        <Routes>
 
-        {/* =====================================
-            PUBLIC WEBSITE
-        ===================================== */}
+          {/* =====================================
+              PUBLIC WEBSITE
+          ===================================== */}
 
-        {/* Home */}
-        <Route path="/" element={
-            <PublicLayout>
-              <Home />
-            </PublicLayout>
-          }
-        />
+          {/* Home */}
+          <Route path="/" element={
+              <PublicLayout>
+                <Home />
+              </PublicLayout>
+            }
+          />
 
-        {/* About */}
-        <Route
-          path="/about"
-          element={
-            <PublicLayout>
-              <About />
-            </PublicLayout>
-          }
-        />
+          {/* About */}
+          <Route
+            path="/about"
+            element={
+              <PublicLayout>
+                <About />
+              </PublicLayout>
+            }
+          />
 
-        {/* Blog */}
-        <Route
-          path="/blog"
-          element={
-            <PublicLayout>
-              <Blog />
-            </PublicLayout>
-          }
-        />
+          {/* Blog */}
+          <Route
+            path="/blog"
+            element={
+              <PublicLayout>
+                <Blog />
+              </PublicLayout>
+            }
+          />
 
-        {/* Contact */}
-        <Route
-          path="/contact"
-          element={
-            <PublicLayout>
-              <Contact />
-            </PublicLayout>
-          }
-        />
+          {/* Contact */}
+          <Route
+            path="/contact"
+            element={
+              <PublicLayout>
+                <Contact />
+              </PublicLayout>
+            }
+          />
 
-        {/* Services */}
-        <Route
-          path="/services"
-          element={
-            <PublicLayout>
-              <Services />
-            </PublicLayout>
-          }
-        />
+          {/* Services */}
+          <Route
+            path="/services"
+            element={
+              <PublicLayout>
+                <Services />
+              </PublicLayout>
+            }
+          />
 
-        
+
 {/* =====================================
     LEGAL & SUPPORT PAGES
 ===================================== */}
@@ -218,7 +221,9 @@ element={
 />
 
 {/* =====================================
-    FEATURES
+    FEATURES (marketing/demo pages — kept static,
+    not wired to the API, separate from the real
+    dashboard pages below)
 ===================================== */}
 
 {/* Digital Khata */}
@@ -242,158 +247,194 @@ element={
 />
 
 
-        {/* =====================================
-            AUTHENTICATION
-        ===================================== */}
+          {/* =====================================
+              AUTHENTICATION
+          ===================================== */}
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+          <Route
+            path="/login"
+            element={<Login />}
+          />
 
-        <Route
-          path="/signup"
-          element={<Signup />}
-        />
+          <Route
+            path="/signup"
+            element={<Signup />}
+          />
 
-        {/* =====================================
-            DASHBOARD
-        ===================================== */}
+          {/* =====================================
+              DASHBOARD (super admin's overview only)
+          ===================================== */}
 
-        <Route
-          path="/dashboard"
-          element={
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            CUSTOMERS
-        ===================================== */}
+          {/* =====================================
+              CUSTOMERS (normal operational dashboard,
+              landing page for user/employee)
+          ===================================== */}
 
-        <Route
-          path="/customers"
-          element={
-            <DashboardLayout>
-              <Customers />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Customers />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Customer Details */}
-        <Route
-          path="/customers/:id"
-          element={
-            <DashboardLayout>
-              <CustomerDetails />
-            </DashboardLayout>
-          }
-        />
+          {/* Customer Details */}
+          <Route
+            path="/customers/:id"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CustomerDetails />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            KHATA
-        ===================================== */}
+          {/* =====================================
+              KHATA
+          ===================================== */}
 
-        <Route
-          path="/khata"
-          element={
-            <DashboardLayout>
-              <Khata />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/khata"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Khata />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            PAYMENTS
-        ===================================== */}
+          {/* =====================================
+              PAYMENTS
+          ===================================== */}
 
-        <Route
-          path="/payments"
-          element={
-            <DashboardLayout>
-              <Payments />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Payments />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            INVOICES
-        ===================================== */}
+          {/* =====================================
+              INVOICES
+          ===================================== */}
 
-        <Route
-          path="/invoices"
-          element={
-            <DashboardLayout>
-              <Invoices />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/invoices"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Invoices />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            INVENTORY
-        ===================================== */}
+          {/* =====================================
+              INVENTORY
+          ===================================== */}
 
-        <Route
-          path="/inventory"
-          element={
-            <DashboardLayout>
-              <Inventory />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/inventory"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Inventory />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            REPORTS
-        ===================================== */}
+          {/* =====================================
+              VEHICLES
+          ===================================== */}
 
-        <Route
-          path="/reports"
-          element={
-            <DashboardLayout>
-              <Reports />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/vehicles"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Vehicles />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            PROFILE
-        ===================================== */}
+          {/* =====================================
+              REPORTS
+          ===================================== */}
 
-        <Route
-          path="/profile"
-          element={
-            <DashboardLayout>
-              <Profile />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            SETTINGS
-        ===================================== */}
+          {/* =====================================
+              PROFILE
+          ===================================== */}
 
-        <Route
-          path="/settings"
-          element={
-            <DashboardLayout>
-              <Settings />
-            </DashboardLayout>
-          }
-        />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* =====================================
-            404
-        ===================================== */}
+          {/* =====================================
+              SETTINGS
+          ===================================== */}
 
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
-      </Routes>
-      
+          {/* =====================================
+              404
+          ===================================== */}
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
