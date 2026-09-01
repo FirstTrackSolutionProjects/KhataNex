@@ -107,10 +107,10 @@ const Contact = () => {
             </p>
 
             <a
-              href="tel:+919912345678"
+              href="tel:+91 9040170727"
               className="mt-3 block text-sm font-semibold text-emerald-600 hover:text-emerald-700"
             >
-              +91 9912345678
+              +91 9040170727
             </a>
 
           </div>
@@ -131,10 +131,10 @@ const Contact = () => {
             </p>
 
             <a
-              href="mailto:support@khatanex.com"
+              href="mailto:support@khatanex.in"
               className="mt-3 block break-all text-sm font-semibold text-emerald-600 hover:text-emerald-700"
             >
-              support@khatanex.com
+              support@khatanex.in
             </a>
 
           </div>

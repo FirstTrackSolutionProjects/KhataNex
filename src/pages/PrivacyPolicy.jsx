@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
       content: (
         <>
           <p>
-            When you use Khata Nex, we may collect information that you
+            When you use KhatNex, we may collect information that you
             provide directly to us and information generated through your use
             of our services.
           </p>
@@ -56,7 +56,7 @@ const PrivacyPolicy = () => {
         <>
           <p>
             We use collected information to provide, maintain, and improve
-            Khata Nex and its features.
+            KhataNex and its features.
           </p>
 
           <ul>
@@ -80,10 +80,10 @@ const PrivacyPolicy = () => {
       title: "3. Customer and Transaction Data",
       content: (
         <p>
-          Khata Nex allows businesses to store information about their
+          KhataNex allows businesses to store information about their
           customers and transactions. You are responsible for ensuring that
           you have the appropriate authority or lawful basis to provide such
-          information to Khata Nex and to use it for your business purposes.
+          information to KhataNex and to use it for your business purposes.
         </p>
       ),
     },
@@ -93,7 +93,7 @@ const PrivacyPolicy = () => {
       title: "4. Payment Information",
       content: (
         <p>
-          If payment-related features are provided through Khata Nex,
+          If payment-related features are provided through KhataNex,
           payment information may be processed by authorized payment service
           providers. We do not intend to store sensitive payment credentials
           such as complete card numbers or banking passwords unless explicitly
@@ -135,7 +135,7 @@ const PrivacyPolicy = () => {
         <>
           <p>
             We do not sell your personal information for money. We may share
-            information when reasonably necessary to operate Khata Nex,
+            information when reasonably necessary to operate KhataNex,
             provide requested services, comply with legal obligations, or
             protect our users and platform.
           </p>
@@ -158,7 +158,7 @@ const PrivacyPolicy = () => {
       title: "7. Cookies and Similar Technologies",
       content: (
         <p>
-          Khata Nex may use cookies and similar technologies to maintain
+          KhataNex may use cookies and similar technologies to maintain
           sessions, remember preferences, improve functionality, analyze
           usage, and enhance security. You may be able to control cookies
           through your browser settings, although disabling certain cookies
@@ -208,7 +208,7 @@ const PrivacyPolicy = () => {
         <p>
           You are responsible for maintaining the confidentiality of your
           account credentials and for ensuring that information entered into
-          your Khata Nex account is accurate and lawful. Please contact us
+          your KhataNex account is accurate and lawful. Please contact us
           immediately if you believe that your account has been accessed
           without authorization.
         </p>
@@ -220,7 +220,7 @@ const PrivacyPolicy = () => {
       title: "11. Children's Privacy",
       content: (
         <p>
-          Khata Nex is intended for business and general users and is not
+          KhataNex is intended for business and general users and is not
           specifically directed toward children. We do not knowingly collect
           personal information from children in circumstances where such
           collection is prohibited by applicable law.
@@ -236,7 +236,7 @@ const PrivacyPolicy = () => {
           We may update this Privacy Policy from time to time to reflect
           changes to our services, technology, legal requirements, or privacy
           practices. When we make material changes, we may provide an
-          appropriate notice through the Khata Nex platform or other available
+          appropriate notice through the KhataNex platform or other available
           communication channels.
         </p>
       ),
@@ -261,7 +261,7 @@ const PrivacyPolicy = () => {
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-sky-50 sm:text-lg">
-            Your privacy matters to us. Learn how Khata Nex collects, uses,
+            Your privacy matters to us. Learn how KhataNex collects, uses,
             protects, and manages your information.
           </p>
 
@@ -302,11 +302,11 @@ const PrivacyPolicy = () => {
               {/* Introduction */}
               <div className="rounded-2xl border border-sky-100 bg-sky-50 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-slate-900">
-                  Welcome to Khata Nex
+                  Welcome to KhataNex
                 </h2>
 
                 <p className="mt-4 leading-7 text-slate-600">
-                  Khata Nex is a digital business management platform designed
+                  KhataNex is a digital business management platform designed
                   to help businesses manage customers, digital khata records,
                   payments, invoices, inventory, and business reports.
                 </p>
@@ -314,7 +314,7 @@ const PrivacyPolicy = () => {
                 <p className="mt-4 leading-7 text-slate-600">
                   This Privacy Policy explains how information may be
                   collected, used, stored, protected, and disclosed when you
-                  use Khata Nex.
+                  use KhataNex.
                 </p>
               </div>
 
@@ -363,7 +363,7 @@ const PrivacyPolicy = () => {
                     <p className="mt-2 text-sm leading-6 text-sky-50 sm:text-base">
                       If you have questions, requests, or concerns regarding
                       this Privacy Policy or your personal information, please
-                      contact the Khata Nex support team.
+                      contact the KhataNex support team.
                     </p>
 
                     <a
@@ -371,7 +371,7 @@ const PrivacyPolicy = () => {
                       className="mt-4 inline-flex items-center gap-2 font-semibold text-white underline underline-offset-4 transition hover:text-sky-100"
                     >
                       <Mail size={17} />
-                      support@khatanex.com
+                      support@khatanex.in
                     </a>
                   </div>
                 </div>
@@ -381,7 +381,7 @@ const PrivacyPolicy = () => {
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
                 <p className="text-sm leading-6 text-amber-800">
                   <strong>Important:</strong> This Privacy Policy is a
-                  general product template for Khata Nex and should be
+                  general product template for KhataNex and should be
                   reviewed and customized based on your actual data flows,
                   business entity, payment providers, hosting providers,
                   applicable jurisdictions, and legal requirements before

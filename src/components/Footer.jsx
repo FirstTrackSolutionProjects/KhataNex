@@ -431,7 +431,7 @@ const Footer = () => {
                 />
 
                 <a
-                  href="tel:+919912345678"
+                  href="tel:++91 9040170727"
                   className="text-slate-400 transition-colors hover:text-emerald-400"
                 >
                    +91 9040170727
@@ -449,10 +449,10 @@ const Footer = () => {
                 />
 
                 <a
-                  href="mailto:support@khatanex.com"
+                  href="mailto:support@khatanex.in"
                   className="break-all text-slate-400 transition-colors hover:text-emerald-400"
                 >
-                  support@khatanex.com
+                  support@khatanex.in
                 </a>
 
               </div>
@@ -501,34 +501,6 @@ const Footer = () => {
 
           {/* Bottom Legal Links */}
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 md:justify-end">
-
-            {/* <Link
-              to="/faq"
-              className="text-slate-500 transition-colors hover:text-emerald-400"
-            >
-              FAQ
-            </Link>
-
-            <Link
-              to="/privacy-policy"
-              className="text-slate-500 transition-colors hover:text-emerald-400"
-            >
-              Privacy Policy
-            </Link>
-
-            <Link
-              to="/terms-of-use"
-              className="text-slate-500 transition-colors hover:text-emerald-400"
-            >
-              Terms Of Use
-            </Link>
-
-            <Link
-              to="/refund-cancellation"
-              className="text-slate-500 transition-colors hover:text-emerald-400"
-            >
-              Refund & Cancellation
-            </Link> */}
 
           </div>
 
