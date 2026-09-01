@@ -21,14 +21,14 @@ const RefundCancellation = () => {
       content: (
         <>
           <p>
-            At Khata Nex, we aim to provide reliable digital business
+            At KhataNex, we aim to provide reliable digital business
             management services. This Refund & Cancellation Policy explains
             the conditions under which subscriptions, purchases, or eligible
             payments may be cancelled or refunded.
           </p>
 
           <p>
-            By purchasing or subscribing to a paid Khata Nex service, you
+            By purchasing or subscribing to a paid KhataNex service, you
             acknowledge and agree to this policy.
           </p>
         </>
@@ -41,14 +41,14 @@ const RefundCancellation = () => {
       content: (
         <>
           <p>
-            Users may request cancellation of their Khata Nex subscription or
+            Users may request cancellation of their KhataNex subscription or
             paid service according to the cancellation terms applicable to
             their selected plan.
           </p>
 
           <p>
             Cancellation requests should be submitted through the available
-            account settings or by contacting Khata Nex support.
+            account settings or by contacting KhataNex support.
           </p>
 
           <ul>
@@ -126,7 +126,7 @@ const RefundCancellation = () => {
       content: (
         <>
           <p>
-            If Khata Nex offers recurring subscriptions, users may cancel
+            If KhataNex offers recurring subscriptions, users may cancel
             their subscription before the next billing cycle to prevent future
             recurring charges.
           </p>
@@ -147,7 +147,7 @@ const RefundCancellation = () => {
         <p>
           If you believe that you have been charged more than once for the
           same transaction or that an incorrect amount was charged, please
-          contact Khata Nex support with the relevant transaction details.
+          contact KhataNex support with the relevant transaction details.
           After verification, eligible duplicate or incorrect charges may be
           refunded.
         </p>
@@ -160,7 +160,7 @@ const RefundCancellation = () => {
       content: (
         <>
           <p>
-            To request a refund, contact Khata Nex support and provide the
+            To request a refund, contact KhataNex support and provide the
             information necessary to identify the transaction.
           </p>
 
@@ -201,7 +201,7 @@ const RefundCancellation = () => {
         <p>
           If payments are processed through a third-party payment gateway,
           refunds may also be subject to that provider's processing procedures
-          and timelines. Khata Nex will take reasonable steps to initiate an
+          and timelines. KhataNex will take reasonable steps to initiate an
           approved refund, but the final processing time may depend on the
           payment provider or financial institution.
         </p>
@@ -215,7 +215,7 @@ const RefundCancellation = () => {
         <>
           <p>
             If you experience a significant technical problem that prevents
-            you from using a paid Khata Nex service, please contact support
+            you from using a paid KhataNex service, please contact support
             promptly.
           </p>
 
@@ -236,7 +236,7 @@ const RefundCancellation = () => {
           Nothing in this policy is intended to limit any consumer rights or
           remedies that cannot lawfully be excluded under applicable law.
           Where applicable law requires a refund, cancellation, or other
-          remedy, Khata Nex will comply with those requirements.
+          remedy, KhataNex will comply with those requirements.
         </p>
       ),
     },
@@ -246,10 +246,10 @@ const RefundCancellation = () => {
       title: "12. Changes to This Policy",
       content: (
         <p>
-          Khata Nex may update this Refund & Cancellation Policy from time to
+          KhataNex may update this Refund & Cancellation Policy from time to
           time to reflect changes to our services, pricing, payment methods,
           business practices, or applicable legal requirements. Updated
-          versions will be made available through the Khata Nex platform.
+          versions will be made available through the KhataNex platform.
         </p>
       ),
     },
@@ -274,13 +274,13 @@ const RefundCancellation = () => {
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-sky-50 sm:text-lg">
-            Learn about Khata Nex cancellation requests, refund eligibility,
+            Learn about KhataNex cancellation requests, refund eligibility,
             payment issues, and refund processing.
           </p>
 
-          <div className="mt-6 inline-flex items-center rounded-full bg-white/15 px-5 py-2 text-sm text-white backdrop-blur-sm">
+          {/* <div className="mt-6 inline-flex items-center rounded-full bg-white/15 px-5 py-2 text-sm text-white backdrop-blur-sm">
             Last Updated: August 19, 2026
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -320,13 +320,13 @@ const RefundCancellation = () => {
               {/* Introduction */}
               <div className="rounded-2xl border border-sky-100 bg-sky-50 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-slate-900">
-                  Khata Nex Refund Policy
+                  KhataNex Refund Policy
                 </h2>
 
                 <p className="mt-4 leading-7 text-slate-600">
-                  We want every Khata Nex user to have a reliable experience.
+                  We want every KhataNex user to have a reliable experience.
                   This policy explains when cancellations and refunds may be
-                  available for paid Khata Nex services.
+                  available for paid KhataNex services.
                 </p>
 
                 <p className="mt-4 leading-7 text-slate-600">
@@ -383,11 +383,11 @@ const RefundCancellation = () => {
                     </p>
 
                     <a
-                      href="mailto:support@khatanex.com"
+                      href="mailto:support@khatanex.in"
                       className="mt-4 inline-flex items-center gap-2 font-semibold text-white underline underline-offset-4 transition hover:text-sky-100"
                     >
                       <Mail size={17} />
-                      support@khatanex.com
+                      support@khatanex.in
                     </a>
                   </div>
                 </div>
@@ -403,7 +403,7 @@ const RefundCancellation = () => {
 
                   <p className="text-sm leading-6 text-amber-800">
                     <strong>Important:</strong> This is a general Refund &
-                    Cancellation template for Khata Nex. Before publishing it
+                    Cancellation template for KhataNex. Before publishing it
                     as a final legal policy, customize the refund period,
                     subscription rules, payment gateway, applicable taxes,
                     cancellation process, and grievance/contact details based
