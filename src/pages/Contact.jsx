@@ -36,10 +36,8 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setFormData(INITIAL_FORM_STATE);
-
       await sendContactUs(formData);
-
+      setFormData(INITIAL_FORM_STATE);
       setSubmitted(true);
     } catch (error) {
       alert(error.message || "Failed to send message. Please try again.");
