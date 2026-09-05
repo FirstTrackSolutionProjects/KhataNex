@@ -24,6 +24,8 @@ const Contact = () => {
 
   const [submitted, setSubmitted] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -36,13 +38,17 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       await sendContactUs(formData);
       setFormData(INITIAL_FORM_STATE);
       setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
     } catch (error) {
       alert(error.message || "Failed to send message. Please try again.");
     } finally {
-      setSubmitted(false);
+      setLoading(false);
     }
   };
 
@@ -339,10 +345,11 @@ const Contact = () => {
               {/* Submit */}
               <button
                 type="submit"
+                disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg sm:w-auto"
               >
                 <Send size={18} />
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
 
             </form>
