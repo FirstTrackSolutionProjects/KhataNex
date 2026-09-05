@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const sendContactUs = async (payload) => {
     const response = await fetch(`${API_URL}/api/contacts`, {
