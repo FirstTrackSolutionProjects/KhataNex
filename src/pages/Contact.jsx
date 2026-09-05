@@ -9,15 +9,18 @@ import {
   CheckCircle,
   ArrowUpRight,
 } from "lucide-react";
+import { CONTACT_US_SUBJECT_ENUM } from "../constants";
+import sendContactUs from "../services/contact/send_contact_us.contact.service";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM_STATE = {
     name: "",
     email: "",
     phone: "",
-    subject: "",
+    subject: CONTACT_US_SUBJECT_ENUM.ACCOUNT_SUPPORT,
     message: "",
-  });
+  }
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   const [submitted, setSubmitted] = useState(false);
 
@@ -30,22 +33,19 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      setFormData(INITIAL_FORM_STATE);
 
-    setSubmitted(true);
+      await sendContactUs(formData);
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
-
-    setTimeout(() => {
+      setSubmitted(true);
+    } catch (error) {
+      alert(error.message || "Failed to send message. Please try again.");
+    } finally {
       setSubmitted(false);
-    }, 5000);
+    }
   };
 
   return (
@@ -310,27 +310,13 @@ const Contact = () => {
                     onChange={handleChange}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="">
-                      Select a subject
-                    </option>
-                    <option value="general">
-                      General Enquiry
-                    </option>
-                    <option value="account">
-                      Account Support
-                    </option>
-                    <option value="payment">
-                      Payment Issue
-                    </option>
-                    <option value="khata">
-                      Khata Support
-                    </option>
-                    <option value="technical">
-                      Technical Support
-                    </option>
-                    <option value="other">
-                      Other
-                    </option>
+                   {
+                    Object.entries(CONTACT_US_SUBJECT_ENUM).map(([key, value]) => (
+                      <option key={key} value={value}>
+                        {value}
+                      </option>
+                    ))
+                   }
                   </select>
                 </div>
 
