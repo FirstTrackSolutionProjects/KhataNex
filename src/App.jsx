@@ -45,6 +45,7 @@ import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Banking from "./pages/Banking";
 
 // =====================================
 // Dashboard Layout
@@ -271,6 +272,21 @@ element={
               <ProtectedRoute allowedRoles={["superadmin"]}>
                 <DashboardLayout>
                   <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================
+              BANKING (superadmin only)
+          ===================================== */}
+
+          <Route
+            path="/banking"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <Banking />
                 </DashboardLayout>
               </ProtectedRoute>
             }
