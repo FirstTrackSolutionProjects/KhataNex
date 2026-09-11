@@ -1,23 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Search, Users, Menu, X, ChevronDown } from "lucide-react";
-import {
-  Plus,
-  Search,
-  Users,
-  Menu,
-  IndianRupee,
-  CheckCircle2,
-  Home,
-  Bell,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import CustomerCard from "../components/CustomerCard";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import api from "../lib/api";
-import { useAuth } from "../context/AuthContext";
 
 const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
 
@@ -156,8 +144,6 @@ const AddressFields = ({ address, setAddress }) => {
 };
 
 const Customers = () => {
-  const { user } = useAuth(); // FIXED: Added this line
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -188,29 +174,6 @@ const Customers = () => {
   useEffect(() => {
     loadCustomers();
   }, []);
-
-  // Handler functions for header buttons
-  const handleHomeClick = () => {
-    navigate("/");
-  };
-
-  const handleSearchClick = () => {
-    const searchInput = document.querySelector('input[type="text"], input[placeholder*="Search"]');
-    if (searchInput) {
-      searchInput.focus();
-      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      alert("🔍 Search functionality is available on this page.");
-    }
-  };
-
-  const handleNotificationClick = () => {
-    alert("📬 No new notifications at this time.");
-  };
-
-  const handleProfileClick = () => {
-    navigate("/profile");
-  };
 
   const filteredCustomers = customers.filter(
     (customer) =>
@@ -380,58 +343,28 @@ const Customers = () => {
       <div className="lg:pl-64">
         <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
           <div className="flex items-center gap-3">
-
-        {/* TOPBAR */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="shrink-0 rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
-              aria-label="Open menu"
+              className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
             >
               <Menu size={22} />
             </button>
 
             <div>
               <h1 className="text-lg font-bold">Customers</h1>
-            <div className="min-w-0">
-              <h1 className="truncate text-base font-bold text-slate-900 sm:text-lg">
-                Customers
-              </h1>
               <p className="hidden text-xs text-slate-400 sm:block">
                 Manage your customer accounts
               </p>
             </div>
           </div>
 
-
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-  {/* Home Button */}
-  <button
-    onClick={handleHomeClick}
-    className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
-    aria-label="Home"
-    title="Go to Home"
-  >
-    <Home size={19} />
-  </button>
-
-  {/* Search Button */}
-  <button
-    onClick={handleSearchClick}
-    className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
-    aria-label="Search"
-    title="Search"
-  >
-    <Search size={19} />
-  </button>
-
-  {/* Notification Button */}
-  <button
-    onClick={handleNotificationClick}
-    className="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
-    aria-label="Notifications"
-
+          <Button
+            icon={Plus}
+            size="sm"
+            onClick={() => setShowAddModal(true)}
+          >
+            Add Customer
+          </Button>
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8">
@@ -447,6 +380,7 @@ const Customers = () => {
                 <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
                   <Users size={21} />
                 </div>
+
                 <div>
                   <p className="text-xs text-slate-500">
                     Total Customers
@@ -459,37 +393,25 @@ const Customers = () => {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs text-slate-500">
+                Total Receivable
+              </p>
 
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
-                  <IndianRupee size={21} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Total Receivable
-                  </p>
-                  <p className="text-2xl font-bold text-emerald-600">
-                    {loading ? "..." : `₹${totalReceivable.toLocaleString("en-IN")}`}
-                  </p>
-                </div>
-              </div>
+              <p className="mt-2 text-2xl font-bold text-emerald-600">
+                {loading
+                  ? "..."
+                  : `₹${totalReceivable.toLocaleString("en-IN")}`}
+              </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-purple-100 p-3 text-purple-600">
-                  <CheckCircle2 size={21} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Settled Accounts
-                  </p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {loading ? "..." : settledCount}
-                  </p>
-                </div>
-              </div>
+              <p className="text-xs text-slate-500">
+                Settled Accounts
+              </p>
 
+              <p className="mt-2 text-2xl font-bold">
+                {loading ? "..." : settledCount}
+              </p>
             </div>
           </div>
 
