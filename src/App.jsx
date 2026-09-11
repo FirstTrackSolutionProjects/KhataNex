@@ -46,6 +46,7 @@ import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Banking from "./pages/Banking";
 
 // =====================================
 // Dashboard Layout (NO Navbar - pages have their own header)
@@ -259,6 +260,26 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* =====================================
+              BANKING (superadmin only)
+          ===================================== */}
+
+          <Route
+            path="/banking"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <Banking />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================
+              CUSTOMERS (normal operational dashboard,
+              landing page for user/employee)
+          ===================================== */}
 
           <Route
             path="/customers"
