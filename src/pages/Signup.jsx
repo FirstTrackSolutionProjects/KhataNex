@@ -8,6 +8,8 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ArrowLeft,
+  Home,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -46,8 +48,6 @@ const Signup = () => {
         phone: formData.phone,
         password: formData.password,
       });
-      // New self-registered accounts are always the 'user' role, which
-      // lands on Customers — the normal operational dashboard.
       navigate("/customers");
     } catch (err) {
       setError(err.message || "Could not create your account. Please try again.");
@@ -58,11 +58,25 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
-
       <div className="mx-auto max-w-lg">
+        {/* Navigation */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600"
+          >
+            <ArrowLeft size={18} />
+            Back to Home
+          </Link>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+          >
+            <Home size={18} />
+          </Link>
+        </div>
 
         <div className="mb-8 text-center">
-
           <Link
             to="/"
             className="mx-auto mb-5 flex w-fit items-center gap-2"
@@ -70,20 +84,16 @@ const Signup = () => {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white">
               K
             </div>
-
             <span className="text-xl font-bold text-slate-900">
               KHATANEX
             </span>
           </Link>
-
           <h1 className="text-3xl font-bold">
             Create your account
           </h1>
-
           <p className="mt-2 text-sm text-slate-500">
             Start managing your business digitally.
           </p>
-
         </div>
 
         <form
@@ -101,13 +111,11 @@ const Signup = () => {
             <label className="mb-2 block text-sm font-medium">
               Full Name
             </label>
-
             <div className="relative">
               <User
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-
               <input
                 type="text"
                 name="name"
@@ -124,7 +132,6 @@ const Signup = () => {
             <label className="mb-2 block text-sm font-medium">
               Business Name
             </label>
-
             <input
               type="text"
               name="businessName"
@@ -140,13 +147,11 @@ const Signup = () => {
             <label className="mb-2 block text-sm font-medium">
               Email Address
             </label>
-
             <div className="relative">
               <Mail
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-
               <input
                 type="email"
                 name="email"
@@ -163,13 +168,11 @@ const Signup = () => {
             <label className="mb-2 block text-sm font-medium">
               Phone Number
             </label>
-
             <div className="relative">
               <Phone
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-
               <input
                 type="tel"
                 name="phone"
@@ -186,14 +189,11 @@ const Signup = () => {
             <label className="mb-2 block text-sm font-medium">
               Password
             </label>
-
             <div className="relative">
-
               <Lock
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -202,21 +202,13 @@ const Signup = () => {
                 placeholder="Create password"
                 className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
-
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
               >
-                {showPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
-
             </div>
           </div>
 
@@ -225,7 +217,6 @@ const Signup = () => {
               type="checkbox"
               className="mt-0.5 accent-emerald-600"
             />
-
             <span>
               I agree to the Terms & Conditions and Privacy Policy.
             </span>
@@ -239,7 +230,6 @@ const Signup = () => {
             {submitting ? "Creating account..." : "Create Account"}
             <ArrowRight size={17} />
           </button>
-
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-500">
@@ -251,7 +241,6 @@ const Signup = () => {
             Login
           </Link>
         </p>
-
       </div>
     </div>
   );

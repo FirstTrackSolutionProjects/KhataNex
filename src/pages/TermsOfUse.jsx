@@ -21,14 +21,14 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Welcome to Khata Nex. By accessing or using the Khata Nex
+            Welcome to KhataNex. By accessing or using the KhataNex
             platform, website, or services, you agree to be bound by these
             Terms of Use.
           </p>
 
           <p>
             If you do not agree with any part of these terms, please do not
-            use Khata Nex or its services.
+            use KhataNex or its services.
           </p>
         </>
       ),
@@ -36,15 +36,15 @@ const TermsOfUse = () => {
     {
       id: "about",
       icon: FileText,
-      title: "2. About Khata Nex",
+      title: "2. About KhataNex",
       content: (
         <>
           <p>
-            Khata Nex is a digital business management platform designed to
+            KhatNex is a digital business management platform designed to
             help businesses manage their day-to-day records digitally.
           </p>
 
-          <p>Depending on the features available, Khata Nex may provide:</p>
+          <p>Depending on the features available, KhataNex may provide:</p>
 
           <ul>
             <li>Digital Khata management</li>
@@ -65,7 +65,7 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Some Khata Nex features may require you to create an account. You
+            Some KhataNex features may require you to create an account. You
             are responsible for providing accurate and up-to-date information
             during registration.
           </p>
@@ -78,7 +78,7 @@ const TermsOfUse = () => {
 
           <p>
             If you believe that your account has been accessed without
-            authorization, you should notify Khata Nex as soon as possible.
+            authorization, you should notify KhataNex as soon as possible.
           </p>
         </>
       ),
@@ -90,14 +90,14 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Khata Nex allows users to store business-related information,
+            KhataNex allows users to store business-related information,
             including customer details, transactions, payments, invoices,
             products, and other records.
           </p>
 
           <p>
             You are responsible for ensuring that the information you enter
-            into Khata Nex is accurate, lawful, and appropriate for your
+            into KhataNex is accurate, lawful, and appropriate for your
             business purposes.
           </p>
 
@@ -115,14 +115,14 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            You agree to use Khata Nex only for lawful business and personal
+            You agree to use KhataNex only for lawful business and personal
             purposes permitted by these Terms.
           </p>
 
           <p>You must not:</p>
 
           <ul>
-            <li>Use Khata Nex for fraudulent or illegal activities.</li>
+            <li>Use KhataNex for fraudulent or illegal activities.</li>
             <li>
               Attempt to gain unauthorized access to another user's account.
             </li>
@@ -138,7 +138,7 @@ const TermsOfUse = () => {
               person.
             </li>
             <li>
-              Copy, modify, distribute, or misuse Khata Nex's proprietary
+              Copy, modify, distribute, or misuse KhataNex's proprietary
               software or content without authorization.
             </li>
           </ul>
@@ -152,12 +152,12 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Khata Nex may provide features for recording and tracking
+            KhataNex may provide features for recording and tracking
             payments and transactions.
           </p>
 
           <p>
-            Unless specifically stated otherwise, Khata Nex does not
+            Unless specifically stated otherwise, KhataNex does not
             independently guarantee the completion, settlement, or validity of
             transactions recorded by users.
           </p>
@@ -176,7 +176,7 @@ const TermsOfUse = () => {
       content: (
         <p>
           You are responsible for ensuring that the information entered into
-          your Khata Nex account is complete, accurate, and current. Khata Nex
+          your KhataNex account is complete, accurate, and current. Khata Nex
           is not responsible for losses resulting from incorrect, incomplete,
           outdated, or misleading information entered by users.
         </p>
@@ -189,7 +189,7 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            We aim to keep Khata Nex available and reliable, but we do not
+            We aim to keep KhataNex available and reliable, but we do not
             guarantee that the service will always be uninterrupted,
             error-free, or available at all times.
           </p>
@@ -209,7 +209,7 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Khata Nex uses reasonable security measures to help protect user
+            KhataNex uses reasonable security measures to help protect user
             accounts and business information.
           </p>
 
@@ -227,10 +227,10 @@ const TermsOfUse = () => {
       title: "10. Intellectual Property",
       content: (
         <p>
-          Khata Nex, including its software, design, branding, logos,
+          KhataNex, including its software, design, branding, logos,
           graphics, interface, text, and other original content, may be
           protected by applicable intellectual property laws. Except where
-          permitted by law or expressly authorized by Khata Nex, you may not
+          permitted by law or expressly authorized by KhataNex, you may not
           reproduce, modify, distribute, sell, or create derivative works from
           these materials.
         </p>
@@ -243,12 +243,12 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            You may not use Khata Nex to conduct activities that are unlawful,
+            You may not use KhataNex to conduct activities that are unlawful,
             fraudulent, deceptive, abusive, or harmful.
           </p>
 
           <p>
-            Khata Nex may take appropriate action, including restricting or
+            KhataNex may take appropriate action, including restricting or
             suspending access, when there is reasonable evidence of misuse,
             security threats, fraud, or violation of these Terms.
           </p>
@@ -262,7 +262,7 @@ const TermsOfUse = () => {
       content: (
         <>
           <p>
-            Khata Nex may suspend or terminate an account when necessary to
+            KhataNex may suspend or terminate an account when necessary to
             protect the platform, users, or third parties, or when a user
             violates these Terms or applicable law.
           </p>
@@ -281,7 +281,7 @@ const TermsOfUse = () => {
       title: "13. Limitation of Liability",
       content: (
         <p>
-          To the extent permitted by applicable law, Khata Nex will not be
+          To the extent permitted by applicable law, KhataNex will not be
           responsible for indirect, incidental, special, consequential, or
           business-related losses arising from the use of the platform,
           including losses resulting from incorrect data entered by users,
@@ -296,7 +296,7 @@ const TermsOfUse = () => {
       title: "14. Privacy",
       content: (
         <p>
-          Your use of Khata Nex is also subject to our Privacy Policy, which
+          Your use of KhataNex is also subject to our Privacy Policy, which
           explains how we collect, use, protect, and manage information
           associated with your use of the platform.
         </p>
@@ -308,7 +308,7 @@ const TermsOfUse = () => {
       title: "15. Changes to These Terms",
       content: (
         <p>
-          Khata Nex may update these Terms of Use from time to time to reflect
+          KhataNex may update these Terms of Use from time to time to reflect
           changes to our services, technology, business practices, or legal
           requirements. Updated terms will be made available through the
           platform or other appropriate communication channels.
@@ -338,7 +338,7 @@ const TermsOfUse = () => {
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-sky-50 sm:text-lg">
-            Please read these terms carefully before using Khata Nex and its
+            Please read these terms carefully before using KhataNex and its
             business management services.
           </p>
 
@@ -383,16 +383,16 @@ const TermsOfUse = () => {
               {/* Introduction */}
               <div className="rounded-2xl border border-sky-100 bg-sky-50 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-slate-900">
-                  Welcome to Khata Nex
+                  Welcome to KhataNex
                 </h2>
 
                 <p className="mt-4 leading-7 text-slate-600">
                   These Terms of Use govern your access to and use of the
-                  Khata Nex platform, website, and related services.
+                  KhataNex platform, website, and related services.
                 </p>
 
                 <p className="mt-4 leading-7 text-slate-600">
-                  Khata Nex provides digital tools that can help businesses
+                  KhataNex provides digital tools that can help businesses
                   manage customers, transactions, payments, invoices,
                   inventory, and business records.
                 </p>
@@ -444,7 +444,7 @@ const TermsOfUse = () => {
 
                     <p className="mt-2 text-sm leading-6 text-sky-50 sm:text-base">
                       If you have questions about these Terms of Use or need
-                      assistance with Khata Nex, please contact our support
+                      assistance with KhataNex, please contact our support
                       team.
                     </p>
 
@@ -453,7 +453,7 @@ const TermsOfUse = () => {
                       className="mt-4 inline-flex items-center gap-2 font-semibold text-white underline underline-offset-4 transition hover:text-sky-100"
                     >
                       <Mail size={17} />
-                      support@khatanex.com
+                      support@khatanex.in
                     </a>
                   </div>
                 </div>
@@ -469,7 +469,7 @@ const TermsOfUse = () => {
 
                   <p className="text-sm leading-6 text-amber-800">
                     <strong>Important:</strong> These Terms of Use are a
-                    general product template for Khata Nex. Before using them
+                    general product template for KhataNex. Before using them
                     as final legal terms, they should be reviewed and
                     customized according to your actual business entity,
                     services, payment providers, jurisdiction, refund policy,

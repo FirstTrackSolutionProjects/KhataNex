@@ -16,7 +16,7 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "What is Khata Nex?",
+      question: "What is KhataNex?",
       answer:
         "Khata Nex is a digital business management platform that helps shopkeepers and small businesses manage customers, track credit and payments, create invoices, manage inventory, and monitor business performance digitally.",
       icon: HelpCircle,
@@ -28,7 +28,7 @@ const FAQ = () => {
       icon: FileText,
     },
     {
-      question: "Can I manage my customers with Khata Nex?",
+      question: "Can I manage my customers with KhataNex?",
       answer:
         "Yes. Khata Nex allows you to add customers, manage their information, view transaction history, check outstanding balances, and keep all customer records organized in one place.",
       icon: Users,
@@ -46,7 +46,7 @@ const FAQ = () => {
       icon: FileText,
     },
     {
-      question: "Does Khata Nex support inventory management?",
+      question: "Does KhataNex support inventory management?",
       answer:
         "Yes. The inventory management feature can help you track products, stock quantities, product prices, and available stock so that you can manage your business more efficiently.",
       icon: Package,
@@ -64,7 +64,7 @@ const FAQ = () => {
       icon: ShieldCheck,
     },
     {
-      question: "Can I access Khata Nex from my mobile?",
+      question: "Can I access KhataNex from my mobile?",
       answer:
         "Yes. Khata Nex is designed to be responsive, allowing you to access your business information from mobile phones, tablets, laptops, and desktop computers.",
       icon: HelpCircle,
@@ -97,7 +97,7 @@ const FAQ = () => {
 
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
             Everything You Need to Know About{" "}
-            <span className="text-sky-500">Khata Nex</span>
+            <span className="text-sky-500">KhataNex</span>
           </h1>
 
           <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">
@@ -196,7 +196,7 @@ const FAQ = () => {
 
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-sky-50 sm:text-base">
                 Can't find the answer you're looking for? Our support team is
-                ready to help you with Khata Nex.
+                ready to help you with KhataNex.
               </p>
 
               <button

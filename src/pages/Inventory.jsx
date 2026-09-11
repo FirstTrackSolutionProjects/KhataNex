@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Menu,
   ClipboardList,
+  IndianRupee,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
@@ -69,8 +70,6 @@ const Inventory = () => {
   const stockValue = stock.reduce((sum, p) => sum + Number(p.price || 0) * Number(p.quantity || 0), 0);
   const lowStockCount = stock.filter((p) => Number(p.quantity || 0) < LOW_STOCK_THRESHOLD).length;
 
-  // As soon as an HSN code is typed and the field loses focus, check for a
-  // matching purchase invoice and offer to auto-fill price/quantity.
   const handleHsnBlur = async () => {
     if (!productForm.hsn_code) {
       setHsnHint("");
@@ -190,10 +189,17 @@ const Inventory = () => {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs text-slate-500">Stock Value</p>
-              <p className="mt-2 text-2xl font-bold">
-                {loading ? "..." : `₹${stockValue.toLocaleString("en-IN")}`}
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                  <IndianRupee size={21} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Stock Value</p>
+                  <p className="text-2xl font-bold text-emerald-600">
+                    {loading ? "..." : `₹${stockValue.toLocaleString("en-IN")}`}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">

@@ -9,17 +9,22 @@ import {
   CheckCircle,
   ArrowUpRight,
 } from "lucide-react";
+import { CONTACT_US_SUBJECT_ENUM } from "../constants";
+import sendContactUs from "../services/contact/send_contact_us.contact.service";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM_STATE = {
     name: "",
     email: "",
     phone: "",
-    subject: "",
+    subject: CONTACT_US_SUBJECT_ENUM.ACCOUNT_SUPPORT,
     message: "",
-  });
+  }
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   const [submitted, setSubmitted] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,22 +35,21 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    setSubmitted(true);
-
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
-
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 5000);
+    try {
+      setLoading(true);
+      await sendContactUs(formData);
+      setFormData(INITIAL_FORM_STATE);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    } catch (error) {
+      alert(error.message || "Failed to send message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,10 +111,10 @@ const Contact = () => {
             </p>
 
             <a
-              href="tel:+919912345678"
+              href="tel:+91 9040170727"
               className="mt-3 block text-sm font-semibold text-emerald-600 hover:text-emerald-700"
             >
-              +91 9912345678
+              +91 9040170727
             </a>
 
           </div>
@@ -131,10 +135,10 @@ const Contact = () => {
             </p>
 
             <a
-              href="mailto:support@khatanex.com"
+              href="mailto:support@khatanex.in"
               className="mt-3 block break-all text-sm font-semibold text-emerald-600 hover:text-emerald-700"
             >
-              support@khatanex.com
+              support@khatanex.in
             </a>
 
           </div>
@@ -310,27 +314,13 @@ const Contact = () => {
                     onChange={handleChange}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="">
-                      Select a subject
-                    </option>
-                    <option value="general">
-                      General Enquiry
-                    </option>
-                    <option value="account">
-                      Account Support
-                    </option>
-                    <option value="payment">
-                      Payment Issue
-                    </option>
-                    <option value="khata">
-                      Khata Support
-                    </option>
-                    <option value="technical">
-                      Technical Support
-                    </option>
-                    <option value="other">
-                      Other
-                    </option>
+                   {
+                    Object.entries(CONTACT_US_SUBJECT_ENUM).map(([key, value]) => (
+                      <option key={key} value={value}>
+                        {value}
+                      </option>
+                    ))
+                   }
                   </select>
                 </div>
 
@@ -355,10 +345,11 @@ const Contact = () => {
               {/* Submit */}
               <button
                 type="submit"
+                disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg sm:w-auto"
               >
                 <Send size={18} />
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
 
             </form>

@@ -11,7 +11,9 @@ import {
   UserPlus,
   Ban,
   CheckCircle2,
+  Home,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
@@ -26,6 +28,7 @@ import api from "../lib/api";
 // employees land on /customers instead.
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [stats, setStats] = useState({
@@ -87,6 +90,29 @@ const Dashboard = () => {
     loadDashboard();
   }, []);
 
+  // Handler functions for header buttons
+  const handleHomeClick = () => {
+    navigate("/");
+  };
+
+  const handleSearchClick = () => {
+    const searchInput = document.querySelector('input[type="text"], input[placeholder*="Search"]');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      alert("🔍 Search functionality is available on the Customers page.");
+    }
+  };
+
+  const handleNotificationClick = () => {
+    alert("📬 No new notifications at this time.");
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
   const handleCreateEmployee = async (e) => {
     e.preventDefault();
     setEmployeeError("");
@@ -129,9 +155,7 @@ const Dashboard = () => {
 
         {/* TOPBAR */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-6">
-
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-
             <button
               onClick={() => setSidebarOpen(true)}
               className="shrink-0 rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
@@ -144,35 +168,53 @@ const Dashboard = () => {
               <h1 className="truncate text-base font-bold text-slate-900 sm:text-lg">
                 Dashboard
               </h1>
-
               <p className="hidden text-xs text-slate-400 sm:block">
                 Business overview
               </p>
             </div>
-
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-
+            {/* Home Button */}
             <button
+              onClick={handleHomeClick}
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+              aria-label="Home"
+              title="Go to Home"
+            >
+              <Home size={19} />
+            </button>
+
+            {/* Search Button */}
+            <button
+              onClick={handleSearchClick}
               className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
               aria-label="Search"
+              title="Search"
             >
               <Search size={19} />
             </button>
 
+            {/* Notification Button */}
             <button
+              onClick={handleNotificationClick}
               className="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
               aria-label="Notifications"
+              title="Notifications"
             >
               <Bell size={19} />
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            <div className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 sm:ml-2 sm:h-9 sm:w-9">
+            {/* Profile Button */}
+            <button
+              onClick={handleProfileClick}
+              className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-200 sm:ml-2 sm:h-9 sm:w-9"
+              aria-label="Profile"
+              title="Go to Profile"
+            >
               {(user?.name || "S").charAt(0).toUpperCase()}
-            </div>
-
+            </button>
           </div>
         </header>
 

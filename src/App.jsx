@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BottomNav from "./components/BottomNav";
 import { AuthProvider } from "./context/AuthContext";
 // =====================================
 // Public Pages
@@ -48,28 +49,27 @@ import Settings from "./pages/Settings";
 import Banking from "./pages/Banking";
 
 // =====================================
-// Dashboard Layout
+// Dashboard Layout (NO Navbar - pages have their own header)
 // =====================================
 const DashboardLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
       {children}
+      <BottomNav />
     </div>
   );
 };
 
 // =====================================
-// Public Layout
+// Public Layout (includes Navbar for public pages)
 // =====================================
 const PublicLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
-
       <main>
         {children}
       </main>
-
       <Footer />
     </div>
   );
@@ -82,33 +82,21 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
       <div className="text-center">
-
         <h1 className="text-8xl font-extrabold text-emerald-600">
           404
         </h1>
-
         <h2 className="mt-4 text-2xl font-bold text-slate-800">
           Page Not Found
         </h2>
-
         <p className="mt-2 text-slate-500">
           The page you are looking for does not exist.
         </p>
-
         <a
           href="/"
-          className="
-            mt-6 inline-flex items-center justify-center
-            rounded-xl bg-emerald-600
-            px-6 py-3
-            font-semibold text-white
-            transition
-            hover:bg-emerald-700
-          "
+          className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
         >
           Go to Home
         </a>
-
       </div>
     </div>
   );
@@ -125,7 +113,7 @@ function App() {
         <Routes>
 
           {/* =====================================
-              PUBLIC WEBSITE
+              PUBLIC WEBSITE (has Navbar)
           ===================================== */}
 
           {/* Home */}
@@ -176,80 +164,76 @@ function App() {
             }
           />
 
+          {/* =====================================
+              LEGAL & SUPPORT PAGES
+          ===================================== */}
 
-{/* =====================================
-    LEGAL & SUPPORT PAGES
-===================================== */}
+          {/* Refund & Cancellation */}
+          <Route
+            path="/refund-cancellation"
+            element={
+              <PublicLayout>
+                <RefundCancellation />
+              </PublicLayout>
+            }
+          />
 
-{/* Refund & Cancellation */}
-<Route
-  path="/refund-cancellation"
-  element={
-    <PublicLayout>
-      <RefundCancellation />
-    </PublicLayout>
-  }
-/>
+          {/* Terms Of Use */}
+          <Route
+            path="/terms-of-use"
+            element={
+              <PublicLayout>
+                <TermsOfUse />
+              </PublicLayout>
+            }
+          />
 
-{/* Terms Of Use */}
-<Route
-path="/terms-of-use"
-element={
-  <PublicLayout>
-    <TermsOfUse />
-  </PublicLayout>
-}
-/>
+          {/* Privacy Policy */}
+          <Route
+            path="/privacy-policy"
+            element={
+              <PublicLayout>
+                <PrivacyPolicy />
+              </PublicLayout>
+            }
+          />
 
-{/* Privacy Policy */}
-<Route
-  path="/privacy-policy"
-  element={
-    <PublicLayout>
-      <PrivacyPolicy />
-    </PublicLayout>
-  }
-/>
-
-{/* FAQ */}
-<Route
-  path="/faq"
-  element={
-    <PublicLayout>
-      <FAQ />
-    </PublicLayout>
-  }
-/>
-
-{/* =====================================
-    FEATURES (marketing/demo pages — kept static,
-    not wired to the API, separate from the real
-    dashboard pages below)
-===================================== */}
-
-{/* Digital Khata */}
-<Route
-  path="/digital-khata"
-  element={
-    <PublicLayout>
-      <DigitalKhata />
-    </PublicLayout>
-  }
-/>
-
-{/* Customer Management */}
-<Route
-  path="/customer-management"
-  element={
-    <PublicLayout>
-      <CustomerManagement />
-    </PublicLayout>
-  }
-/>
-
+          {/* FAQ */}
+          <Route
+            path="/faq"
+            element={
+              <PublicLayout>
+                <FAQ />
+              </PublicLayout>
+            }
+          />
 
           {/* =====================================
-              AUTHENTICATION
+              FEATURES (marketing/demo pages)
+          ===================================== */}
+
+          {/* Digital Khata */}
+          <Route
+            path="/digital-khata"
+            element={
+              <PublicLayout>
+                <DigitalKhata />
+              </PublicLayout>
+            }
+          />
+
+          {/* Customer Management */}
+          <Route
+            path="/customer-management"
+            element={
+              <PublicLayout>
+                <CustomerManagement />
+              </PublicLayout>
+            }
+          />
+
+          {/* =====================================
+              AUTHENTICATION (no Navbar, clean layout)
           ===================================== */}
 
           <Route
@@ -263,7 +247,7 @@ element={
           />
 
           {/* =====================================
-              DASHBOARD (super admin's overview only)
+              DASHBOARD PAGES (NO outer Navbar - pages have their own header)
           ===================================== */}
 
           <Route
@@ -308,7 +292,6 @@ element={
             }
           />
 
-          {/* Customer Details */}
           <Route
             path="/customers/:id"
             element={
@@ -319,10 +302,6 @@ element={
               </ProtectedRoute>
             }
           />
-
-          {/* =====================================
-              KHATA
-          ===================================== */}
 
           <Route
             path="/khata"
@@ -335,10 +314,6 @@ element={
             }
           />
 
-          {/* =====================================
-              PAYMENTS
-          ===================================== */}
-
           <Route
             path="/payments"
             element={
@@ -349,10 +324,6 @@ element={
               </ProtectedRoute>
             }
           />
-
-          {/* =====================================
-              INVOICES
-          ===================================== */}
 
           <Route
             path="/invoices"
@@ -365,10 +336,6 @@ element={
             }
           />
 
-          {/* =====================================
-              INVENTORY
-          ===================================== */}
-
           <Route
             path="/inventory"
             element={
@@ -379,10 +346,6 @@ element={
               </ProtectedRoute>
             }
           />
-
-          {/* =====================================
-              VEHICLES
-          ===================================== */}
 
           <Route
             path="/vehicles"
@@ -395,10 +358,6 @@ element={
             }
           />
 
-          {/* =====================================
-              REPORTS
-          ===================================== */}
-
           <Route
             path="/reports"
             element={
@@ -410,10 +369,6 @@ element={
             }
           />
 
-          {/* =====================================
-              PROFILE
-          ===================================== */}
-
           <Route
             path="/profile"
             element={
@@ -424,10 +379,6 @@ element={
               </ProtectedRoute>
             }
           />
-
-          {/* =====================================
-              SETTINGS
-          ===================================== */}
 
           <Route
             path="/settings"
