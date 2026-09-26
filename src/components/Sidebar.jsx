@@ -26,12 +26,14 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   // operational dashboard.
   const menuItems = [
     ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
-    ...(isSuperadmin ? [{ name: "Banking", path: "/banking", icon: Landmark }] : []),
     { name: "Customers", path: "/customers", icon: Users },
     { name: "Khata", path: "/khata", icon: BookOpen },
     { name: "Payments", path: "/payments", icon: CreditCard },
     { name: "Invoices", path: "/invoices", icon: FileText },
+    { name: "Quotations", path: "/quotations", icon: FileText },
+    { name: "Receipts", path: "/money-receipts", icon: FileText },
     { name: "Inventory", path: "/inventory", icon: Package },
+    { name: "Banking", path: "/banking", icon: Landmark },
     { name: "Vehicles", path: "/vehicles", icon: Truck },
     { name: "Reports", path: "/reports", icon: BarChart3 },
   ];

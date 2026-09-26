@@ -41,6 +41,8 @@ import CustomerDetails from "./pages/CustomerDetails";
 import Khata from "./pages/Khata";
 import Payments from "./pages/Payments";
 import Invoices from "./pages/Invoices";
+import Quotations from "./pages/Quotations";
+import MoneyReceipts from "./pages/MoneyReceipts";
 import Inventory from "./pages/Inventory";
 import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
@@ -262,13 +264,13 @@ function App() {
           />
 
           {/* =====================================
-              BANKING (superadmin only)
+              BANKING
           ===================================== */}
 
           <Route
             path="/banking"
             element={
-              <ProtectedRoute allowedRoles={["superadmin"]}>
+              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]}>
                 <DashboardLayout>
                   <Banking />
                 </DashboardLayout>
@@ -331,6 +333,28 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Invoices />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/quotations"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Quotations />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/money-receipts"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <MoneyReceipts />
                 </DashboardLayout>
               </ProtectedRoute>
             }
