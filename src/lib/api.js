@@ -1,7 +1,10 @@
 // Small fetch wrapper for the FIRST TRACK KHATANEX backend.
 // Reads the API base URL from Vite's env (set VITE_API_BASE_URL in .env
+// Reads the API base URL from Vite's env (set VITE_API_BASE_URL in .env
 // locally and in Netlify's site settings for production).
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+// locally and in Netlify's site settings for production).
+const BASE_URL = "http://localhost:5001";
+
 
 const TOKEN_KEY = "khatanex_token";
 
