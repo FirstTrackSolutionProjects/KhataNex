@@ -9,7 +9,9 @@ import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
+import Sidebar from "./components/Sidebar";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 // =====================================
 // Public Pages
 // =====================================
@@ -46,6 +48,8 @@ import MoneyReceipts from "./pages/MoneyReceipts";
 import Inventory from "./pages/Inventory";
 import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
+import MyUsers from "./pages/MyUsers";
+import MyUserDetails from "./pages/MyUserDetails";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Banking from "./pages/Banking";
@@ -56,7 +60,8 @@ import Banking from "./pages/Banking";
 const DashboardLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
-      {children}
+      <Sidebar />
+      <main>{children}</main>
       <BottomNav />
     </div>
   );
@@ -110,9 +115,10 @@ const NotFound = () => {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <ScrollToTop />
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
 
           {/* =====================================
               PUBLIC WEBSITE (has Navbar)
@@ -392,6 +398,28 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-users"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <MyUsers />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-users/:id"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <MyUserDetails />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+
 
           <Route
             path="/profile"
@@ -425,7 +453,8 @@ function App() {
           />
 
         </Routes>
-      </AuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

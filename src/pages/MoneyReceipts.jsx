@@ -15,7 +15,7 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
-import api, { fileUrl } from "../lib/api";
+import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 
 const money = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN", {
@@ -858,6 +858,7 @@ function MoneyReceiptForm({
             : manualCustomer.name.trim() || null,
         against_type: againstType,
         amount_received: numericAmount,
+        amount: numericAmount,
         payment_mode: paymentMode,
         transaction_reference:
           transactionReference.trim() || null,
@@ -906,15 +907,18 @@ function MoneyReceiptForm({
         );
       }
 
-      if (!draft && downloadUrl) {
-        const pdfUrl = fileUrl(downloadUrl);
+      const pdfPath = receipt?.pdf_path || downloadUrl || response?.pdf_path;
 
-        if (pdfUrl) {
-          window.open(
-            pdfUrl,
-            "_blank",
-            "noopener,noreferrer"
-          );
+      if (!draft && pdfPath) {
+        try {
+          const pdfUrl = await secureFileObjectUrl(pdfPath);
+          const pdfWindow = window.open(pdfUrl, "_blank");
+
+          if (!pdfWindow) URL.revokeObjectURL(pdfUrl);
+          else setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+        } catch (err) {
+          console.error("Failed to open money receipt PDF:", err);
+          window.alert(err.message || "Could not open the money receipt PDF.");
         }
       }
 
@@ -1322,6 +1326,7 @@ const MoneyReceipts = () => {
         receipt?.payment_mode,
         receipt?.transaction_reference,
         receipt?.amount_received,
+        receipt?.amount,
       ]
         .filter(Boolean)
         .some((value) =>
@@ -1332,7 +1337,7 @@ const MoneyReceipts = () => {
 
   const totalValue = documents.reduce(
     (sum, receipt) =>
-      sum + numberValue(receipt?.amount_received),
+      sum + numberValue(receipt?.amount_received ?? receipt?.amount),
     0
   );
 
@@ -1348,10 +1353,8 @@ const MoneyReceipts = () => {
       "draft"
   ).length;
 
-  const downloadReceipt = (receipt) => {
-    const url =
-      receipt?.download_url ||
-      receipt?.pdf_path;
+  const downloadReceipt = async (receipt) => {
+    const url = receipt?.pdf_path || receipt?.download_url;
 
     if (!url) {
       window.alert(
@@ -1360,11 +1363,25 @@ const MoneyReceipts = () => {
       return;
     }
 
-    window.open(
-      fileUrl(url),
-      "_blank",
-      "noopener,noreferrer"
-    );
+    try {
+      const pdfBlob = await fetchSecureFile(url);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = window.document.createElement("a");
+
+      link.href = pdfUrl;
+      link.download = receipt.receipt_number
+        ? `${receipt.receipt_number}.pdf`
+        : "money-receipt.pdf";
+
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+    } catch (err) {
+      console.error("Failed to download money receipt PDF:", err);
+      window.alert(err.message || "Could not download the money receipt PDF.");
+    }
   };
 
   const handleCreated = async () => {
@@ -1468,12 +1485,12 @@ const MoneyReceipts = () => {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-200 p-4 sm:p-5">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 p-4 sm:p-5">
               <div className="relative max-w-xl">
                 <Search
                   size={18}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <input
@@ -1482,35 +1499,35 @@ const MoneyReceipts = () => {
                     setSearch(e.target.value)
                   }
                   placeholder="Search receipt number, customer, amount or payment reference..."
-                  className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
 
             {loading ? (
               <div className="p-10 text-center">
-                <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-indigo-600" />
+                <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600" />
 
-                <p className="mt-3 text-sm text-gray-500">
+                <p className="mt-3 text-sm text-slate-500">
                   Loading receipts...
                 </p>
               </div>
             ) : filteredReceipts.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
                   <CreditCard
                     size={22}
-                    className="text-gray-500"
+                    className="text-slate-500"
                   />
                 </div>
 
-                <h3 className="mt-4 text-sm font-semibold text-gray-900">
+                <h3 className="mt-4 text-sm font-semibold text-slate-900">
                   {search
                     ? "No receipts found"
                     : "No receipts yet"}
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-500">
                   {search
                     ? "Try a different search term."
                     : "Create your first money receipt to record a payment."}
@@ -1520,7 +1537,7 @@ const MoneyReceipts = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreate(true)}
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
                   >
                     <Plus size={16} />
                     Create Receipt
@@ -1529,36 +1546,40 @@ const MoneyReceipts = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <table className="w-full min-w-[850px] text-left">
+                  <thead>
+                    <tr className="bg-emerald-600 text-white">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Receipt
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Received From
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Date
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Payment
                       </th>
 
-                      <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Amount
                       </th>
 
-                      <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
+                        Status
+                      </th>
+
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-right">
                         Actions
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-100 bg-white">
+                  <tbody className="divide-y divide-slate-100">
                     {filteredReceipts.map((receipt) => {
                       const customerName =
                         receipt?.customer_name ||
@@ -1573,24 +1594,18 @@ const MoneyReceipts = () => {
                       return (
                         <tr
                           key={receipt.id}
-                          className="hover:bg-gray-50"
+                          className="hover:bg-slate-50"
                         >
                           <td className="whitespace-nowrap px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600">
+                              <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600">
                                 <FileText size={16} />
                               </div>
 
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="font-medium text-slate-900">
                                   {receipt?.receipt_number ||
                                     `Receipt #${receipt.id}`}
-                                </p>
-
-                                <p className="mt-1 text-xs text-gray-500">
-                                  {status === "draft"
-                                    ? "Draft"
-                                    : "Issued"}
                                 </p>
                               </div>
                             </div>
@@ -1600,66 +1615,65 @@ const MoneyReceipts = () => {
                             <div className="flex items-center gap-2">
                               <User
                                 size={15}
-                                className="shrink-0 text-gray-400"
+                                className="shrink-0 text-slate-400"
                               />
 
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-medium text-gray-900">
+                                <p className="truncate font-medium text-slate-900">
                                   {customerName}
                                 </p>
 
                                 {receipt?.received_from_phone && (
-                                  <p className="mt-1 text-xs text-gray-500">
-                                    {
-                                      receipt.received_from_phone
-                                    }
+                                  <p className="mt-0.5 text-xs text-slate-500">
+                                    {receipt.received_from_phone}
                                   </p>
                                 )}
                               </div>
                             </div>
                           </td>
 
-                          <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
-                            {formatDate(
-                              receipt?.receipt_date
-                            )}
+                          <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">
+                            {formatDate(receipt?.receipt_date)}
                           </td>
 
                           <td className="px-5 py-4">
-                            <p className="text-sm font-medium capitalize text-gray-800">
+                            <p className="text-sm font-medium capitalize text-slate-800">
                               {String(
-                                receipt?.payment_mode ||
-                                "cash"
-                              ).replace(
-                                /_/g,
-                                " "
-                              )}
+                                receipt?.payment_mode || "cash"
+                              ).replace(/_/g, " ")}
                             </p>
 
                             {receipt?.transaction_reference && (
-                              <p className="mt-1 max-w-[180px] truncate text-xs text-gray-500">
-                                {
-                                  receipt.transaction_reference
-                                }
+                              <p className="mt-0.5 max-w-[180px] truncate text-xs text-slate-500">
+                                {receipt.transaction_reference}
                               </p>
                             )}
                           </td>
 
-                          <td className="whitespace-nowrap px-5 py-4 text-right">
-                            <p className="text-sm font-semibold text-gray-900">
-                              {money(
-                                receipt?.amount_received
-                              )}
-                            </p>
+                          <td className="whitespace-nowrap px-5 py-4 font-semibold text-slate-900">
+                            {money(
+                              receipt?.amount_received ??
+                                receipt?.amount
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                                status === "draft"
+                                  ? "bg-slate-100 text-slate-600"
+                                  : "bg-emerald-50 text-emerald-700"
+                              }`}
+                            >
+                              {status === "draft" ? "Draft" : "Issued"}
+                            </span>
                           </td>
 
                           <td className="whitespace-nowrap px-5 py-4 text-right">
                             <button
                               type="button"
-                              onClick={() =>
-                                downloadReceipt(receipt)
-                              }
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                              onClick={() => downloadReceipt(receipt)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
                             >
                               <Download size={14} />
                               PDF

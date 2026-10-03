@@ -12,7 +12,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
-import api, { fileUrl } from "../lib/api";
+import api, { fetchSecureFile } from "../lib/api";
 
 const STATUS_STYLE = {
   created: "bg-slate-100 text-slate-600",
@@ -208,25 +208,53 @@ const Vehicles = () => {
                   <div className="mt-4 flex flex-wrap items-center gap-2">
 
                     {trip.waybill_pdf_path && (
-                      <a
-                        href={fileUrl(trip.waybill_pdf_path)}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const blob = await fetchSecureFile(trip.waybill_pdf_path);
+                            const url = URL.createObjectURL(blob);
+                            const link = window.document.createElement("a");
+                            link.href = url;
+                            link.download = trip.waybill_number ? trip.waybill_number + ".pdf" : "way-bill.pdf";
+                            window.document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+                          } catch (err) {
+                            console.error("Failed to download way bill:", err);
+                            window.alert(err.message || "Could not download the way bill.");
+                          }
+                        }}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
                       >
                         <Download size={13} /> Way Bill
-                      </a>
+                      </button>
                     )}
 
                     {trip.waybill_uploaded_file && (
-                      <a
-                        href={fileUrl(trip.waybill_uploaded_file)}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const blob = await fetchSecureFile(trip.waybill_uploaded_file);
+                            const url = URL.createObjectURL(blob);
+                            const link = window.document.createElement("a");
+                            link.href = url;
+                            link.download = "uploaded-way-bill";
+                            window.document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+                          } catch (err) {
+                            console.error("Failed to download uploaded way bill:", err);
+                            window.alert(err.message || "Could not download the uploaded way bill.");
+                          }
+                        }}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
                       >
                         <Download size={13} /> Uploaded Way Bill
-                      </a>
+                      </button>
                     )}
 
                     {trip.trip_type === "outgoing" && trip.status === "created" && (

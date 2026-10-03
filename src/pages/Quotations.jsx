@@ -20,7 +20,7 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
-import api, { fileUrl } from "../lib/api";
+import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 
 const DOC_TYPE_LABEL = {
   invoice: "Invoice",
@@ -1702,17 +1702,54 @@ const Quotations = () => {
     (document) => document.email_status === "sent"
   ).length;
 
-  const downloadDocument = (document) => {
-    const url =
-      document.download_url ||
-      fileUrl(document.pdf_path);
-
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+  const downloadDocument = async (document) => {
+    const url = document?.pdf_path || document?.download_url;
+    if (!url) {
+      window.alert("PDF is not available for this document.");
       return;
     }
 
-    window.alert("PDF is not available for this document.");
+    try {
+      const pdfBlob = await fetchSecureFile(url);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = window.document.createElement("a");
+
+      link.href = pdfUrl;
+      link.download = document.quotation_number
+        ? `${document.quotation_number}.pdf`
+        : "quotation.pdf";
+
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+    } catch (err) {
+      console.error("Failed to download quotation PDF:", err);
+      window.alert(err.message || "Could not download the quotation PDF.");
+    }
+  };
+
+  const handleDeleteQuotation = async (quotation) => {
+    const quotationLabel =
+      quotation.quotation_number || `Quotation #${quotation.id}`;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${quotationLabel}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.del(`/api/documents/${quotation.id}`);
+      setDocuments((prev) => prev.filter((d) => d.id !== quotation.id));
+    } catch (err) {
+      console.error("Failed to delete quotation:", err);
+      window.alert(
+        err.message || "Failed to delete quotation. Please try again."
+      );
+    }
   };
 
   const resendEmail = async (document) => {
@@ -1733,14 +1770,30 @@ const Quotations = () => {
     setShowCreate(false);
     await loadData();
 
-    const url = response?.download_url
-      ? fileUrl(response.download_url)
-      : response?.document?.pdf_path
-        ? fileUrl(response.document.pdf_path)
-        : null;
+    const pdfPath =
+      response?.document?.pdf_path ||
+      response?.pdf_path ||
+      response?.download_url;
 
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+    if (!pdfPath) {
+      const errorMsg =
+        response?.error ||
+        response?.message ||
+        response?.pdf_error ||
+        "Quotation was created, but PDF generation failed on the server.";
+      window.alert(errorMsg);
+      return;
+    }
+
+    try {
+      const pdfUrl = await secureFileObjectUrl(pdfPath);
+      const pdfWindow = window.open(pdfUrl, "_blank");
+
+      if (!pdfWindow) URL.revokeObjectURL(pdfUrl);
+      else setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+    } catch (err) {
+      console.error("Failed to open quotation PDF:", err);
+      window.alert(err.message || "Could not open the quotation PDF.");
     }
   };
 
@@ -1827,22 +1880,22 @@ const Quotations = () => {
 
           </div>
 
-          <div className="mt-5 rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
 
-            <div className="border-b border-gray-100 p-4">
+            <div className="border-b border-slate-100 p-4">
               <div className="flex items-center gap-3">
 
                 <div className="relative flex-1 xl:max-w-lg">
                   <Search
                     size={17}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search quotation ID, customer name or amount..."
-                    className="w-full rounded-lg border border-gray-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
@@ -1850,7 +1903,7 @@ const Quotations = () => {
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="rounded-lg px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100"
+                    className="rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100"
                   >
                     Clear
                   </button>
@@ -1880,24 +1933,24 @@ const Quotations = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-sm">
+                <table className="w-full min-w-[900px] text-left">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs text-gray-500">
-                      <th className="px-4 py-3">Document</th>
-                      <th className="px-4 py-3">Type</th>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Date</th>
-                      <th className="px-4 py-3">Amount</th>
-                      <th className="px-4 py-3">Email</th>
-                      <th className="px-4 py-3">Actions</th>
+                    <tr className="bg-emerald-600 text-white">
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Document</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Type</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Customer</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Date</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Amount</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Email</th>
+                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Actions</th>
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100">
                     {filteredDocuments.map((document) => (
                       <tr
                         key={document.id}
-                        className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                        className="hover:bg-slate-50"
                       >
                         <td className="px-4 py-4">
                           <span className="font-semibold text-gray-900">
@@ -1935,14 +1988,14 @@ const Quotations = () => {
                           {money(document.total_amount)}
                         </td>
 
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4">
                           <span
                             className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                               document.email_status === "sent"
-                                ? "bg-green-50 text-green-700"
+                                ? "bg-emerald-50 text-emerald-700"
                                 : document.email_status === "failed"
                                   ? "bg-red-50 text-red-700"
-                                  : "bg-gray-100 text-gray-600"
+                                  : "bg-slate-100 text-slate-600"
                             }`}
                           >
                             {EMAIL_LABEL[
@@ -1951,7 +2004,7 @@ const Quotations = () => {
                           </span>
                         </td>
 
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4">
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
@@ -1959,7 +2012,7 @@ const Quotations = () => {
                                 downloadDocument(document)
                               }
                               title="Download PDF"
-                              className="rounded-md p-2 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600"
+                              className="rounded-lg p-2 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600"
                             >
                               <Download size={16} />
                             </button>
@@ -1971,11 +2024,22 @@ const Quotations = () => {
                                   resendEmail(document)
                                 }
                                 title="Resend email"
-                                className="rounded-md p-2 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600"
+                                className="rounded-lg p-2 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600"
                               >
                                 <Mail size={16} />
                               </button>
                             )}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDeleteQuotation(document)
+                              }
+                              title="Delete Quotation"
+                              className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>

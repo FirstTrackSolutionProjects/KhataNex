@@ -160,3 +160,168 @@ video {
 .profile-dropdown-trigger {
   cursor: pointer;
 }
+
+/* =====================================
+   APP-WIDE DARK MODE STYLING
+   ===================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-gray-50 {
+  background-color: #0b1120 !important;
+}
+
+.dark .bg-white {
+  background-color: #151f32 !important;
+  color: #f1f5f9;
+}
+
+.dark header {
+  background-color: #151f32 !important;
+  border-color: #1e293b !important;
+}
+
+.dark aside {
+  background-color: #0b1120 !important;
+  border-color: #1e293b !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100,
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: #243049 !important;
+}
+
+.dark .border-slate-300,
+.dark .border-gray-300 {
+  border-color: #334155 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-slate-800,
+.dark .text-gray-800,
+.dark .text-slate-700,
+.dark .text-gray-700 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-gray-600,
+.dark .text-slate-500,
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #64748b !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  background-color: #1e293b !important;
+  color: #64748b !important;
+}
+
+.dark table thead,
+.dark thead {
+  background-color: #0f172a !important;
+}
+
+.dark table thead th,
+.dark thead th {
+  color: #94a3b8 !important;
+  border-color: #243049 !important;
+}
+
+.dark table tbody tr {
+  border-color: #243049 !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-gray-100 {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/80 {
+  background-color: #111a2e !important;
+}
+
+.dark .divide-slate-100 > * + *,
+.dark .divide-slate-200 > * + *,
+.dark .divide-gray-100 > * + *,
+.dark .divide-gray-200 > * + * {
+  border-color: #243049 !important;
+}
+
+/* Modals & Dialogs */
+.dark [role="dialog"],
+.dark .bg-white.rounded-2xl {
+  background-color: #151f32 !important;
+  border-color: #243049 !important;
+}
+
+/* Hover effects */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: #1e293b !important;
+}
+
+/* Green Accents */
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.dark .border-emerald-200,
+.dark .border-emerald-100 {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.dark .bg-emerald-600 {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+.dark .hover\:bg-emerald-700:hover {
+  background-color: #047857 !important;
+}
