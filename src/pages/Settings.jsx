@@ -12,22 +12,27 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
+import { useTheme } from "../context/ThemeContext";
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   const [settings, setSettings] = useState({
     notifications: true,
     paymentReminder: true,
-    darkMode: false,
+    darkMode: isDark,
     twoFactor: false,
   });
 
   const toggleSetting = (key) => {
-    setSettings({
-      ...settings,
-      [key]: !settings[key],
-    });
+    if (key === "darkMode") {
+      toggleTheme();
+    }
+    setSettings((prev) => ({
+      ...prev,
+      [key]: key === "darkMode" ? !isDark : !prev[key],
+    }));
   };
 
   const SettingRow = ({

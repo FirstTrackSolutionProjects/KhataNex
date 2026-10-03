@@ -171,6 +171,27 @@ const Customers = () => {
     }
   };
 
+  const handleDeleteCustomer = async (id, name) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${
+          name || "this customer"
+        }? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    try {
+      setCustomers((prev) => prev.filter((c) => c.id !== id));
+      await api.del(`/api/customers/${id}`);
+      loadCustomers();
+    } catch (err) {
+      console.error("Failed to delete customer:", err);
+      window.alert(err.message || "Failed to delete customer.");
+      loadCustomers();
+    }
+  };
+
   useEffect(() => {
     loadCustomers();
   }, []);
@@ -445,6 +466,7 @@ const Customers = () => {
                   name={customer.name}
                   phone={customer.phone}
                   balance={Number(customer.total_due || 0)}
+                  onDelete={handleDeleteCustomer}
                 />
               ))}
             </div>

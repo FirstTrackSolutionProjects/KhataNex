@@ -18,7 +18,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
-import { api, fileUrl } from "../lib/api";
+import { api, secureFileObjectUrl } from "../lib/api";
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -34,6 +34,9 @@ const Profile = () => {
 
   const logoInputRef = useRef(null);
   const signatureInputRef = useRef(null);
+
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [signatureUrl, setSignatureUrl] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -80,6 +83,42 @@ const Profile = () => {
       payment_terms: user.payment_terms || "",
     });
   }, [user]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let logoObjectUrl = null;
+    let signatureObjectUrl = null;
+
+    const loadProfileFiles = async () => {
+      setLogoUrl(null);
+      setSignatureUrl(null);
+
+      try {
+        if (user?.logo_path) {
+          logoObjectUrl = await secureFileObjectUrl(user.logo_path);
+          if (!cancelled) setLogoUrl(logoObjectUrl);
+        }
+
+        if (user?.signature_path) {
+          signatureObjectUrl = await secureFileObjectUrl(user.signature_path);
+          if (!cancelled) setSignatureUrl(signatureObjectUrl);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setLogoUrl(null);
+          setSignatureUrl(null);
+        }
+      }
+    };
+
+    loadProfileFiles();
+
+    return () => {
+      cancelled = true;
+      if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+      if (signatureObjectUrl) URL.revokeObjectURL(signatureObjectUrl);
+    };
+  }, [user?.logo_path, user?.signature_path]);
 
   const completion = useMemo(() => {
     const importantFields = [
@@ -237,9 +276,6 @@ const Profile = () => {
       ? "bg-white focus:border-emerald-500"
       : "cursor-default bg-slate-50 text-slate-600"
   }`;
-
-  const logoUrl = fileUrl(user?.logo_path);
-  const signatureUrl = fileUrl(user?.signature_path);
 
   return (
     <div className="min-h-screen bg-slate-50">

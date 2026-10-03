@@ -13,6 +13,7 @@ import {
   X,
   Truck,
   Landmark,
+  UserRound,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -26,6 +27,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   // operational dashboard.
   const menuItems = [
     ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
+    ...(isSuperadmin ? [{ name: "My Users", path: "/my-users", icon: UserRound }] : []),
     { name: "Customers", path: "/customers", icon: Users },
     { name: "Khata", path: "/khata", icon: BookOpen },
     { name: "Payments", path: "/payments", icon: CreditCard },

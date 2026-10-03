@@ -18,7 +18,7 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
-import api, { fileUrl } from "../lib/api";
+import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 
 const EMAIL_STYLE = {
   sent: "bg-emerald-100 text-emerald-700",
@@ -143,14 +143,14 @@ const Field = ({
   disabled = false,
   min,
   step,
+  error = false,
+  errorText = "",
+  className = "",
 }) => (
   <div>
     <label className="mb-1.5 block text-sm font-medium text-slate-700">
       {label}
-
-      {required && (
-        <span className="ml-1 text-red-500">*</span>
-      )}
+      {required && <span className="ml-1 text-red-500">*</span>}
     </label>
 
     <input
@@ -162,8 +162,15 @@ const Field = ({
       disabled={disabled}
       min={min}
       step={step}
-      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:text-slate-500"
+      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none transition disabled:bg-slate-100 disabled:text-slate-500 ${
+        error
+          ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+          : "border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+      } ${className}`}
     />
+    {errorText && (
+      <p className="mt-1 text-xs font-semibold text-red-600">{errorText}</p>
+    )}
   </div>
 );
 
@@ -761,6 +768,29 @@ const Invoices = () => {
   const [items, setItems] =
     useState([emptyItem()]);
 
+  const hasStockError = useMemo(() => {
+    return items.some((item) => {
+      const matched = stock.find(
+        (s) =>
+          (item.product_id && String(s.id) === String(item.product_id)) ||
+          (item.product_name &&
+            s.product_name &&
+            s.product_name.trim().toLowerCase() ===
+              item.product_name.trim().toLowerCase())
+      );
+      if (
+        !matched ||
+        matched.item_type === "service" ||
+        matched.type === "service" ||
+        item.item_type === "service"
+      ) {
+        return false;
+      }
+      const avail = Number(matched.quantity ?? matched.stock_quantity ?? 0);
+      return Number(item.quantity || 0) > avail;
+    });
+  }, [items, stock]);
+
   const [saving, setSaving] =
     useState(false);
 
@@ -817,6 +847,21 @@ const Invoices = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteInvoice = async (invoice) => {
+    const invoiceLabel = invoice.invoice_number || `Invoice #${invoice.id}`;
+    if (!window.confirm(`Are you sure you want to delete ${invoiceLabel}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await api.del(`/api/documents/${invoice.id}`);
+      setDocuments((prev) => prev.filter((d) => d.id !== invoice.id));
+    } catch (err) {
+      console.error("Failed to delete invoice:", err);
+      window.alert(err.message || "Failed to delete invoice. Please try again.");
     }
   };
 
@@ -1195,6 +1240,11 @@ const Invoices = () => {
     setSaving(true);
 
     try {
+      let previewWindow = null;
+      try {
+        previewWindow = window.open("", "_blank");
+      } catch (_) {}
+
       const createdDocument = await api.post(
         "/api/documents",
         {
@@ -1260,12 +1310,30 @@ const Invoices = () => {
           items: cleanItems,
         }
       );
-            if (createdDocument?.pdf_path) {
-        window.open(
-          fileUrl(createdDocument.pdf_path),
-          "_blank",
-          "noopener,noreferrer"
-        );
+
+      const pdfPath =
+        createdDocument?.document?.pdf_path ||
+        createdDocument?.pdf_path ||
+        createdDocument?.download_url;
+
+      if (pdfPath) {
+        try {
+          const pdfUrl = await secureFileObjectUrl(pdfPath);
+
+          if (previewWindow && !previewWindow.closed) {
+            previewWindow.location.href = pdfUrl;
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+          } else {
+            const pdfWindow = window.open(pdfUrl, "_blank");
+            if (!pdfWindow) URL.revokeObjectURL(pdfUrl);
+            else setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+          }
+        } catch (pdfErr) {
+          console.error("Failed to load invoice PDF:", pdfErr);
+          if (previewWindow) previewWindow.close();
+        }
+      } else if (previewWindow) {
+        previewWindow.close();
       }
 
       setShowModal(false);
@@ -1522,21 +1590,41 @@ const Invoices = () => {
                           </td>
 
                           <td className="px-5 py-4">
-                            {document.pdf_path && (
-                              <a
-                                href={fileUrl(
-                                  document.pdf_path
-                                )}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-emerald-600"
-                                title="Download PDF"
+                            <div className="flex items-center gap-1">
+                              {(document.pdf_path || document.download_url) && (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      const pdfBlob = await fetchSecureFile(document.pdf_path || document.download_url);
+                                      const pdfUrl = URL.createObjectURL(pdfBlob);
+                                      const link = window.document.createElement("a");
+                                      link.href = pdfUrl;
+                                      link.download = document.invoice_number ? `${document.invoice_number}.pdf` : "invoice.pdf";
+                                      window.document.body.appendChild(link);
+                                      link.click();
+                                      link.remove();
+                                      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                                    } catch (err) {
+                                      console.error("Failed to download invoice PDF:", err);
+                                      window.alert(err.message || "Could not download the invoice PDF.");
+                                    }
+                                  }}
+                                  className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-emerald-600"
+                                  title="Download PDF"
+                                >
+                                  <Download size={17} />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteInvoice(document)}
+                                className="rounded-lg p-2 text-slate-600 hover:bg-rose-50 hover:text-rose-600"
+                                title="Delete Invoice"
                               >
-                                <Download
-                                  size={17}
-                                />
-                              </a>
-                            )}
+                                <Trash2 size={17} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -1995,8 +2083,27 @@ const Invoices = () => {
                   }
                 >
                   <div className="space-y-4">
-                    {items.map(
-                      (item, index) => (
+                    {items.map((item, index) => {
+                      const matchedStock = stock.find(
+                        (s) =>
+                          (item.product_id && String(s.id) === String(item.product_id)) ||
+                          (item.product_name &&
+                            s.product_name &&
+                            s.product_name.trim().toLowerCase() ===
+                              item.product_name.trim().toLowerCase())
+                      );
+                      const isStockTracked =
+                        matchedStock &&
+                        matchedStock.item_type !== "service" &&
+                        matchedStock.type !== "service" &&
+                        item.item_type !== "service";
+                      const availStock = isStockTracked
+                        ? Number(matchedStock.quantity ?? matchedStock.stock_quantity ?? 0)
+                        : null;
+                      const isOverStock =
+                        isStockTracked && Number(item.quantity || 0) > availStock;
+
+                      return (
                         <div
                           key={index}
                           className="rounded-xl border border-slate-200 bg-slate-50 p-4"
@@ -2004,8 +2111,7 @@ const Invoices = () => {
                           <div className="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <p className="font-medium text-slate-800">
-                                Item{" "}
-                                {index + 1}
+                                Item {index + 1}
                               </p>
 
                               <p className="text-xs text-slate-500">
@@ -2015,17 +2121,11 @@ const Invoices = () => {
 
                             <button
                               type="button"
-                              onClick={() =>
-                                removeItemRow(
-                                  index
-                                )
-                              }
+                              onClick={() => removeItemRow(index)}
                               className="rounded-lg p-2 text-red-500 hover:bg-red-50"
                               title="Remove item"
                             >
-                              <Trash2
-                                size={17}
-                              />
+                              <Trash2 size={17} />
                             </button>
                           </div>
 
@@ -2038,22 +2138,14 @@ const Invoices = () => {
                               <ItemAutocomplete
                                 stock={stock}
                                 item={item}
-                                onSelect={(
-                                  product
-                                ) =>
-                                  selectProduct(
-                                    index,
-                                    product
-                                  )
+                                onSelect={(product) =>
+                                  selectProduct(index, product)
                                 }
                               />
 
                               {item.category && (
                                 <p className="mt-1 text-xs text-slate-500">
-                                  Category:{" "}
-                                  {
-                                    item.category
-                                  }
+                                  Category: {item.category}
                                 </p>
                               )}
                             </div>
@@ -2061,17 +2153,9 @@ const Invoices = () => {
                             <div className="lg:col-span-3">
                               <Field
                                 label="Description"
-                                value={
-                                  item.description
-                                }
-                                onChange={(
-                                  value
-                                ) =>
-                                  updateItem(
-                                    index,
-                                    "description",
-                                    value
-                                  )
+                                value={item.description}
+                                onChange={(value) =>
+                                  updateItem(index, "description", value)
                                 }
                                 placeholder="Item description"
                               />
@@ -2080,17 +2164,9 @@ const Invoices = () => {
                             <div className="lg:col-span-2">
                               <Field
                                 label="HSN / SAC"
-                                value={
-                                  item.hsn_code
-                                }
-                                onChange={(
-                                  value
-                                ) =>
-                                  updateItem(
-                                    index,
-                                    "hsn_code",
-                                    value
-                                  )
+                                value={item.hsn_code}
+                                onChange={(value) =>
+                                  updateItem(index, "hsn_code", value)
                                 }
                               />
                             </div>
@@ -2098,26 +2174,13 @@ const Invoices = () => {
                             <div className="lg:col-span-2">
                               <SelectField
                                 label="Type"
-                                value={
-                                  item.item_type
-                                }
-                                onChange={(
-                                  value
-                                ) =>
-                                  updateItem(
-                                    index,
-                                    "item_type",
-                                    value
-                                  )
+                                value={item.item_type}
+                                onChange={(value) =>
+                                  updateItem(index, "item_type", value)
                                 }
                               >
-                                <option value="goods">
-                                  Goods
-                                </option>
-
-                                <option value="service">
-                                  Service
-                                </option>
+                                <option value="goods">Goods</option>
+                                <option value="service">Service</option>
                               </SelectField>
                             </div>
 
@@ -2127,17 +2190,15 @@ const Invoices = () => {
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                value={
-                                  item.quantity
+                                value={item.quantity}
+                                onChange={(value) =>
+                                  updateItem(index, "quantity", value)
                                 }
-                                onChange={(
-                                  value
-                                ) =>
-                                  updateItem(
-                                    index,
-                                    "quantity",
-                                    value
-                                  )
+                                error={isOverStock}
+                                errorText={
+                                  isOverStock
+                                    ? `Available stock: ${availStock}`
+                                    : ""
                                 }
                               />
                             </div>
@@ -2202,8 +2263,8 @@ const Invoices = () => {
                             </div>
                           </div>
                         </div>
-                      )
-                    )}
+                      );
+                    })}
 
                     <p className="text-xs text-slate-500">
                       Inventory selection fills item name, category, HSN/SAC, type, unit and price when those values are available.
@@ -2616,7 +2677,7 @@ const Invoices = () => {
                   <div className="mt-4 space-y-3">
                     <button
                       type="submit"
-                      disabled={saving}
+                      disabled={saving || hasStockError}
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Download size={17} />
@@ -2625,6 +2686,11 @@ const Invoices = () => {
                         ? "Creating Invoice..."
                         : "Create & Download Invoice"}
                     </button>
+                    {hasStockError && (
+                      <p className="text-center text-xs font-semibold text-red-600">
+                        Item quantity exceeds available stock.
+                      </p>
+                    )}
 
                     <button
                       type="button"

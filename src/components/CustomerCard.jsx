@@ -3,6 +3,7 @@ import {
   Phone,
   ArrowRight,
   UserRound,
+  Trash2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -12,6 +13,7 @@ const CustomerCard = ({
   phone,
   balance = 0,
   transactions = 0,
+  onDelete,
 }) => {
 
   const hasBalance = balance > 0;
@@ -84,13 +86,30 @@ const CustomerCard = ({
           {transactions} Transactions
         </span>
 
-        <Link
-          to={`/customers/${id}`}
-          className="flex items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
-        >
-          View Details
-          <ArrowRight size={14} />
-        </Link>
+        <div className="flex items-center gap-2">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(id, name);
+              }}
+              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+              title="Delete customer"
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+
+          <Link
+            to={`/customers/${id}`}
+            className="flex items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
+          >
+            View Details
+            <ArrowRight size={14} />
+          </Link>
+        </div>
 
       </div>
 

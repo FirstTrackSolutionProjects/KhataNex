@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Phone,
@@ -10,6 +10,7 @@ import {
   Pencil,
   X,
   Save,
+  Trash2,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
@@ -25,10 +26,12 @@ const emptyAddress = {
 
 const CustomerDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [dues, setDues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -63,6 +66,11 @@ const CustomerDetails = () => {
 
       setCustomer(data.customer);
 
+      const customerDues = (data.sales_history || []).filter(
+        (sale) => sale.payment_type === "due"
+      );
+      setDues(customerDues);
+
       const sales = (data.sales_history || []).map((sale) => ({
         id: "sale-" + sale.id,
         date: sale.sale_date,
@@ -95,6 +103,26 @@ const CustomerDetails = () => {
       setError(err.message || "Could not load customer.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteCustomer = async () => {
+    if (!customer) return;
+    const name = customer.name || customer.business_name || "this customer";
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${name}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.del(`/api/customers/${id}`);
+      navigate("/customers");
+    } catch (err) {
+      console.error("Failed to delete customer:", err);
+      window.alert(err.message || "Failed to delete customer.");
     }
   };
 
@@ -359,13 +387,24 @@ const CustomerDetails = () => {
                     </div>
                   </div>
 
-                  <button
-                    onClick={startEditing}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
-                  >
-                    <Pencil size={16} />
-                    Edit Customer
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDeleteCustomer}
+                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                    >
+                      <Trash2 size={16} />
+                      Delete Customer
+                    </button>
+
+                    <button
+                      onClick={startEditing}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      <Pencil size={16} />
+                      Edit Customer
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -462,6 +501,52 @@ const CustomerDetails = () => {
                   </p>
                 </div>
               </div>
+
+              {dues.length > 0 && (
+                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <div className="border-b border-slate-200 p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="font-bold text-slate-900">
+                          Outstanding Dues Breakdown
+                        </h2>
+                        <p className="mt-1 text-xs text-slate-400">
+                          Individual credit items and unsettled dues
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                        {dues.length} Due{dues.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-slate-100">
+                    {dues.map((due) => (
+                      <div
+                        key={due.id}
+                        className="flex items-center justify-between p-4 sm:px-6"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-800">
+                            {due.item_name || "Credit Sale"}
+                          </p>
+                          <p className="mt-0.5 text-xs text-slate-400">
+                            {due.sale_date
+                              ? new Date(due.sale_date).toLocaleDateString(
+                                  "en-IN"
+                                )
+                              : "Date not recorded"}
+                            {due.notes ? ` · ${due.notes}` : ""}
+                          </p>
+                        </div>
+                        <p className="shrink-0 text-sm font-bold text-red-600">
+                          ₹{Number(due.amount || 0).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
                 <div className="border-b border-slate-200 p-5">
