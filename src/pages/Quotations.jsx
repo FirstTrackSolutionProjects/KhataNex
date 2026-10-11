@@ -1106,7 +1106,7 @@ function QuotationForm({
             <p className="mt-1 text-xs text-gray-500">
               {isEditing
                 ? `Editing ${initialData?.invoice_number || "Quotation"}`
-                : ""}
+                : "Quotation number will be generated automatically when saved."}
             </p>
           </div>
 
@@ -1678,7 +1678,7 @@ function QuotationForm({
               </div>
 
               <div className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
-
+                Inventory selection fills the item name, category, HSN and current price. You can edit the quotation line before saving.
               </div>
             </Section>
 
