@@ -14,10 +14,13 @@ import {
   Truck,
   Landmark,
   UserRound,
+  User,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-const Sidebar = ({ isOpen = false, onClose }) => {
+const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
+  const isSidebarOpen = open !== undefined ? Boolean(open) : Boolean(isOpen);
+  const handleClose = onClose || onCancel;
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isSuperadmin = user?.role === "superadmin";
@@ -43,7 +46,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const handleLogout = () => {
     logout();
     navigate("/login");
-    if (onClose) onClose();
+    if (handleClose) handleClose();
   };
 
   return (
@@ -52,11 +55,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           MOBILE OVERLAY
       ========================================== */}
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className={`
-          fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-[1px]
+          fixed inset-0 z-[55] bg-slate-950/40 backdrop-blur-[1px]
           transition-opacity duration-300 lg:hidden
-          ${isOpen ? "visible opacity-100" : "invisible opacity-0"}
+          ${isSidebarOpen ? "visible opacity-100" : "invisible opacity-0"}
         `}
       />
 
@@ -65,7 +68,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       ========================================== */}
       <aside
         className={`
-          fixed left-0 top-0 z-50
+          fixed left-0 top-0 z-[60]
           flex h-screen w-[280px] flex-col
           border-r border-slate-200 bg-white
           shadow-xl
@@ -75,7 +78,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           lg:translate-x-0
           lg:shadow-none
 
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
 
@@ -86,7 +89,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
           <NavLink
             to="/"
-            onClick={onClose}
+            onClick={handleClose}
             className="flex items-center gap-3"
           >
 
@@ -116,7 +119,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           {/* Mobile Close Button */}
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="
               rounded-lg p-2
               text-slate-500
@@ -160,7 +163,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         {/* =====================================
             NAVIGATION
         ====================================== */}
-        <nav className="mt-6 flex-1 overflow-y-auto px-3 pb-4">
+        <nav className="mt-6 flex-1 overflow-y-auto px-3 pb-36 lg:pb-6">
 
           {/* Main Menu */}
           <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -176,7 +179,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  onClick={onClose}
+                  onClick={handleClose}
                   className={({ isActive }) =>
                     `
                     group flex items-center gap-3
@@ -215,7 +218,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
           <NavLink
             to="/profile"
-            onClick={onClose}
+            onClick={handleClose}
             className={({ isActive }) =>
               `
               flex items-center gap-3
@@ -241,7 +244,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
           <NavLink
             to="/settings"
-            onClick={onClose}
+            onClick={handleClose}
             className={({ isActive }) =>
               `
               mt-1 flex items-center gap-3
@@ -265,23 +268,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
             <span>Settings</span>
           </NavLink>
 
-        </nav>
-
-        {/* =====================================
-            LOGOUT
-        ====================================== */}
-        <div className="shrink-0 border-t border-slate-200 p-3">
-
           <button
             type="button"
             onClick={handleLogout}
-            className="
-              flex w-full items-center gap-3
-              rounded-xl px-3 py-3
-              text-sm font-semibold text-red-600
-              transition
-              hover:bg-red-50
-            "
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 text-left"
           >
             <LogOut
               size={20}
@@ -291,14 +281,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
             <span>Logout</span>
           </button>
 
-        </div>
+        </nav>
 
       </aside>
     </>
   );
 };
-
-// Add User import
-import { User } from "lucide-react";
 
 export default Sidebar;

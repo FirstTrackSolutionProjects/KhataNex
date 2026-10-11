@@ -11,6 +11,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
 
 const EMPTY_FORM = {
@@ -28,6 +29,8 @@ const Banking = () => {
   const [banking, setBanking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedDefaultId, setSelectedDefaultId] = useState("");
+  const [settingDefault, setSettingDefault] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -42,11 +45,41 @@ const Banking = () => {
 
     try {
       const data = await api.get("/api/banking");
-      setBanking(data.banking || []);
+      const list = data.banking || [];
+      setBanking(list);
+
+      const defBank = list.find((b) => b.is_default);
+      const savedDefaultId = localStorage.getItem("khatanex_default_bank_id");
+      if (defBank) {
+        setSelectedDefaultId(String(defBank.id));
+        localStorage.setItem("khatanex_default_bank_id", String(defBank.id));
+      } else if (savedDefaultId) {
+        setSelectedDefaultId(savedDefaultId);
+      } else if (list.length > 0) {
+        setSelectedDefaultId(String(list[0].id));
+      }
     } catch (err) {
       setError(err.message || "Could not load banking details.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSetDefault = async () => {
+    if (!selectedDefaultId) return;
+    setSettingDefault(true);
+    try {
+      try {
+        await api.patch(`/api/banking/${selectedDefaultId}`, { is_default: true });
+      } catch (_) {
+        await api.put(`/api/banking/${selectedDefaultId}`, { is_default: true });
+      }
+      localStorage.setItem("khatanex_default_bank_id", String(selectedDefaultId));
+      await loadBanking();
+    } catch (err) {
+      setError(err.message || "Could not set default bank account.");
+    } finally {
+      setSettingDefault(false);
     }
   };
 
@@ -139,29 +172,15 @@ const Banking = () => {
       />
 
       <div className="lg:pl-64">
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
-            >
-              <Menu size={22} />
-            </button>
-
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">
-                Banking
-              </h1>
-              <p className="hidden text-xs text-slate-400 sm:block">
-                Manage bank accounts used on your documents
-              </p>
-            </div>
-          </div>
-
-          <Button icon={Plus} size="sm" onClick={openAddModal}>
-            Add Bank
-          </Button>
-        </header>
+        <PageHeader
+          title="Banking"
+          subtitle="Manage bank accounts used on your documents"
+          onMenuClick={() => setSidebarOpen(true)}
+          showHome={true}
+          showProfile={true}
+          onNew={openAddModal}
+          newLabel="Add Bank"
+        />
 
         <main className="p-4 sm:p-6 lg:p-8">
           {error && (
@@ -186,6 +205,45 @@ const Banking = () => {
               </div>
             </div>
           </div>
+
+          {!loading && banking.length > 0 && (
+            <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-base font-bold text-slate-900">
+                Set Default Bank Account
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Choose exactly one default bank account to automatically appear on invoices and quotations.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <select
+                  value={selectedDefaultId}
+                  onChange={(e) => setSelectedDefaultId(e.target.value)}
+                  className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                  <option value="">Select a bank account...</option>
+                  {banking.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {[
+                        b.bank_name,
+                        b.branch,
+                        b.account_number ? `A/C: ${b.account_number}` : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" • ")}
+                      {b.is_default ? " ★ Default" : ""}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  size="sm"
+                  disabled={!selectedDefaultId || settingDefault}
+                  onClick={handleSetDefault}
+                >
+                  {settingDefault ? "Saving..." : "Set as Default Account"}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <p className="mt-8 text-center text-sm text-slate-400">

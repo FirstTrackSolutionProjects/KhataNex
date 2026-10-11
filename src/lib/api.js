@@ -57,10 +57,12 @@ async function apiRequest(path, { method = "GET", body, isFormData = false } = {
 export const api = {
   get: (path) => apiRequest(path, { method: "GET" }),
   post: (path, body) => apiRequest(path, { method: "POST", body }),
+  put: (path, body) => apiRequest(path, { method: "PUT", body }),
   patch: (path, body) => apiRequest(path, { method: "PATCH", body }),
   del: (path) => apiRequest(path, { method: "DELETE" }),
   delete: (path) => apiRequest(path, { method: "DELETE" }),
   postForm: (path, formData) => apiRequest(path, { method: "POST", body: formData, isFormData: true }),
+  putForm: (path, formData) => apiRequest(path, { method: "PUT", body: formData, isFormData: true }),
   patchForm: (path, formData) => apiRequest(path, { method: "PATCH", body: formData, isFormData: true }),
 };
 

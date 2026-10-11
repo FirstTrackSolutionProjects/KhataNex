@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FileText,
   Plus,
@@ -6,6 +6,7 @@ import {
   Download,
   Menu,
   Trash2,
+  Pencil,
   Mail,
   X,
   CalendarDays,
@@ -14,10 +15,13 @@ import {
   Building2,
   CreditCard,
   RotateCcw,
+  Eye,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
 import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 
 const EMAIL_STYLE = {
@@ -357,19 +361,46 @@ const ItemAutocomplete = ({
   );
 
   const [open, setOpen] = useState(false);
+  const [filterType, setFilterType] = useState("all");
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     setQuery(item.product_name || "");
   }, [item.product_name]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const matches = useMemo(() => {
+    let list = stock || [];
+    if (filterType === "goods") {
+      list = list.filter((p) => {
+        const t = (p.item_type || p.type || "").toLowerCase();
+        const c = (p.category || "").toLowerCase();
+        return t !== "service" && c !== "service" && c !== "services";
+      });
+    } else if (filterType === "service") {
+      list = list.filter((p) => {
+        const t = (p.item_type || p.type || "").toLowerCase();
+        const c = (p.category || "").toLowerCase();
+        return t === "service" || c === "service" || c === "services";
+      });
+    }
+
     const q = String(query || "")
       .trim()
       .toLowerCase();
 
-    if (!q) return [];
+    if (!q) return list.slice(0, 8);
 
-    return stock
+    return list
       .filter((product) =>
         [
           product.product_name,
@@ -387,10 +418,10 @@ const ItemAutocomplete = ({
           )
       )
       .slice(0, 8);
-  }, [stock, query]);
+  }, [stock, query, filterType]);
 
   return (
-    <div className="relative min-w-[220px]">
+    <div className="relative min-w-[220px]" ref={wrapperRef}>
       <input
         value={query}
         onChange={(e) => {
@@ -402,53 +433,75 @@ const ItemAutocomplete = ({
         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
       />
 
-      {open && query && (
-        <div className="absolute left-0 top-full z-40 mt-1 w-[320px] max-w-[90vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          {matches.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-slate-500">
-              No inventory item found.
-            </div>
-          ) : (
-            matches.map((product) => (
+      {open && (
+        <div className="absolute left-0 top-full z-40 mt-1 flex w-[320px] max-w-[90vw] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+          <div className="flex shrink-0 items-center gap-1 border-b border-slate-100 bg-slate-50 p-1.5">
+            {[
+              { id: "all", label: "All" },
+              { id: "goods", label: "Goods" },
+              { id: "service", label: "Service" },
+            ].map(({ id, label }) => (
               <button
+                key={id}
                 type="button"
-                key={product.id}
-                onClick={() => {
-                  onSelect(product);
-
-                  setQuery(
-                    product.product_name ||
-                      product.name ||
-                      ""
-                  );
-
-                  setOpen(false);
-                }}
-                className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-emerald-50"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setFilterType(id)}
+                className={`flex-1 rounded-md py-1 text-xs font-medium transition ${
+                  filterType === id
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-slate-600 hover:bg-slate-200/60"
+                }`}
               >
-                <div className="font-medium text-slate-900">
-                  {product.product_name ||
-                    product.name ||
-                    "Item"}
-                </div>
-
-                <div className="mt-1 text-xs text-slate-500">
-                  {[
-                    product.category,
-                    product.hsn_code
-                      ? `HSN/SAC: ${product.hsn_code}`
-                      : "",
-                    product.price !== undefined &&
-                    product.price !== null
-                      ? money(product.price)
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" • ")}
-                </div>
+                {label}
               </button>
-            ))
-          )}
+            ))}
+          </div>
+
+          <div className="max-h-56 overflow-y-auto">
+            {matches.length === 0 ? (
+              <div className="px-4 py-3 text-center text-xs text-slate-500">
+                No {filterType !== "all" ? filterType : ""} inventory item found.
+              </div>
+            ) : (
+              matches.map((product) => (
+                <button
+                  type="button"
+                  key={product.id}
+                  onClick={() => {
+                    onSelect(product);
+                    setQuery(
+                      product.product_name ||
+                        product.name ||
+                        ""
+                    );
+                    setOpen(false);
+                  }}
+                  className="block w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-emerald-50"
+                >
+                  <div className="font-medium text-slate-900">
+                    {product.product_name ||
+                      product.name ||
+                      "Item"}
+                  </div>
+
+                  <div className="mt-1 text-xs text-slate-500">
+                    {[
+                      product.category,
+                      product.hsn_code
+                        ? `HSN/SAC: ${product.hsn_code}`
+                        : "",
+                      product.price !== undefined &&
+                      product.price !== null
+                        ? money(product.price)
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" • ")}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -668,6 +721,40 @@ const Invoices = () => {
 
   const [showModal, setShowModal] =
     useState(false);
+  const [editingDoc, setEditingDoc] =
+    useState(null);
+
+  const [invoicePreviewModal, setInvoicePreviewModal] = useState({
+    isOpen: false,
+    document: null,
+    pdfUrl: "",
+    loading: false,
+  });
+
+  const handleOpenInvoicePreview = async (doc) => {
+    const pdfPath = doc.pdf_path || doc.download_url;
+    setInvoicePreviewModal({
+      isOpen: true,
+      document: doc,
+      pdfUrl: "",
+      loading: Boolean(pdfPath),
+    });
+    if (pdfPath) {
+      try {
+        const blob = await fetchSecureFile(pdfPath);
+        const url = URL.createObjectURL(blob);
+        setInvoicePreviewModal({
+          isOpen: true,
+          document: doc,
+          pdfUrl: url,
+          loading: false,
+        });
+      } catch (err) {
+        console.error("Failed to load invoice preview:", err);
+        setInvoicePreviewModal((prev) => ({ ...prev, loading: false }));
+      }
+    }
+  };
 
   const [customerId, setCustomerId] =
     useState("");
@@ -833,13 +920,19 @@ const Invoices = () => {
         stockRes.stock || []
       );
 
-      setBankAccounts(
+      const banks =
         bankRes.banking ||
           bankRes.banks ||
           bankRes.accounts ||
           bankRes.data ||
-          []
-      );
+          [];
+      setBankAccounts(banks);
+
+      const savedDefaultId = localStorage.getItem("khatanex_default_bank_id");
+      const defBank = banks.find((b) => b.is_default) || banks.find((b) => String(b.id) === String(savedDefaultId)) || banks[0];
+      if (defBank) {
+        setBankAccountId((prev) => prev || String(defBank.id));
+      }
     } catch (err) {
       setError(
         err.message ||
@@ -1166,11 +1259,115 @@ const Invoices = () => {
     setTdsRate(0);
     setRoundOff(0);
 
-    setBankAccountId("");
+    const savedDefaultId = localStorage.getItem("khatanex_default_bank_id");
+    const defBank = bankAccounts.find((b) => b.is_default) || bankAccounts.find((b) => String(b.id) === String(savedDefaultId)) || bankAccounts[0];
+    setBankAccountId(defBank ? String(defBank.id) : "");
 
     setItems([emptyItem()]);
 
     setSaveError("");
+    setEditingDoc(null);
+  };
+
+  const openEditModal = (doc) => {
+    setEditingDoc(doc);
+    setSaveError("");
+
+    if (doc.customer_id) {
+      setCustomerMode("existing");
+      setCustomerId(String(doc.customer_id));
+      const foundCust = customers.find((c) => String(c.id) === String(doc.customer_id));
+      setCustomer(foundCust || null);
+      setManualCustomer({
+        name: "",
+        business_name: "",
+        email: "",
+        phone: "",
+        gstin: "",
+        pan: "",
+        billing_state: "",
+        billing_district: "",
+        billing_city: "",
+        billing_pincode: "",
+        billing_landmark: "",
+        shipping_state: "",
+        shipping_district: "",
+        shipping_city: "",
+        shipping_pincode: "",
+        shipping_landmark: "",
+      });
+    } else {
+      setCustomerMode("manual");
+      setCustomerId("");
+      setCustomer(null);
+      setManualCustomer({
+        name: doc.customer_name || doc.to_name || "",
+        business_name: doc.customer_business_name || doc.to_business_name || "",
+        email: doc.customer_email || doc.to_email || "",
+        phone: doc.customer_phone || doc.to_phone || "",
+        gstin: doc.customer_gstin || doc.to_gstin || "",
+        pan: doc.customer_pan || doc.to_pan || "",
+        billing_state: doc.billing_state || "",
+        billing_district: doc.billing_district || "",
+        billing_city: doc.billing_city || "",
+        billing_pincode: doc.billing_pincode || "",
+        billing_landmark: doc.billing_landmark || "",
+        shipping_state: doc.shipping_state || "",
+        shipping_district: doc.shipping_district || "",
+        shipping_city: doc.shipping_city || "",
+        shipping_pincode: doc.shipping_pincode || "",
+        shipping_landmark: doc.shipping_landmark || "",
+      });
+    }
+
+    setInvoiceDate(doc.invoice_date ? doc.invoice_date.slice(0, 10) : todayString());
+    setDueDate(doc.due_date ? doc.due_date.slice(0, 10) : "");
+    setPaymentTerms(doc.payment_terms || "");
+    setCurrency(doc.currency || "INR");
+    setNotes(doc.notes || "");
+    setTermsConditions(doc.terms_conditions || "");
+    setDiscountPercent(Number(doc.discount_percent || 0));
+
+    const igst = Number(doc.igst_rate || 0);
+    const cgst = Number(doc.cgst_rate || 0);
+    const sgst = Number(doc.sgst_rate || 0);
+
+    if (igst > 0) {
+      setTaxMode("igst");
+      setIgstRate(igst);
+    } else if (cgst > 0 || sgst > 0) {
+      setTaxMode("gst");
+      setCgstRate(cgst);
+      setSgstRate(sgst);
+    } else {
+      setTaxMode("none");
+      setCgstRate(0);
+      setSgstRate(0);
+      setIgstRate(0);
+    }
+
+    setTcsRate(Number(doc.tcs_rate || 0));
+    setTdsRate(Number(doc.tds_rate || 0));
+    setRoundOff(Number(doc.round_off || 0));
+    setBankAccountId(doc.bank_account_id ? String(doc.bank_account_id) : "");
+
+    if (Array.isArray(doc.items) && doc.items.length > 0) {
+      setItems(
+        doc.items.map((it) => ({
+          name: it.name || it.item_name || "",
+          hsn_sac: it.hsn_sac || "",
+          quantity: it.quantity || 1,
+          unit: it.unit || "PCS",
+          price: it.price || 0,
+          discount_percent: it.discount_percent || 0,
+          tax_rate: it.tax_rate || 0,
+        }))
+      );
+    } else {
+      setItems([emptyItem()]);
+    }
+
+    setShowModal(true);
   };
 
   const handleCreateInvoice = async (
@@ -1240,100 +1437,78 @@ const Invoices = () => {
     setSaving(true);
 
     try {
-      let previewWindow = null;
-      try {
-        previewWindow = window.open("", "_blank");
-      } catch (_) {}
+      const payload = {
+        doc_type: "invoice",
 
-      const createdDocument = await api.post(
-        "/api/documents",
-        {
-          doc_type: "invoice",
+        customer_id:
+          customerMode === "existing"
+            ? customerId || undefined
+            : undefined,
 
-          customer_id:
-            customerMode === "existing"
-              ? customerId || undefined
-              : undefined,
+        manual_customer:
+          customerMode === "manual"
+            ? manualCustomer
+            : undefined,
 
-          manual_customer:
-            customerMode === "manual"
-              ? manualCustomer
-              : undefined,
+        invoice_date:
+          invoiceDate || undefined,
 
-          invoice_date:
-            invoiceDate || undefined,
+        due_date:
+          dueDate || undefined,
 
-          due_date:
-            dueDate || undefined,
+        payment_terms:
+          paymentTerms || undefined,
 
-          payment_terms:
-            paymentTerms || undefined,
+        currency,
 
-          currency,
+        notes:
+          notes || undefined,
 
-          notes:
-            notes || undefined,
+        terms_conditions:
+          termsConditions || undefined,
 
-          terms_conditions:
-            termsConditions || undefined,
+        discount_percent:
+          discountPercent || 0,
 
-          discount_percent:
-            discountPercent || 0,
+        cgst_rate:
+          taxMode === "gst"
+            ? cgstRate || 0
+            : 0,
 
-          cgst_rate:
-            taxMode === "gst"
-              ? cgstRate || 0
-              : 0,
+        sgst_rate:
+          taxMode === "gst"
+            ? sgstRate || 0
+            : 0,
 
-          sgst_rate:
-            taxMode === "gst"
-              ? sgstRate || 0
-              : 0,
+        igst_rate:
+          taxMode === "igst"
+            ? igstRate || 0
+            : 0,
 
-          igst_rate:
-            taxMode === "igst"
-              ? igstRate || 0
-              : 0,
+        tcs_rate:
+          tcsRate || 0,
 
-          tcs_rate:
-            tcsRate || 0,
+        tds_rate:
+          tdsRate || 0,
 
-          tds_rate:
-            tdsRate || 0,
+        round_off:
+          roundOff || 0,
 
-          round_off:
-            roundOff || 0,
+        bank_account_id:
+          bankAccountId || undefined,
 
-          bank_account_id:
-            bankAccountId || undefined,
+        items: cleanItems,
+      };
 
-          items: cleanItems,
-        }
-      );
-
-      const pdfPath =
-        createdDocument?.document?.pdf_path ||
-        createdDocument?.pdf_path ||
-        createdDocument?.download_url;
-
-      if (pdfPath) {
+      let createdDocument;
+      if (editingDoc) {
         try {
-          const pdfUrl = await secureFileObjectUrl(pdfPath);
-
-          if (previewWindow && !previewWindow.closed) {
-            previewWindow.location.href = pdfUrl;
-            setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
-          } else {
-            const pdfWindow = window.open(pdfUrl, "_blank");
-            if (!pdfWindow) URL.revokeObjectURL(pdfUrl);
-            else setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
-          }
-        } catch (pdfErr) {
-          console.error("Failed to load invoice PDF:", pdfErr);
-          if (previewWindow) previewWindow.close();
+          createdDocument = await api.patch(`/api/documents/${editingDoc.id}`, payload);
+        } catch (_) {
+          createdDocument = await api.put(`/api/documents/${editingDoc.id}`, payload);
         }
-      } else if (previewWindow) {
-        previewWindow.close();
+      } else {
+        createdDocument = await api.post("/api/documents", payload);
       }
 
       setShowModal(false);
@@ -1341,6 +1516,14 @@ const Invoices = () => {
       resetForm();
 
       await loadData();
+
+      const savedDoc =
+        createdDocument?.document ||
+        createdDocument?.data ||
+        createdDocument;
+      if (savedDoc) {
+        handleOpenInvoicePreview(savedDoc);
+      }
     } catch (err) {
       setSaveError(
         err.message ||
@@ -1366,39 +1549,16 @@ const Invoices = () => {
       />
 
       <main className="lg:ml-64">
-        <div className="border-b border-slate-200 bg-white">
-          <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setSidebarOpen(true)
-                }
-                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-              >
-                <Menu size={22} />
-              </button>
-
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">
-                  Invoices
-                </h1>
-
-                <p className="text-xs text-slate-500">
-                  Create and manage your invoices
-                </p>
-              </div>
-            </div>
-
-            <Button
-              icon={Plus}
-              size="sm"
-              onClick={openCreateModal}
-            >
-              Create Invoice
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title="Invoices"
+          subtitle="Create and manage your invoices"
+          onMenuClick={() => setSidebarOpen(true)}
+          showHome={true}
+          showSearch={true}
+          showProfile={true}
+          onNew={openCreateModal}
+          newLabel="Create Invoice"
+        />
 
         <div className="space-y-5 p-4 sm:p-6 lg:p-8">
           {error && (
@@ -1590,7 +1750,16 @@ const Invoices = () => {
                           </td>
 
                           <td className="px-5 py-4">
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenInvoicePreview(document)}
+                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
+                                title="View Invoice"
+                                aria-label="View invoice"
+                              >
+                                <Eye size={17} className="sm:w-5 sm:h-5" />
+                              </button>
                               {(document.pdf_path || document.download_url) && (
                                 <button
                                   type="button"
@@ -1610,19 +1779,28 @@ const Invoices = () => {
                                       window.alert(err.message || "Could not download the invoice PDF.");
                                     }
                                   }}
-                                  className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-emerald-600"
+                                  className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
                                   title="Download PDF"
                                 >
-                                  <Download size={17} />
+                                  <Download size={17} className="sm:w-5 sm:h-5" />
                                 </button>
                               )}
                               <button
                                 type="button"
+                                onClick={() => openEditModal(document)}
+                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
+                                title="Edit Invoice"
+                                aria-label="Edit invoice"
+                              >
+                                <Pencil size={17} className="sm:w-5 sm:h-5" />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handleDeleteInvoice(document)}
-                                className="rounded-lg p-2 text-slate-600 hover:bg-rose-50 hover:text-rose-600"
+                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition"
                                 title="Delete Invoice"
                               >
-                                <Trash2 size={17} />
+                                <Trash2 size={17} className="sm:w-5 sm:h-5" />
                               </button>
                             </div>
                           </td>
@@ -1638,7 +1816,7 @@ const Invoices = () => {
       </main>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-3 sm:p-5">
+        <div className="fixed inset-0 z-50 lg:left-64 overflow-y-auto bg-black/40 p-3 sm:p-5 lg:p-6">
           <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl bg-slate-50 shadow-2xl">
             <div className="sticky top-0 z-50 border-b border-slate-200 bg-white">
               <div className="flex items-center justify-between gap-4 px-5 py-4">
@@ -1649,11 +1827,15 @@ const Invoices = () => {
 
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">
-                      Create Invoice
+                      {editingDoc
+                        ? `Edit Invoice (${editingDoc.invoice_number || "#" + editingDoc.id})`
+                        : "Create Invoice"}
                     </h2>
 
                     <p className="text-xs text-slate-500">
-                      Invoice number will be generated automatically when saved.
+                      {editingDoc
+                        ? "Update details and save to refresh PDF immediately."
+                        : ""}
                     </p>
                   </div>
                 </div>
@@ -1724,9 +1906,9 @@ const Invoices = () => {
                   </div>
 
                   <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                    Invoice Number:{" "}
+                   
                     <span className="font-semibold text-slate-800">
-                      Generated automatically on save
+                      
                     </span>
                   </div>
                 </Section>
@@ -1869,7 +2051,7 @@ const Invoices = () => {
 
                       {!selectedCustomer && (
                         <p className="text-xs text-slate-500">
-                          Search and select a customer. Saved customer billing and shipping details will be used automatically.
+                          Search and select a customer
                         </p>
                       )}
                     </div>
@@ -2115,7 +2297,7 @@ const Invoices = () => {
                               </p>
 
                               <p className="text-xs text-slate-500">
-                                Select from inventory to autofill available details.
+                                Select from inventory.
                               </p>
                             </div>
 
@@ -2267,7 +2449,7 @@ const Invoices = () => {
                     })}
 
                     <p className="text-xs text-slate-500">
-                      Inventory selection fills item name, category, HSN/SAC, type, unit and price when those values are available.
+                      
                     </p>
                   </div>
                 </Section>
@@ -2478,23 +2660,29 @@ const Invoices = () => {
                   )}
 
                   <div className="mt-4 grid gap-4 md:grid-cols-3">
-                    <Field
+                    <SelectField
                       label="TCS %"
-                      type="number"
-                      min="0"
-                      step="0.01"
                       value={tcsRate}
-                      onChange={setTcsRate}
-                    />
+                      onChange={(val) => setTcsRate(Number(val))}
+                    >
+                      {[0, 1, 2, 2.5, 20].map((rate) => (
+                        <option key={rate} value={rate}>
+                          {rate}%
+                        </option>
+                      ))}
+                    </SelectField>
 
-                    <Field
+                    <SelectField
                       label="TDS %"
-                      type="number"
-                      min="0"
-                      step="0.01"
                       value={tdsRate}
-                      onChange={setTdsRate}
-                    />
+                      onChange={(val) => setTdsRate(Number(val))}
+                    >
+                      {[0, 0.1, 1, 2, 10, 30].map((rate) => (
+                        <option key={rate} value={rate}>
+                          {rate}%
+                        </option>
+                      ))}
+                    </SelectField>
 
                     <Field
                       label="Round Off"
@@ -2728,6 +2916,106 @@ const Invoices = () => {
           </div>
         </div>
       )}
+
+      {/* IN-PAGE INVOICE ATTACHMENT VIEW MODAL */}
+      <Modal
+        open={invoicePreviewModal.isOpen}
+        onClose={() => {
+          if (invoicePreviewModal.pdfUrl) {
+            URL.revokeObjectURL(invoicePreviewModal.pdfUrl);
+          }
+          setInvoicePreviewModal({
+            isOpen: false,
+            document: null,
+            pdfUrl: "",
+            loading: false,
+          });
+        }}
+        title={`Invoice ${invoicePreviewModal.document?.invoice_number ? `#${invoicePreviewModal.document.invoice_number}` : ""}`}
+      >
+        <div className="space-y-4">
+          <div className="flex min-h-[300px] max-h-[70vh] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+            {invoicePreviewModal.loading ? (
+              <p className="text-sm text-slate-500">Loading invoice document...</p>
+            ) : invoicePreviewModal.pdfUrl ? (
+              <iframe
+                src={invoicePreviewModal.pdfUrl}
+                title="Invoice Document"
+                className="h-[65vh] w-full rounded-lg border-0"
+              />
+            ) : (
+              <div className="p-6 text-center text-sm text-slate-500">
+                <FileText size={36} className="mx-auto mb-2 text-slate-400" />
+                <p>Invoice PDF is not attached or generated yet.</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Customer: {invoicePreviewModal.document?.customer_name || invoicePreviewModal.document?.to_name || "—"}
+                </p>
+                <p className="text-xs text-slate-400">
+                  Total: {money(invoicePreviewModal.document?.total_amount)}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+            {/* Delete Action */}
+            <button
+              type="button"
+              onClick={() => {
+                const docToDelete = invoicePreviewModal.document;
+                if (invoicePreviewModal.pdfUrl) {
+                  URL.revokeObjectURL(invoicePreviewModal.pdfUrl);
+                }
+                setInvoicePreviewModal({
+                  isOpen: false,
+                  document: null,
+                  pdfUrl: "",
+                  loading: false,
+                });
+                if (docToDelete) handleDeleteInvoice(docToDelete);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+            >
+              <Trash2 size={15} /> Delete
+            </button>
+
+            <div className="flex items-center gap-2">
+              {/* Download Action */}
+              {invoicePreviewModal.pdfUrl && (
+                <a
+                  href={invoicePreviewModal.pdfUrl}
+                  download={
+                    invoicePreviewModal.document?.invoice_number
+                      ? `${invoicePreviewModal.document.invoice_number}.pdf`
+                      : "invoice.pdf"
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <Download size={15} /> Download
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (invoicePreviewModal.pdfUrl) {
+                    URL.revokeObjectURL(invoicePreviewModal.pdfUrl);
+                  }
+                  setInvoicePreviewModal({
+                    isOpen: false,
+                    document: null,
+                    pdfUrl: "",
+                    loading: false,
+                  });
+                }}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
