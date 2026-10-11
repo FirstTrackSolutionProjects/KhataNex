@@ -362,8 +362,6 @@ const Khata = () => {
   const [productItems, setProductItems] = useState([
     { id: 1, product_id: "", product_name: "", price: 0, quantity: 1, stock_quantity: 0, search: "" },
   ]);
-  const [cashInHand, setCashInHand] = useState(0);
-  const [cashInBank, setCashInBank] = useState(0);
   const [form, setForm] = useState({
     customerId: "",
     name: "",
@@ -467,12 +465,10 @@ const Khata = () => {
     setLoading(true);
     setError("");
     try {
-      const [khataRes, custRes, stockRes, plRes, payRes] = await Promise.all([
+      const [khataRes, custRes, stockRes] = await Promise.all([
         api.get("/api/khata"),
         api.get("/api/customers").catch(() => ({ customers: [] })),
         api.get("/api/stock").catch(() => ({ stock: [] })),
-        api.get("/api/reports/profit-loss").catch(() => null),
-        api.get("/api/payments").catch(() => ({ payments: [] })),
       ]);
       const serverEntries = khataRes.entries || [];
       const debitIds = new Set(
@@ -575,41 +571,6 @@ const Khata = () => {
         }
       });
 
-      // Compute Cash in Hand and Cash in Bank
-      let handCash = Number(plRes?.cash_in_hand ?? 0);
-      let bankCash = Number(plRes?.cash_in_bank ?? 0);
-
-      const pList = payRes?.payments || [];
-      if (!handCash && !bankCash && pList.length > 0) {
-        const cashIn = pList
-          .filter((p) => ["cash"].includes((p.payment_mode || p.payment_type || "").toLowerCase()) && ["money_received", "advance_receivable", "due_received"].includes((p.payment_category || "").toLowerCase()))
-          .reduce((s, p) => s + Number(p.amount || 0), 0);
-        const cashOut = pList
-          .filter((p) => ["cash"].includes((p.payment_mode || p.payment_type || "").toLowerCase()) && ["paid_out", "advance_payable", "purchase_bill"].includes((p.payment_category || "").toLowerCase()))
-          .reduce((s, p) => s + Number(p.amount || 0), 0);
-        handCash = Math.max(0, cashIn - cashOut);
-
-        const bankIn = pList
-          .filter((p) => !["cash"].includes((p.payment_mode || p.payment_type || "").toLowerCase()) && ["money_received", "advance_receivable", "due_received"].includes((p.payment_category || "").toLowerCase()))
-          .reduce((s, p) => s + Number(p.amount || 0), 0);
-        const bankOut = pList
-          .filter((p) => !["cash"].includes((p.payment_mode || p.payment_type || "").toLowerCase()) && ["paid_out", "advance_payable", "purchase_bill"].includes((p.payment_category || "").toLowerCase()))
-          .reduce((s, p) => s + Number(p.amount || 0), 0);
-        bankCash = Math.max(0, bankIn - bankOut);
-      }
-
-      if (!handCash) {
-        const kCashIn = combined
-          .filter((e) => e.type === "credit" && (e.payment_mode === "cash" || e.payment_type === "cash" || !e.payment_mode))
-          .reduce((s, e) => s + Number(e.amount || 0), 0);
-        const kCashOut = combined
-          .filter((e) => e.type === "debit")
-          .reduce((s, e) => s + Number(e.amount || 0), 0);
-        handCash = Math.max(0, kCashIn - kCashOut);
-      }
-
-      setCashInHand(handCash);
-      setCashInBank(bankCash);
       setEntries(combined);
       setCustomers(custRes.customers || []);
       setStock(stockRes.stock || []);
@@ -1171,7 +1132,7 @@ const Khata = () => {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-3">
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs text-slate-500">
@@ -1199,32 +1160,6 @@ const Khata = () => {
                 netBalance >= 0 ? "text-emerald-700" : "text-red-600"
               }`}>
                 {loading ? "..." : `${netBalance < 0 ? "-" : ""}₹${Math.abs(netBalance).toLocaleString("en-IN")}`}
-              </p>
-            </div>
-
-            <div
-              onClick={() => navigate("/banking")}
-              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500">Cash in Hand</p>
-                <span className="text-[10px] font-semibold text-emerald-600">View →</span>
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-800">
-                {loading ? "..." : `₹${cashInHand.toLocaleString("en-IN")}`}
-              </p>
-            </div>
-
-            <div
-              onClick={() => navigate("/banking")}
-              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500">Cash in Bank</p>
-                <span className="text-[10px] font-semibold text-blue-600">View →</span>
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-800">
-                {loading ? "..." : `₹${cashInBank.toLocaleString("en-IN")}`}
               </p>
             </div>
 
