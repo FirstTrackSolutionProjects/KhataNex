@@ -1835,7 +1835,7 @@ const Invoices = () => {
                     <p className="text-xs text-slate-500">
                       {editingDoc
                         ? "Update details and save to refresh PDF immediately."
-                        : ""}
+                        : "Invoice number will be generated automatically when saved."}
                     </p>
                   </div>
                 </div>
@@ -1906,9 +1906,9 @@ const Invoices = () => {
                   </div>
 
                   <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                   
+                    Invoice Number:{" "}
                     <span className="font-semibold text-slate-800">
-                      
+                      Generated automatically on save
                     </span>
                   </div>
                 </Section>
@@ -2051,7 +2051,7 @@ const Invoices = () => {
 
                       {!selectedCustomer && (
                         <p className="text-xs text-slate-500">
-                          Search and select a customer
+                          Search and select a customer. Saved customer billing and shipping details will be used automatically.
                         </p>
                       )}
                     </div>
@@ -2297,7 +2297,7 @@ const Invoices = () => {
                               </p>
 
                               <p className="text-xs text-slate-500">
-                                Select from inventory.
+                                Select from inventory to autofill available details.
                               </p>
                             </div>
 
@@ -2449,7 +2449,7 @@ const Invoices = () => {
                     })}
 
                     <p className="text-xs text-slate-500">
-                      
+                      Inventory selection fills item name, category, HSN/SAC, type, unit and price when those values are available.
                     </p>
                   </div>
                 </Section>
@@ -2974,12 +2974,12 @@ const Invoices = () => {
                 });
                 if (docToDelete) handleDeleteInvoice(docToDelete);
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
             >
-              <Trash2 size={15} /> Delete
+              <Trash2 size={15} className="sm:w-4 sm:h-4" /> Delete
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Download Action */}
               {invoicePreviewModal.pdfUrl && (
                 <a
@@ -2989,9 +2989,9 @@ const Invoices = () => {
                       ? `${invoicePreviewModal.document.invoice_number}.pdf`
                       : "invoice.pdf"
                   }
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
-                  <Download size={15} /> Download
+                  <Download size={15} className="sm:w-4 sm:h-4" /> Download
                 </a>
               )}
 
@@ -3008,7 +3008,7 @@ const Invoices = () => {
                     loading: false,
                   });
                 }}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                className="rounded-xl bg-slate-900 px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Close
               </button>
