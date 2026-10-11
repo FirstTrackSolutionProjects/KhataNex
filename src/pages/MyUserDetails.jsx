@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   ArrowLeft,
   BarChart3,
   Building2,
   CalendarDays,
+  Calendar,
   CheckCircle2,
   ChevronRight,
   CreditCard,
@@ -26,6 +27,11 @@ import {
   Eye,
   Search,
   Trash2,
+  TrendingDown,
+  IndianRupee,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Wallet,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
@@ -69,14 +75,136 @@ const displayValue = (value, fallback = "—") => {
   return String(value);
 };
 
+const USER_REPORT_PERIODS = [
+  { id: "today", label: "Today", months: 1 },
+  { id: "this_week", label: "This Week", months: 1 },
+  { id: "this_month", label: "This Month", months: 1 },
+  { id: "this_year", label: "This Year", months: 12 },
+  { id: "last_6_months", label: "6M", months: 6 },
+  { id: "last_12_months", label: "12M", months: 12 },
+];
+
+const isDateInPeriod = (dateVal, p, cStart, cEnd) => {
+  if (!dateVal) return false;
+  const d = new Date(dateVal);
+  if (Number.isNaN(d.getTime())) return false;
+  const now = new Date();
+
+  if (p === "custom") {
+    if (cStart) {
+      const s = new Date(cStart);
+      s.setHours(0, 0, 0, 0);
+      if (d < s) return false;
+    }
+    if (cEnd) {
+      const e = new Date(cEnd);
+      e.setHours(23, 59, 59, 999);
+      if (d > e) return false;
+    }
+    return true;
+  }
+  if (p === "today") {
+    return d.toDateString() === now.toDateString();
+  }
+  if (p === "this_week") {
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+    return d >= startOfWeek && d <= now;
+  }
+  if (p === "this_month") {
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }
+  if (p === "this_year") {
+    return d.getFullYear() === now.getFullYear();
+  }
+  if (p === "last_6_months") {
+    const sixMonthsAgo = new Date(now);
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+    return d >= sixMonthsAgo;
+  }
+  if (p === "last_12_months") {
+    const twelveMonthsAgo = new Date(now);
+    twelveMonthsAgo.setFullYear(now.getFullYear() - 1);
+    return d >= twelveMonthsAgo;
+  }
+  return true;
+};
+
 const getResponseData = (response) => response?.data || response || {};
 
+const getKhataRecordType = (record) => {
+  if (!record) return "credit";
+  const rawType = String(record.type || record.entry_type || "").trim().toLowerCase();
+  const rawMode = String(record.payment_mode || record.payment_type || "").trim().toLowerCase();
+  const rawSrc = String(record.source || "").trim().toLowerCase();
+  const rawCat = String(record.payment_category || record.category || "").trim().toLowerCase();
+  const rawStatus = String(record.status || "").trim().toLowerCase();
+
+  // Debit entries
+  if (
+    rawType === "debit" ||
+    rawMode === "debit" ||
+    rawCat === "debit" ||
+    rawSrc === "khata_debit" ||
+    Number(record.debit_amount || 0) > 0
+  ) {
+    return "debit";
+  }
+
+  // Due entries
+  if (
+    rawType === "due" ||
+    rawMode === "due" ||
+    rawCat === "due" ||
+    rawSrc === "customer_due" ||
+    rawStatus === "due" ||
+    rawStatus === "pending" ||
+    rawStatus === "partially_paid" ||
+    Number(record.remaining_amount || 0) > 0
+  ) {
+    return "due";
+  }
+
+  // Credit entries (sales, receipts, manual credit)
+  return "credit";
+};
+
 const extractRecordsFromResponse = (data, type) => {
-  if (Array.isArray(data)) return data;
+  if (Array.isArray(data)) {
+    if (type === "khata") {
+      return data.map((item) => {
+        const resolvedType = getKhataRecordType(item);
+        return {
+          ...item,
+          type: resolvedType,
+          entry_type: resolvedType,
+          source: item.source || (resolvedType === "due" && item.remaining_amount !== undefined ? "customer_due" : (item.payment_type ? "collection" : "khata_entry")),
+        };
+      });
+    }
+    return data;
+  }
   if (!data || typeof data !== "object") return [];
 
   // 1. Direct key match
-  if (Array.isArray(data[type])) return data[type];
+  if (Array.isArray(data[type])) {
+    const list = data[type];
+    if (type === "khata") {
+      return list.map((item) => {
+        const resolvedType = getKhataRecordType(item);
+        return {
+          ...item,
+          type: resolvedType,
+          entry_type: resolvedType,
+          source: item.source || (resolvedType === "due" && item.remaining_amount !== undefined ? "customer_due" : (item.payment_type ? "collection" : "khata_entry")),
+        };
+      });
+    }
+    return list;
+  }
 
   // 2. Type-specific alias keys
   if (type === "inventory" || type === "stock") {
@@ -91,9 +219,36 @@ const extractRecordsFromResponse = (data, type) => {
   }
 
   if (type === "khata") {
-    if (Array.isArray(data.khata)) return data.khata;
-    if (Array.isArray(data.entries)) return data.entries;
-    if (Array.isArray(data.ledger)) return data.ledger;
+    let list = null;
+    if (Array.isArray(data.khata)) list = data.khata;
+    else if (Array.isArray(data.entries)) list = data.entries;
+    else if (Array.isArray(data.ledger)) list = data.ledger;
+    else if (data.credit || data.debit || data.due) {
+      list = [
+        ...(Array.isArray(data.credit) ? data.credit.map((x) => ({ ...x, type: x.type || "credit", source: x.source || "khata_entry" })) : []),
+        ...(Array.isArray(data.debit) ? data.debit.map((x) => ({ ...x, type: x.type || "debit", source: x.source || "khata_entry" })) : []),
+        ...(Array.isArray(data.due) ? data.due.map((x) => ({ ...x, type: x.type || "due", source: x.source || "customer_due" })) : []),
+      ];
+    }
+    if (list) {
+      return list.map((item) => {
+        const resolvedType = getKhataRecordType(item);
+        return {
+          ...item,
+          type: resolvedType,
+          entry_type: resolvedType,
+          source: item.source || (resolvedType === "due" && item.remaining_amount !== undefined ? "customer_due" : (item.payment_type ? "collection" : "khata_entry")),
+        };
+      });
+    }
+  }
+
+  if (type === "purchase-bills" || type === "purchase_bills" || type === "purchase-bill" || type === "purchases") {
+    if (Array.isArray(data["purchase-bills"])) return data["purchase-bills"];
+    if (Array.isArray(data.purchase_bills)) return data.purchase_bills;
+    if (Array.isArray(data.purchaseBills)) return data.purchaseBills;
+    if (Array.isArray(data.bills)) return data.bills;
+    if (Array.isArray(data.purchases)) return data.purchases;
   }
 
   if (type === "vehicles" || type === "vehicle") {
@@ -102,8 +257,9 @@ const extractRecordsFromResponse = (data, type) => {
     if (Array.isArray(data.vehicle_trips)) return data.vehicle_trips;
   }
 
-  if (type === "payments") {
+  if (type === "payments" || type === "payment") {
     if (Array.isArray(data.payments)) return data.payments;
+    if (Array.isArray(data.payment)) return data.payment;
   }
 
   if (type === "expenses") {
@@ -140,6 +296,451 @@ const extractRecordsFromResponse = (data, type) => {
   }
 
   return [];
+};
+
+const formatTxDate = (tx) => {
+  const dVal = tx.date || tx.created_at;
+  if (!dVal) return "—";
+  try {
+    const d = new Date(dVal);
+    if (Number.isNaN(d.getTime())) return String(dVal).split("T")[0];
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return String(dVal);
+  }
+};
+
+const formatTxTime = (tx) => {
+  if (tx.time && typeof tx.time === "string" && tx.time.trim() && tx.time !== "00:00:00") {
+    return tx.time.slice(0, 5);
+  }
+  const dVal = tx.date || tx.created_at;
+  if (dVal && typeof dVal === "string" && (dVal.includes("T") || dVal.includes(" "))) {
+    try {
+      const d = new Date(dVal);
+      if (!Number.isNaN(d.getTime())) {
+        return d.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+    } catch {
+      return "";
+    }
+  }
+  return "";
+};
+
+const USER_METRIC_LABELS = {
+  "total-sales": "Total Sales",
+  "expenses": "Total Expense",
+  "purchases": "Purchases",
+  "debit-entries": "Debit Entries",
+  "pay-out": "Business Pay Out",
+  "advance-receivable": "Advance Receivable",
+  "advance-payable": "Advance Payable",
+  "cash-in-hand": "Cash in Hand",
+  "cash-in-bank": "Cash in Bank",
+  "net-profit": "Net Profit",
+};
+
+const USER_EXPENSE_CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "Purchases", label: "Purchases" },
+  { id: "Debit Entries", label: "Debit Entries" },
+  { id: "Business Pay Out", label: "Business Pay Out" },
+  { id: "Advance Payable", label: "Advance Payable" },
+  { id: "Other Expenses", label: "Other Expenses" },
+];
+
+const getUserFallbackTransactions = (metricSlug, label, currentPeriod, cStart, cEnd, rawData) => {
+  const txs = [];
+  const norm = (metricSlug || "").toLowerCase();
+  const inPeriod = (dt) => isDateInPeriod(dt, currentPeriod, cStart, cEnd);
+  const khata = rawData.khata || [];
+  const payments = rawData.payments || [];
+  const invoices = rawData.invoices || [];
+  const purchaseBills = rawData.purchaseBills || [];
+
+  if (norm === "total-sales" || norm === "sales") {
+    invoices
+      .filter((inv) => inPeriod(inv.invoice_date || inv.created_at))
+      .forEach((inv) => {
+        txs.push({
+          id: `inv-${inv.id}`,
+          date: inv.invoice_date || inv.created_at,
+          time: inv.created_at,
+          party: inv.customer_name || inv.client_name || "Invoice Customer",
+          description: `Invoice #${inv.document_number || inv.invoice_number || inv.id}`,
+          payment_mode: inv.payment_mode || "online",
+          amount: Number(inv.total_amount || 0),
+          source: "invoice",
+          structure_category: "Sales",
+        });
+      });
+
+    khata
+      .filter((k) => {
+        const t = String(k.type || k.entry_type || "").toLowerCase();
+        return (t === "credit" || Number(k.credit_amount || 0) > 0) && inPeriod(k.entry_date || k.date || k.created_at);
+      })
+      .forEach((ke) => {
+        txs.push({
+          id: `ke-${ke.id}`,
+          date: ke.entry_date || ke.date || ke.created_at,
+          time: ke.entry_time || ke.created_at,
+          party: ke.customer_name || "Walk-in",
+          description: ke.description || "Khata Credit Sale",
+          payment_mode: ke.payment_mode || "cash",
+          amount: Number(ke.amount || ke.credit_amount || 0),
+          source: "khata_credit",
+          structure_category: "Sales",
+        });
+      });
+  } else if (norm === "purchases" || norm === "total-purchases") {
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        return (cat === "purchase_bill" || cat === "purchase") && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || p.vendor_name || "Vendor",
+          description: p.purpose || "Purchase Bill",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "purchase_bill",
+          structure_category: "Purchases",
+        });
+      });
+
+    purchaseBills
+      .filter((pb) => inPeriod(pb.bill_date || pb.date || pb.created_at))
+      .forEach((pb) => {
+        if (!txs.some((t) => t.id === `pay-${pb.id}`)) {
+          txs.push({
+            id: `pb-${pb.id}`,
+            date: pb.bill_date || pb.date || pb.created_at,
+            time: pb.created_at,
+            party: pb.vendor_name || pb.party_name || "Vendor",
+            description: pb.bill_number ? `Bill #${pb.bill_number}` : "Purchase Bill",
+            payment_mode: pb.payment_mode || "cash",
+            amount: Number(pb.total_amount || pb.amount || 0),
+            source: "purchase_bill",
+            structure_category: "Purchases",
+          });
+        }
+      });
+  } else if (norm === "expenses" || norm === "total-expenses") {
+    // 1. Purchases
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        return (cat === "purchase_bill" || cat === "purchase") && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-pb-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || p.vendor_name || "Vendor",
+          description: p.purpose || "Purchase Bill",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "purchase_bill",
+          structure_category: "Purchases",
+        });
+      });
+
+    // 1b. Purchase Bills (if any not already in payments)
+    purchaseBills
+      .filter((pb) => inPeriod(pb.bill_date || pb.date || pb.created_at))
+      .forEach((pb) => {
+        if (!txs.some((t) => t.id === `pay-pb-${pb.id}` || t.id === `pb-${pb.id}`)) {
+          txs.push({
+            id: `pb-${pb.id}`,
+            date: pb.bill_date || pb.date || pb.created_at,
+            time: pb.created_at,
+            party: pb.vendor_name || pb.party_name || "Vendor",
+            description: pb.bill_number ? `Bill #${pb.bill_number}` : "Purchase Bill",
+            payment_mode: pb.payment_mode || "cash",
+            amount: Number(pb.total_amount || pb.amount || 0),
+            source: "purchase_bill",
+            structure_category: "Purchases",
+          });
+        }
+      });
+
+    // 2. Debit Entries
+    khata
+      .filter((ke) => {
+        const t = String(ke.type || ke.entry_type || "").toLowerCase();
+        return (t === "debit" || Number(ke.debit_amount || 0) > 0) && inPeriod(ke.entry_date || ke.date || ke.created_at);
+      })
+      .forEach((ke) => {
+        txs.push({
+          id: `ke-${ke.id}`,
+          date: ke.entry_date || ke.date || ke.created_at,
+          time: ke.entry_time || ke.created_at,
+          party: ke.customer_name || "Debit Payee",
+          description: ke.description || "Khata Debit",
+          payment_mode: ke.payment_mode || "cash",
+          amount: Number(ke.amount || ke.debit_amount || 0),
+          source: "khata_debit",
+          structure_category: "Debit",
+        });
+      });
+
+    // 3. Business Pay Out
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        const isPurchaseLinked = Boolean(
+          p.purchase_bill_id ||
+          String(p.purpose || "").startsWith("Purchase Bill") ||
+          (rawData.purchaseBills || []).some((pb) => Number(pb.payment_id) === Number(p.id) || Number(pb.id) === Number(p.purchase_bill_id))
+        );
+        const isKhataLinked = Boolean(p.khata_entry_id);
+        return ["paid_by_business", "paid_out", "expense"].includes(cat) && !isPurchaseLinked && !isKhataLinked && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Payee / Vendor",
+          description: p.purpose || "Business Payout",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "payment_payout",
+          structure_category: "Business Pay Out",
+        });
+      });
+
+    // 4. Advance Payable
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        return cat === "advance_payable" && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-advp-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Payee / Vendor",
+          description: p.purpose || "Advance Payable",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "advance_payable",
+          structure_category: "Advance Payable",
+        });
+      });
+
+    // 5. Other Expenses
+    (rawData.expenses || [])
+      .filter((ex) => inPeriod(ex.expense_date || ex.date || ex.created_at))
+      .forEach((ex) => {
+        txs.push({
+          id: `ex-${ex.id}`,
+          date: ex.expense_date || ex.date || ex.created_at,
+          time: ex.created_at,
+          party: ex.vendor_name || ex.party_name || ex.added_by || "Vendor / Payee",
+          description: ex.description || ex.category || "Direct Expense",
+          payment_mode: ex.payment_mode || "cash",
+          amount: Number(ex.amount || 0),
+          source: "direct_expense",
+          structure_category: "Other Expenses",
+        });
+      });
+  } else if (norm === "debit-entries" || norm === "debit") {
+    khata
+      .filter((ke) => {
+        const t = String(ke.type || ke.entry_type || "").toLowerCase();
+        return (t === "debit" || Number(ke.debit_amount || 0) > 0) && inPeriod(ke.entry_date || ke.date || ke.created_at);
+      })
+      .forEach((ke) => {
+        txs.push({
+          id: `ke-${ke.id}`,
+          date: ke.entry_date || ke.date || ke.created_at,
+          time: ke.entry_time || ke.created_at,
+          party: ke.customer_name || "Debit Payee",
+          description: ke.description || "Khata Debit",
+          payment_mode: ke.payment_mode || "cash",
+          amount: Number(ke.amount || ke.debit_amount || 0),
+          source: "khata_debit",
+          structure_category: "Debit",
+        });
+      });
+  } else if (norm === "pay-out" || norm === "payout" || norm === "business-payout" || norm === "business-pay-out") {
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        const isPurchaseLinked = Boolean(
+          p.purchase_bill_id ||
+          String(p.purpose || "").startsWith("Purchase Bill") ||
+          (rawData.purchaseBills || []).some((pb) => Number(pb.payment_id) === Number(p.id) || Number(pb.id) === Number(p.purchase_bill_id))
+        );
+        const isKhataLinked = Boolean(p.khata_entry_id);
+        return ["paid_by_business", "paid_out", "expense"].includes(cat) && !isPurchaseLinked && !isKhataLinked && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Payee / Vendor",
+          description: p.purpose || "Business Payout",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "payment_payout",
+          structure_category: "Business Pay Out",
+        });
+      });
+  } else if (norm === "advance-receivable") {
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        return ["advance_receivable", "advance_from_investor"].includes(cat) && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Customer / Investor",
+          description: p.purpose || "Advance Receivable",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "Payments Advance Receivable",
+          structure_category: "Payments Advance Receivable",
+        });
+      });
+  } else if (norm === "advance-payable") {
+    payments
+      .filter((p) => {
+        const cat = String(p.payment_category || "").toLowerCase();
+        return cat === "advance_payable" && inPeriod(p.payment_date || p.created_at);
+      })
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Payee / Vendor",
+          description: p.purpose || "Advance Payable",
+          payment_mode: p.payment_mode || "cash",
+          amount: Number(p.amount || 0),
+          source: "Payments Advance Payable",
+          structure_category: "Payments Advance Payable",
+        });
+      });
+  } else if (norm === "cash-in-hand") {
+    khata
+      .filter((ke) => (ke.payment_mode || "cash").toLowerCase() === "cash" && inPeriod(ke.entry_date || ke.date || ke.created_at))
+      .forEach((ke) => {
+        txs.push({
+          id: `ke-${ke.id}`,
+          date: ke.entry_date || ke.date || ke.created_at,
+          time: ke.entry_time || ke.created_at,
+          party: ke.customer_name || "Walk-in",
+          description: ke.description || (ke.type === "credit" ? "Cash Credit" : "Cash Debit"),
+          payment_mode: "Cash",
+          amount: Number(ke.amount || 0),
+          source: `khata_${ke.type}`,
+          structure_category: "Khata",
+        });
+      });
+    payments
+      .filter((p) => (p.payment_mode || "").toLowerCase() === "cash" && inPeriod(p.payment_date || p.created_at))
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Party",
+          description: p.purpose || p.payment_category,
+          payment_mode: "Cash",
+          amount: Number(p.amount || 0),
+          source: "payment",
+          structure_category: "Payments",
+        });
+      });
+  } else if (norm === "cash-in-bank") {
+    khata
+      .filter((ke) => ["upi", "online", "bank"].includes((ke.payment_mode || "").toLowerCase()) && inPeriod(ke.entry_date || ke.date || ke.created_at))
+      .forEach((ke) => {
+        txs.push({
+          id: `ke-${ke.id}`,
+          date: ke.entry_date || ke.date || ke.created_at,
+          time: ke.entry_time || ke.created_at,
+          party: ke.customer_name || "Walk-in",
+          description: ke.description || (ke.type === "credit" ? "Bank/UPI Credit" : "Bank/UPI Debit"),
+          payment_mode: ke.payment_mode?.toUpperCase() || "UPI",
+          amount: Number(ke.amount || 0),
+          source: `khata_${ke.type}`,
+          structure_category: "Khata",
+        });
+      });
+    payments
+      .filter((p) => ["upi", "online", "bank", "cheque", "neft", "rtgs"].includes((p.payment_mode || "").toLowerCase()) && inPeriod(p.payment_date || p.created_at))
+      .forEach((p) => {
+        txs.push({
+          id: `pay-${p.id}`,
+          date: p.payment_date || p.created_at,
+          time: p.created_at,
+          party: p.party_name || "Party",
+          description: p.purpose || p.payment_category,
+          payment_mode: p.payment_mode?.toUpperCase() || "UPI",
+          amount: Number(p.amount || 0),
+          source: "payment",
+          structure_category: "Payments",
+        });
+      });
+  }
+
+  txs.sort((a, b) => {
+    const dateA = a.date || a.created_at || "";
+    const dateB = b.date || b.created_at || "";
+    const timeA =
+      a.time ||
+      (a.created_at && String(a.created_at).includes("T")
+        ? String(a.created_at).split("T")[1]
+        : "") ||
+      "00:00:00";
+    const timeB =
+      b.time ||
+      (b.created_at && String(b.created_at).includes("T")
+        ? String(b.created_at).split("T")[1]
+        : "") ||
+      "00:00:00";
+    const dtA =
+      new Date(`${String(dateA).slice(0, 10)}T${String(timeA).slice(0, 8)}`).getTime() || 0;
+    const dtB =
+      new Date(`${String(dateB).slice(0, 10)}T${String(timeB).slice(0, 8)}`).getTime() || 0;
+    if (dtB !== dtA) return dtB - dtA;
+    const rawIdA = Number(String(a.id || "").replace(/\D+/g, "")) || 0;
+    const rawIdB = Number(String(b.id || "").replace(/\D+/g, "")) || 0;
+    return rawIdB - rawIdA;
+  });
+  const totalAmount = txs.reduce((acc, t) => acc + Number(t.amount || 0), 0);
+
+  return {
+    metric: metricSlug,
+    label,
+    period: currentPeriod,
+    total_amount: totalAmount,
+    count: txs.length,
+    transactions: txs,
+  };
 };
 
 
@@ -272,7 +873,11 @@ const RecordModal = ({
                   ? "Vehicle Trip Details"
                   : type === "expense"
                     ? "Expense Details"
-                    : "Record Details";
+                    : type === "purchase-bill" || type === "purchase_bill"
+                      ? "Purchase Bill Details"
+                      : type === "khata"
+                        ? "Khata Entry Details"
+                        : "Record Details";
 
   const documentNumber =
     record.invoice_number ||
@@ -473,6 +1078,77 @@ const RecordModal = ({
     </div>
   );
 
+  const renderPurchaseBillDetails = () => (
+    <>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <InfoRow label="Bill Number" value={record.bill_number ? `#${record.bill_number}` : "—"} />
+        <InfoRow label="Vendor Name" value={record.vendor_name} />
+        <InfoRow label="Bill Date" value={formatDate(record.bill_date || record.created_at)} />
+        <InfoRow label="Payment Status" value={Number(record.is_paid) ? "Paid" : "Unpaid"} />
+        <InfoRow label="Payment Mode" value={record.payment_mode || "—"} />
+        <InfoRow label="Total Amount" value={formatMoney(record.total_amount ?? record.amount)} />
+        {record.payment_reference && (
+          <InfoRow label="Payment Reference" value={record.payment_reference} />
+        )}
+        {record.added_by && (
+          <InfoRow label="Recorded By" value={record.added_by} />
+        )}
+      </div>
+
+      {record.items?.length > 0 && (
+        <div className="mt-6">
+          <p className="mb-3 text-sm font-semibold text-slate-800">Bill Items</p>
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-amber-50">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-amber-800">Item</th>
+                  <th className="px-4 py-3 text-right font-semibold text-amber-800">Qty</th>
+                  <th className="px-4 py-3 text-right font-semibold text-amber-800">Price</th>
+                  <th className="px-4 py-3 text-right font-semibold text-amber-800">Discount</th>
+                  <th className="px-4 py-3 text-right font-semibold text-amber-800">GST %</th>
+                  <th className="px-4 py-3 text-right font-semibold text-amber-800">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {record.items.map((item, idx) => (
+                  <tr key={item.id || idx} className="border-t border-slate-100">
+                    <td className="px-4 py-3 text-slate-800 font-medium">{item.item_name || item.linked_stock_name || "—"}</td>
+                    <td className="px-4 py-3 text-right text-slate-600">{displayValue(item.quantity)} {item.unit || ""}</td>
+                    <td className="px-4 py-3 text-right text-slate-600">{formatMoney(item.price)}</td>
+                    <td className="px-4 py-3 text-right text-slate-600">{formatMoney(item.discount)}</td>
+                    <td className="px-4 py-3 text-right text-slate-600">{displayValue(item.gst_rate, "0")}%</td>
+                    <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatMoney(item.total_amount || (Number(item.quantity || 0) * Number(item.price || 0)))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  const renderKhataDetails = () => (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <InfoRow label="Party / Customer" value={record.customer_name || record.party_name || record.name || "Walk-in"} />
+      <InfoRow label="Entry Type" value={String(record.type || record.entry_type || "").toUpperCase()} />
+      <InfoRow label="Amount" value={formatMoney(record.amount)} />
+      <InfoRow label="Date" value={formatDate(record.entry_date || record.date || record.created_at)} />
+      <InfoRow label="Payment Mode" value={record.payment_mode || "cash"} />
+      <InfoRow label="Description" value={record.description || "—"} />
+      {record.product_name && (
+        <InfoRow label="Linked Product" value={record.product_name} />
+      )}
+      {record.customer_phone && (
+        <InfoRow label="Phone" value={record.customer_phone} />
+      )}
+      {record.customer_email && (
+        <InfoRow label="Email" value={record.customer_email} />
+      )}
+    </div>
+  );
+
   const renderGenericDetails = () => {
     const hiddenKeys = new Set([
       "pdf_path",
@@ -540,7 +1216,11 @@ const RecordModal = ({
               ? renderCustomerDetails()
               : type === "expense"
                 ? renderExpenseDetails()
-                : renderGenericDetails()}
+                : type === "purchase-bill" || type === "purchase_bill"
+                  ? renderPurchaseBillDetails()
+                  : type === "khata"
+                    ? renderKhataDetails()
+                    : renderGenericDetails()}
 
           {type === "customer" && onDeleteCustomer && (
             <div className="mt-5 flex justify-end border-t border-slate-100 pt-4">
@@ -583,19 +1263,451 @@ const MyUserDetails = () => {
   const [showReports, setShowReports] = useState(false);
   const [selectedBusinessSection, setSelectedBusinessSection] = useState("");
 
+  // Scoped Superadmin Reports State
+  const [userReportPeriod, setUserReportPeriod] = useState("this_month");
+  const [showUserCustomCalendar, setShowUserCustomCalendar] = useState(false);
+  const [userCustomStartDate, setUserCustomStartDate] = useState("");
+  const [userCustomEndDate, setUserCustomEndDate] = useState("");
+  const [userReportsLoading, setUserReportsLoading] = useState(false);
+  const [userReportsData, setUserReportsData] = useState(null);
+  const [userRawData, setUserRawData] = useState({ khata: [], payments: [], purchaseBills: [], invoices: [] });
+  const [khataFilter, setKhataFilter] = useState("all");
+
+  // Superadmin Drilldown Modal State
+  const [userDrilldownOpen, setUserDrilldownOpen] = useState(false);
+  const [userDrilldownLoading, setUserDrilldownLoading] = useState(false);
+  const [userDrilldownData, setUserDrilldownData] = useState(null);
+  const [userActiveMetricLabel, setUserActiveMetricLabel] = useState("");
+  const [userActiveMetricSlug, setUserActiveMetricSlug] = useState("");
+  const [userExpenseFilterCategory, setUserExpenseFilterCategory] = useState("all");
+
+  const loadUserReports = async (periodId) => {
+    try {
+      setUserReportsLoading(true);
+      const [repRes, overRes, khataRes, payRes, billsRes, invRes, expRes] = await Promise.all([
+        api.get(`/api/superadmin/users/${id}/data?type=reports&period=${periodId}`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/overview?period=${periodId}`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=khata`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=payments`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=purchase-bills`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=invoices`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=expenses`).catch(() => null),
+      ]);
+
+      const repData = getResponseData(repRes);
+      const overData = getResponseData(overRes);
+      const khataList = extractRecordsFromResponse(getResponseData(khataRes), "khata");
+      const payList = extractRecordsFromResponse(getResponseData(payRes), "payments");
+      const billsList = extractRecordsFromResponse(getResponseData(billsRes), "purchase-bills");
+      const invList = extractRecordsFromResponse(getResponseData(invRes), "invoices");
+      const expList = extractRecordsFromResponse(getResponseData(expRes), "expenses");
+
+      setUserRawData({ khata: khataList, payments: payList, purchaseBills: billsList, invoices: invList, expenses: expList });
+      setUserReportsData({
+        reports: repData?.reports || overData?.overview?.reports || overData?.reports || null,
+        overview: overData?.overview || null,
+      });
+    } catch (err) {
+      console.error("Failed to load user reports:", err);
+    } finally {
+      setUserReportsLoading(false);
+    }
+  };
+
+  const userMetrics = useMemo(() => {
+    const inPeriod = (dt) => isDateInPeriod(dt, userReportPeriod, userCustomStartDate, userCustomEndDate);
+
+    const periodInvoices = (userRawData.invoices || []).filter((i) =>
+      inPeriod(i.invoice_date || i.created_at)
+    );
+    const invoiceSalesSum = periodInvoices.reduce((sum, i) => sum + Number(i.total_amount || 0), 0);
+
+    const periodKhataCredits = (userRawData.khata || []).filter((k) => {
+      const t = String(k.type || k.entry_type || "").toLowerCase();
+      return (t === "credit" || Number(k.credit_amount || 0) > 0) && inPeriod(k.entry_date || k.date || k.created_at);
+    });
+    const khataCreditSalesSum = periodKhataCredits.reduce((sum, k) => sum + Number(k.amount || k.credit_amount || 0), 0);
+
+    const periodPayments = (userRawData.payments || []).filter((p) =>
+      inPeriod(p.payment_date || p.created_at)
+    );
+
+    const periodKhataDebits = (userRawData.khata || []).filter((k) => {
+      const t = String(k.type || k.entry_type || "").toLowerCase();
+      return (t === "debit" || Number(k.debit_amount || 0) > 0) && inPeriod(k.entry_date || k.date || k.created_at);
+    });
+    const khataDebitsSum = periodKhataDebits.reduce((sum, k) => sum + Number(k.amount || k.debit_amount || 0), 0);
+
+    const paymentExpensesSum = periodPayments
+      .filter((p) => {
+        if (p.khata_entry_id) return false;
+        if (p.purchase_bill_id) return false;
+        const cat = (p.payment_category || "").toLowerCase();
+        return cat === "paid_by_business" || cat === "paid_out" || cat === "expense";
+      })
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const purchasesSum = periodPayments
+      .filter((p) => {
+        const cat = (p.payment_category || "").toLowerCase();
+        return cat === "purchase_bill" || cat === "purchase";
+      })
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const purchaseBillsSum = (userRawData.purchaseBills || [])
+      .filter((pb) => inPeriod(pb.bill_date || pb.date || pb.created_at))
+      .reduce((sum, pb) => sum + Number(pb.total_amount || pb.amount || 0), 0);
+
+    const advRecSum = periodPayments
+      .filter((p) => {
+        const cat = (p.payment_category || "").toLowerCase();
+        return cat === "advance_receivable" || cat === "advance_from_investor";
+      })
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const advPaySum = periodPayments
+      .filter((p) => (p.payment_category || "").toLowerCase() === "advance_payable")
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const cashCreditSales = periodKhataCredits
+      .filter((k) => (k.payment_mode || "cash").toLowerCase() === "cash")
+      .reduce((sum, k) => sum + Number(k.amount || 0), 0);
+    const cashPayments = periodPayments
+      .filter((p) => (p.payment_mode || "").toLowerCase() === "cash")
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const cashInHandFallback = cashCreditSales + cashPayments;
+
+    const bankCreditSales = periodKhataCredits
+      .filter((k) => ["upi", "online", "bank"].includes((k.payment_mode || "").toLowerCase()))
+      .reduce((sum, k) => sum + Number(k.amount || 0), 0);
+    const bankPayments = periodPayments
+      .filter((p) =>
+        ["upi", "online", "bank", "cheque", "neft", "rtgs"].includes((p.payment_mode || "").toLowerCase())
+      )
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const cashInBankFallback = bankCreditSales + bankPayments;
+
+    const rep = userReportsData?.reports || overview?.reports || {};
+    const ov = userReportsData?.overview || overview || {};
+
+    const sales = Number(rep?.total_sales ?? rep?.sales ?? ov?.total_sales ?? (invoiceSalesSum > 0 ? invoiceSalesSum : khataCreditSalesSum));
+    const totalExpense = Number(rep?.total_expense ?? rep?.total_expenses ?? rep?.expenses ?? ov?.expenses ?? (paymentExpensesSum + khataDebitsSum + purchasesSum + advPaySum));
+    const purchases = Number(rep?.purchases ?? rep?.total_purchases ?? ov?.purchases ?? (purchaseBillsSum > 0 ? purchaseBillsSum : purchasesSum));
+    const debitEntries = khataDebitsSum;
+    const payOut = paymentExpensesSum;
+    const advanceReceivable = Number(rep?.advance_receivable ?? advRecSum);
+    const advancePayable = Number(rep?.advance_payable ?? advPaySum);
+    const cashInHand = Number(rep?.cash_in_hand ?? cashInHandFallback);
+    const cashInBank = Number(rep?.cash_in_bank ?? cashInBankFallback);
+    const netProfit = Number(rep?.net_profit ?? ov?.net_profit ?? (sales - totalExpense));
+
+    return {
+      sales,
+      totalExpense,
+      purchases,
+      debitEntries,
+      payOut,
+      advanceReceivable,
+      advancePayable,
+      cashInHand,
+      cashInBank,
+      netProfit,
+    };
+  }, [userRawData, userReportsData, overview, userReportPeriod, userCustomStartDate, userCustomEndDate]);
+
+  const userReportCards = useMemo(() => [
+    {
+      key: "total-sales",
+      title: "Total Sales",
+      value: userMetrics.sales,
+      icon: IndianRupee,
+      bg: "bg-emerald-100",
+      text: "text-emerald-600",
+      valColor: "text-slate-900",
+      subtext: "Total revenue",
+    },
+    {
+      key: "expenses",
+      title: "Total Expense",
+      value: userMetrics.totalExpense,
+      icon: TrendingDown,
+      bg: "bg-rose-100",
+      text: "text-rose-600",
+      valColor: "text-rose-600",
+      subtext: "Purchases, debits & pay out",
+    },
+    {
+      key: "purchases",
+      title: "Purchases",
+      value: userMetrics.purchases,
+      icon: Package,
+      bg: "bg-amber-100",
+      text: "text-amber-600",
+      valColor: "text-amber-700",
+      subtext: "Stock purchases",
+    },
+    {
+      key: "pay-out",
+      title: "Business Pay Out",
+      value: userMetrics.payOut,
+      icon: ArrowUpRight,
+      bg: "bg-orange-100",
+      text: "text-orange-600",
+      valColor: "text-orange-700",
+      subtext: "Direct business payouts",
+    },
+    {
+      key: "advance-receivable",
+      title: "Advance Receivable",
+      value: userMetrics.advanceReceivable,
+      icon: ArrowDownLeft,
+      bg: "bg-blue-100",
+      text: "text-blue-600",
+      valColor: "text-blue-700",
+      subtext: "Receipts & advance in",
+    },
+    {
+      key: "advance-payable",
+      title: "Advance Payable",
+      value: userMetrics.advancePayable,
+      icon: ArrowUpRight,
+      bg: "bg-purple-100",
+      text: "text-purple-600",
+      valColor: "text-purple-700",
+      subtext: "Payments advance out",
+    },
+    {
+      key: "cash-in-hand",
+      title: "Cash in Hand",
+      value: userMetrics.cashInHand,
+      icon: Wallet,
+      bg: "bg-teal-100",
+      text: "text-teal-600",
+      valColor: "text-teal-700",
+      subtext: "Cash transactions",
+    },
+    {
+      key: "cash-in-bank",
+      title: "Cash in Bank",
+      value: userMetrics.cashInBank,
+      icon: Landmark,
+      bg: "bg-indigo-100",
+      text: "text-indigo-600",
+      valColor: "text-indigo-700",
+      subtext: "UPI & bank transfers",
+    },
+    {
+      key: "net-profit",
+      title: "Net Profit",
+      value: userMetrics.netProfit,
+      icon: BarChart3,
+      bg: "bg-emerald-100",
+      text: "text-emerald-700",
+      valColor: userMetrics.netProfit < 0 ? "text-red-600" : "text-emerald-600",
+      subtext: "Sales − Total Expense",
+    },
+  ], [userMetrics]);
+
+  const handleOpenUserDrilldown = async (metricSlug, label) => {
+    setUserActiveMetricSlug(metricSlug);
+    setUserActiveMetricLabel(label);
+    setUserExpenseFilterCategory("all");
+    setUserDrilldownOpen(true);
+    setUserDrilldownLoading(true);
+    setUserDrilldownData(null);
+
+    try {
+      let url = `/api/superadmin/users/${id}/reports/drilldown/${metricSlug}?period=${userReportPeriod}`;
+      if (userReportPeriod === "custom") {
+        if (userCustomStartDate) url += `&from=${userCustomStartDate}`;
+        if (userCustomEndDate) url += `&to=${userCustomEndDate}`;
+      }
+      let res = await api.get(url).catch(() => null);
+      if (!res) {
+        let altUrl = `/api/superadmin/users/${id}/data?type=drilldown&metric=${metricSlug}&period=${userReportPeriod}`;
+        if (userReportPeriod === "custom") {
+          if (userCustomStartDate) altUrl += `&from=${userCustomStartDate}`;
+          if (userCustomEndDate) altUrl += `&to=${userCustomEndDate}`;
+        }
+        res = await api.get(altUrl).catch(() => null);
+      }
+
+      if (res && ((res.transactions && res.transactions.length > 0) || res.count > 0 || res.breakdown)) {
+        const taggedTxs = (res.transactions || []).map((t) => {
+          let cat = t.structure_category || t.category;
+          const src = String(t.source || "").toLowerCase();
+          const rawCat = String(cat || "").toLowerCase().replace(/[\s_-]+/g, "");
+          if (rawCat.includes("purchase") || src.includes("purchase")) {
+            cat = "Purchases";
+          } else if (rawCat.includes("debit") || src.includes("debit")) {
+            cat = "Debit Entries";
+          } else if (rawCat.includes("payout") || rawCat.includes("paidbybusiness") || src.includes("paid_by_business") || src.includes("payout")) {
+            cat = "Business Pay Out";
+          } else if (rawCat.includes("advancepayable") || src.includes("advance_payable")) {
+            cat = "Advance Payable";
+          } else if (rawCat.includes("advancereceivable") || src.includes("advance_receivable")) {
+            cat = "Advance Receivable";
+          } else if (rawCat.includes("moneyreceipt") || src.includes("money_receipt")) {
+            cat = "Money Receipt";
+          } else if (rawCat.includes("sale") || src.includes("collection") || src.includes("invoice") || src.includes("credit")) {
+            cat = "Sales";
+          } else if (rawCat.includes("otherexpense") || rawCat.includes("directexpense") || src.includes("expense") || src.includes("direct_expense")) {
+            cat = "Other Expenses";
+          } else if (!cat) {
+            cat = metricSlug === "total-sales" ? "Sales" : "Other Expenses";
+          }
+          return { ...t, structure_category: cat };
+        });
+        setUserDrilldownData({ ...res, transactions: taggedTxs });
+      } else {
+        const fallback = getUserFallbackTransactions(
+          metricSlug,
+          label,
+          userReportPeriod,
+          userCustomStartDate,
+          userCustomEndDate,
+          userRawData
+        );
+        setUserDrilldownData(fallback);
+      }
+    } catch {
+      const fallback = getUserFallbackTransactions(
+        metricSlug,
+        label,
+        userReportPeriod,
+        userCustomStartDate,
+        userCustomEndDate,
+        userRawData
+      );
+      setUserDrilldownData(fallback);
+    } finally {
+      setUserDrilldownLoading(false);
+    }
+  };
+
+  const filteredUserDrilldownTransactions = useMemo(() => {
+    let list = userDrilldownData?.transactions || [];
+    if (userActiveMetricSlug === "expenses" || userActiveMetricSlug === "total-expenses") {
+      if (userExpenseFilterCategory !== "all") {
+        const targetKey = String(userExpenseFilterCategory || "").toLowerCase().replace(/[\s_-]+/g, "");
+
+        list = list.filter((tx) => {
+          const catKey = String(tx.structure_category || tx.category || "").toLowerCase().replace(/[\s_-]+/g, "");
+          const srcKey = String(tx.source || "").toLowerCase().replace(/[\s_-]+/g, "");
+
+          if (targetKey === "purchases" || targetKey === "purchase") {
+            return catKey.includes("purchase") || srcKey.includes("purchase");
+          }
+          if (targetKey === "debitentries" || targetKey === "debitentry" || targetKey === "debits" || targetKey === "debit") {
+            return catKey.includes("debit") || srcKey.includes("debit");
+          }
+          if (targetKey === "businesspayout" || targetKey === "paidbybusiness" || targetKey === "payout") {
+            return catKey.includes("businesspayout") || catKey.includes("paidbybusiness") || srcKey.includes("paidbybusiness") || srcKey.includes("payout");
+          }
+          if (targetKey === "advancepayable") {
+            return catKey.includes("advancepayable") || srcKey.includes("advancepayable");
+          }
+          if (targetKey === "otherexpenses" || targetKey === "otherexpense" || targetKey === "directexpenses" || targetKey === "directexpense") {
+            return catKey.includes("other") || catKey.includes("direct") || catKey.includes("expense") || srcKey.includes("directexpense") || srcKey.includes("expense");
+          }
+          return catKey.includes(targetKey) || catKey === targetKey;
+        });
+      }
+    }
+
+    return [...list].sort((a, b) => {
+      const dateA = a.date || a.created_at || "";
+      const dateB = b.date || b.created_at || "";
+      const timeA =
+        a.time ||
+        (a.created_at && String(a.created_at).includes("T")
+          ? String(a.created_at).split("T")[1]
+          : "") ||
+        "00:00:00";
+      const timeB =
+        b.time ||
+        (b.created_at && String(b.created_at).includes("T")
+          ? String(b.created_at).split("T")[1]
+          : "") ||
+        "00:00:00";
+      const dtA =
+        new Date(`${String(dateA).slice(0, 10)}T${String(timeA).slice(0, 8)}`).getTime() || 0;
+      const dtB =
+        new Date(`${String(dateB).slice(0, 10)}T${String(timeB).slice(0, 8)}`).getTime() || 0;
+      if (dtB !== dtA) return dtB - dtA;
+      const rawIdA = Number(String(a.id || "").replace(/\D+/g, "")) || 0;
+      const rawIdB = Number(String(b.id || "").replace(/\D+/g, "")) || 0;
+      return rawIdB - rawIdA;
+    });
+  }, [userDrilldownData, userActiveMetricSlug, userExpenseFilterCategory]);
+
+  const actualDebitCount = useMemo(() => {
+    const list = userRawData.khata || [];
+    const fromKhata = list.filter((k) => {
+      const t = String(k.type || k.entry_type || "").toLowerCase();
+      return t === "debit" || Number(k.debit_amount || 0) > 0;
+    }).length;
+    const paymentsList = userRawData.payments || [];
+    const fromPayments = paymentsList.filter((p) => {
+      const cat = String(p.payment_category || "").toLowerCase();
+      return cat === "paid_out" || cat === "paid_by_business" || cat === "expense";
+    }).length;
+    const countFromData = fromKhata + fromPayments;
+    if (countFromData > 0) return countFromData;
+    const rep = userReportsData?.reports || overview?.reports || {};
+    const serverCount = rep.debit_entries_count ?? rep.debitEntriesCount ?? rep.debit_entries ?? overview?.debit_entries ?? overview?.debit_count;
+    if (serverCount !== undefined && serverCount !== null && Number(serverCount) > 0) {
+      return Number(serverCount);
+    }
+    return countFromData || Number(serverCount || 0);
+  }, [userRawData.khata, userRawData.payments, overview, userReportsData]);
+
+  const actualCreditCount = useMemo(() => {
+    const list = userRawData.khata || [];
+    const fromKhata = list.filter((k) => {
+      const t = String(k.type || k.entry_type || "").toLowerCase();
+      return t === "credit" || Number(k.credit_amount || 0) > 0;
+    }).length;
+    const invCount = (userRawData.invoices || []).length;
+    const countFromData = fromKhata + invCount;
+    if (countFromData > 0) return countFromData;
+    const rep = userReportsData?.reports || overview?.reports || {};
+    const serverCount = rep.credit_entries_count ?? rep.creditEntriesCount ?? rep.credit_entries ?? overview?.credit_entries ?? overview?.credit_count;
+    if (serverCount !== undefined && serverCount !== null && Number(serverCount) > 0) {
+      return Number(serverCount);
+    }
+    return countFromData || Number(serverCount || 0);
+  }, [userRawData.khata, userRawData.invoices, overview, userReportsData]);
+
   const loadUser = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await api.get(
-        `/api/superadmin/users/${id}/overview`
-      );
+      const [overRes, khataRes, payRes, billsRes, invRes] = await Promise.all([
+        api.get(`/api/superadmin/users/${id}/overview`),
+        api.get(`/api/superadmin/users/${id}/data?type=khata`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=payments`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=purchase-bills`).catch(() => null),
+        api.get(`/api/superadmin/users/${id}/data?type=invoices`).catch(() => null),
+      ]);
 
-      const data = getResponseData(response);
+      const data = getResponseData(overRes);
 
       setUser(data.user || null);
       setOverview(data.overview || null);
+
+      const khataList = extractRecordsFromResponse(getResponseData(khataRes), "khata");
+      const payList = extractRecordsFromResponse(getResponseData(payRes), "payments");
+      const billsList = extractRecordsFromResponse(getResponseData(billsRes), "purchase-bills");
+      const invList = extractRecordsFromResponse(getResponseData(invRes), "invoices");
+
+      setUserRawData({
+        khata: khataList,
+        payments: payList,
+        purchaseBills: billsList,
+        invoices: invList,
+      });
     } catch (err) {
       console.error("Failed to load selected user:", err);
       setError(err.message || "Could not load user.");
@@ -607,11 +1719,15 @@ const MyUserDetails = () => {
   const handleBusinessSectionChange = (section) => {
     setSelectedBusinessSection(section);
     setRecordSearch("");
+    if (section === "khata") {
+      setKhataFilter("all");
+    }
     if (section === "reports") {
       setActiveType("");
       setRecords([]);
       setRecordsError("");
       setShowReports(true);
+      loadUserReports(userReportPeriod);
     } else if (section) {
       setShowReports(false);
       loadRecords(section);
@@ -657,6 +1773,9 @@ const MyUserDetails = () => {
     setRecordSearch("");
     setLogoUrl("");
     setSignatureUrl("");
+    setUserReportsData(null);
+    setUserRawData({ khata: [], payments: [], invoices: [] });
+    setUserReportPeriod("this_month");
 
     loadUser();
   }, [id]);
@@ -762,6 +1881,10 @@ const MyUserDetails = () => {
           response = await api.get(
             `/api/superadmin/users/${id}/data?type=inventory`
           );
+        } else if (type === "purchase-bills") {
+          response = await api.get(
+            `/api/superadmin/users/${id}/data?type=purchase_bills`
+          );
         } else {
           throw err;
         }
@@ -785,22 +1908,61 @@ const MyUserDetails = () => {
         }
       }
 
+      if ((type === "purchase-bills" || type === "purchase_bills") && recordsList.length === 0) {
+        try {
+          const fallbackRes = await api.get(
+            `/api/superadmin/users/${id}/purchase-bills`
+          );
+          const fallbackData = getResponseData(fallbackRes);
+          const fallbackList = extractRecordsFromResponse(fallbackData, "purchase-bills");
+          if (fallbackList.length > 0) {
+            recordsList = fallbackList;
+          }
+        } catch {
+          // ignore fallback error
+        }
+      }
+
+      if (type === "khata" && recordsList.length === 0) {
+        try {
+          const fallbackRes = await api.get(
+            `/api/superadmin/users/${id}/khata`
+          );
+          const fallbackData = getResponseData(fallbackRes);
+          const fallbackList = extractRecordsFromResponse(fallbackData, "khata");
+          if (fallbackList.length > 0) {
+            recordsList = fallbackList;
+          }
+        } catch {
+          // ignore fallback error
+        }
+      }
+
       setRecords(recordsList);
     } catch (err) {
       console.error(`Failed to load ${type}:`, err);
-      setRecords([]);
-      setRecordsError(err.message || `Could not load ${type}.`);
+      if (type === "khata" && userRawData.khata?.length) {
+        setRecords(userRawData.khata);
+      } else if (type === "payments" && userRawData.payments?.length) {
+        setRecords(userRawData.payments);
+      } else if (type === "purchase-bills" && userRawData.purchaseBills?.length) {
+        setRecords(userRawData.purchaseBills);
+      } else {
+        setRecords([]);
+        setRecordsError(err.message || `Could not load ${type}.`);
+      }
     } finally {
       setRecordsLoading(false);
     }
   };
 
-  const openRecord = async (type, recordId) => {
+  const openRecord = async (type, recordId, rawRecord) => {
     try {
+      const sourceParam = rawRecord?.source ? `&source=${encodeURIComponent(rawRecord.source)}` : "";
       const response = await api.get(
         `/api/superadmin/users/${id}/records/${recordId}?type=${encodeURIComponent(
           type
-        )}`
+        )}${sourceParam}`
       );
 
       const data = getResponseData(response);
@@ -847,9 +2009,11 @@ const MyUserDetails = () => {
     if (type === "money-receipts") return "money-receipt";
     if (type === "customers") return "customer";
     if (type === "payments") return "payment";
+    if (type === "purchase-bills" || type === "purchase_bills") return "purchase-bill";
     if (type === "expenses") return "expense";
     if (type === "vehicles") return "vehicle";
     if (type === "inventory" || type === "stock") return "stock";
+    if (type === "khata") return "khata";
     return type;
   };
 
@@ -893,6 +2057,10 @@ const MyUserDetails = () => {
       );
     }
 
+    if (type === "purchase-bills" || type === "purchase_bills" || type === "purchase-bill" || type === "purchases") {
+      return record.bill_number ? `Bill #${record.bill_number}` : record.vendor_name || "Purchase Bill";
+    }
+
     return record.name || record.title || "Record";
   };
 
@@ -904,15 +2072,13 @@ const MyUserDetails = () => {
     }
 
     if (type === "khata") {
-      const rawType = String(record.type || record.entry_type || "").toLowerCase();
+      const rawType = getKhataRecordType(record);
       const badge =
         rawType === "debit"
           ? "Debit"
           : rawType === "credit"
             ? "Credit"
-            : rawType === "due"
-              ? "Due"
-              : rawType;
+            : "Due";
       const desc = record.description || record.customer_name || "";
       const dateStr = formatDate(
         record.date || record.entry_date || record.created_at
@@ -976,6 +2142,14 @@ const MyUserDetails = () => {
       )}`;
     }
 
+    if (type === "purchase-bills" || type === "purchase_bills" || type === "purchase-bill" || type === "purchases") {
+      const vendor = record.vendor_name || "Vendor";
+      const total = formatMoney(record.total_amount ?? record.amount ?? 0);
+      const dateStr = formatDate(record.bill_date || record.created_at);
+      const status = Number(record.is_paid) ? "Paid" : "Unpaid";
+      return [vendor, total, dateStr, status].filter(Boolean).join(" · ");
+    }
+
     return "";
   };
 
@@ -1008,6 +2182,10 @@ const MyUserDetails = () => {
     const query = recordSearch.trim().toLowerCase();
 
     const filteredRecords = records.filter((record) => {
+      if (activeType === "khata" && khataFilter !== "all") {
+        const kType = getKhataRecordType(record);
+        if (kType !== khataFilter) return false;
+      }
       if (!query) return true;
 
       return [
@@ -1016,9 +2194,12 @@ const MyUserDetails = () => {
         record.invoice_number,
         record.quotation_number,
         record.receipt_number,
+        record.bill_number,
         record.customer_name,
         record.customer_phone,
         record.customer_email,
+        record.party_name,
+        record.vendor_name,
         record.name,
         record.product_name,
         record.vehicle_number,
@@ -1058,22 +2239,46 @@ const MyUserDetails = () => {
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
             />
           </div>
+
+          {activeType === "khata" && (
+            <div className="mt-3 flex items-center gap-1.5">
+              {[
+                { id: "all", label: "All Entries" },
+                { id: "credit", label: "Credit" },
+                { id: "debit", label: "Debit" },
+                { id: "due", label: "Due" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setKhataFilter(f.id)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    khataFilter === f.id
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
           {!filteredRecords.length ? (
             <div className="py-10 text-center">
               <p className="text-sm font-medium text-slate-600">
-                No matching records.
+                No matching {activeType === "khata" && khataFilter !== "all" ? `${khataFilter} ` : ""}records.
               </p>
               <p className="mt-1 text-xs text-slate-400">
-                Try a different search term.
+                {query ? "Try a different search term." : activeType === "khata" && khataFilter !== "all" ? `No ${khataFilter} entries found for this user.` : "No matching records found."}
               </p>
             </div>
           ) : (
             filteredRecords.map((record) => (
               <div
-                key={record.id}
+                key={`${record.source || activeType || "record"}-${record.type || record.entry_type || "item"}-${record.id}`}
                 className="flex w-full items-center justify-between gap-4 px-4 py-4 transition hover:bg-emerald-50/40"
               >
                 <button
@@ -1081,7 +2286,8 @@ const MyUserDetails = () => {
                   onClick={() =>
                     openRecord(
                       getRecordTypeForDetails(activeType),
-                      getRecordId(record, activeType)
+                      getRecordId(record, activeType),
+                      record
                     )
                   }
                   className="flex-1 min-w-0 text-left"
@@ -1100,7 +2306,7 @@ const MyUserDetails = () => {
                     ["money-receipts", "khata", "payments", "expenses"].includes(activeType) && (
                       activeType === "khata" ? (
                         (() => {
-                          const kType = String(record.type || record.entry_type || "").toLowerCase();
+                          const kType = getKhataRecordType(record);
                           if (kType === "debit") {
                             return (
                               <span className="text-sm font-semibold text-red-600 mr-1">
@@ -1150,7 +2356,7 @@ const MyUserDetails = () => {
                     )}
 
                   {record.total_amount !== undefined &&
-                    ["invoices", "quotations"].includes(activeType) && (
+                    ["invoices", "quotations", "purchase-bills", "purchase_bills"].includes(activeType) && (
                       <span className="text-sm font-semibold text-slate-800 mr-1">
                         {formatMoney(record.total_amount)}
                       </span>
@@ -1182,7 +2388,8 @@ const MyUserDetails = () => {
                     onClick={() =>
                       openRecord(
                         getRecordTypeForDetails(activeType),
-                        getRecordId(record, activeType)
+                        getRecordId(record, activeType),
+                        record
                       )
                     }
                     className="rounded-lg p-1 text-slate-400 hover:text-emerald-600"
@@ -1621,7 +2828,9 @@ const MyUserDetails = () => {
                 >
                   <option value="">-- Choose Business Section --</option>
                   <option value="customers">Customers ({overview?.customer_count || 0})</option>
-                  <option value="khata">Khata ({Number(overview?.khata_count || 0)})</option>
+                  <option value="khata">Khata (Credit / Debit / Due) ({userRawData.khata?.length || Number(overview?.khata_count || 0)})</option>
+                  <option value="payments">Payments ({userRawData.payments?.length || overview?.payment_count || 0})</option>
+                  <option value="purchase-bills">Purchase Bills ({userRawData.purchaseBills?.length || overview?.purchase_bill_count || 0})</option>
                   <option value="reports">Reports (Sales, Expenses & Profit)</option>
                   <option value="inventory">Inventory / Stock ({overview?.stock_count || 0})</option>
                   <option value="vehicles">Vehicles ({overview?.vehicle_trip_count || 0})</option>
@@ -1629,7 +2838,7 @@ const MyUserDetails = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <ActivityCard
                 title="Customers"
                 count={overview?.customer_count}
@@ -1639,18 +2848,34 @@ const MyUserDetails = () => {
               />
 
               <ActivityCard
-                title="Khata"
-                count={Number(overview?.khata_count || 0)}
+                title="Khata (Credit / Debit / Due)"
+                count={userRawData.khata?.length || Number(overview?.khata_count || 0)}
                 icon={BookOpen}
-                description="Credit & debit entries"
+                description="Credit, debit & due entries"
                 onClick={() => handleBusinessSectionChange("khata")}
+              />
+
+              <ActivityCard
+                title="Payments"
+                count={userRawData.payments?.length || overview?.payment_count}
+                icon={Receipt}
+                description="Customer & vendor payments"
+                onClick={() => handleBusinessSectionChange("payments")}
+              />
+
+              <ActivityCard
+                title="Purchase Bills"
+                count={userRawData.purchaseBills?.length || overview?.purchase_bill_count}
+                icon={Package}
+                description="Purchase bills & stock vouchers"
+                onClick={() => handleBusinessSectionChange("purchase-bills")}
               />
 
               <ActivityCard
                 title="Reports"
                 count={null}
                 icon={BarChart3}
-                description="Business performance"
+                description="Business performance & drilldowns"
                 showCount={false}
                 onClick={() => handleBusinessSectionChange("reports")}
               />
@@ -1659,7 +2884,7 @@ const MyUserDetails = () => {
                 title="Inventory / Stock"
                 count={overview?.stock_count}
                 icon={Package}
-                description="Stock items"
+                description="Stock items & catalog"
                 onClick={() => handleBusinessSectionChange("inventory")}
               />
 
@@ -1667,12 +2892,12 @@ const MyUserDetails = () => {
                 title="Vehicles"
                 count={overview?.vehicle_trip_count}
                 icon={Truck}
-                description="Vehicle trips"
+                description="Vehicle trips & log"
                 onClick={() => handleBusinessSectionChange("vehicles")}
               />
             </div>
 
-            {["customers", "khata", "inventory", "stock", "vehicles"].includes(activeType) && (
+            {["customers", "khata", "payments", "purchase-bills", "purchase_bills", "inventory", "stock", "vehicles"].includes(activeType) && (
               <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-5 py-3.5">
                   <div className="flex items-center gap-2">
@@ -1723,153 +2948,196 @@ const MyUserDetails = () => {
                   </button>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowReports(false);
-                      setRecordSearch("");
-                      loadRecords("khata");
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
-                  >
-                    <p className="text-xs font-medium text-slate-500">
-                      Total Sales
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-800">
-                      {formatMoney(overview?.reports?.total_sales ?? overview?.reports?.sales ?? overview?.total_sales)}
-                    </p>
-                  </button>
+                {/* Period Controls Header */}
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays size={16} className="text-emerald-600" />
+                    <span className="text-xs font-semibold text-slate-700">Filter Period:</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {USER_REPORT_PERIODS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          setUserReportPeriod(opt.id);
+                          loadUserReports(opt.id);
+                        }}
+                        className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                          userReportPeriod === opt.id
+                            ? "bg-slate-900 text-white shadow-sm"
+                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowReports(false);
-                      setRecordSearch("");
-                      loadRecords("payments");
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
-                  >
-                    <p className="text-xs font-medium text-slate-500">
-                      Due Received
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-800">
-                      {formatMoney(overview?.reports?.due_received ?? overview?.reports?.received ?? overview?.due_received)}
-                    </p>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowUserCustomCalendar(!showUserCustomCalendar)}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition flex items-center gap-1 ${
+                        userReportPeriod === "custom" || showUserCustomCalendar
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                      }`}
+                      title="Custom date range"
+                    >
+                      <Calendar size={13} />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowReports(false);
-                      setRecordSearch("");
-                      loadRecords("expenses");
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
-                  >
-                    <p className="text-xs font-medium text-slate-500">
-                      Expenses
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-800">
-                      {formatMoney(overview?.reports?.expenses ?? overview?.reports?.total_expenses ?? overview?.expenses)}
-                    </p>
-                  </button>
-
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                    <p className="text-xs font-medium text-emerald-700">
-                      Net Profit
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-800">
-                      {formatMoney(
-                        overview?.reports?.net_profit ??
-                          overview?.net_profit ??
-                          (Number(overview?.reports?.total_sales ?? overview?.reports?.sales ?? 0) -
-                            Number(overview?.reports?.expenses ?? overview?.reports?.total_expenses ?? 0))
-                      )}
-                    </p>
+                    {showUserCustomCalendar && (
+                      <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1 shadow-sm">
+                        <input
+                          type="date"
+                          value={userCustomStartDate}
+                          onChange={(e) => {
+                            setUserCustomStartDate(e.target.value);
+                            setUserReportPeriod("custom");
+                            loadUserReports("custom");
+                          }}
+                          className="text-xs text-slate-700 outline-none"
+                        />
+                        <span className="text-xs text-slate-400">to</span>
+                        <input
+                          type="date"
+                          value={userCustomEndDate}
+                          onChange={(e) => {
+                            setUserCustomEndDate(e.target.value);
+                            setUserReportPeriod("custom");
+                            loadUserReports("custom");
+                          }}
+                          className="text-xs text-slate-700 outline-none"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                  <div className="mb-4">
-                    <h3 className="text-base font-bold text-slate-800">
-                      Sales vs Expenses
-                    </h3>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Monthly business performance
-                    </p>
+                {userReportsLoading ? (
+                  <div className="py-12 text-center text-sm font-medium text-slate-500">
+                    Loading reports for {user?.name || "selected user"}...
                   </div>
-
-                  <div className="mb-4 flex flex-wrap gap-4 text-xs font-medium text-slate-600">
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                      Sales
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                      Expenses
-                    </span>
-                  </div>
-
-                  {Array.isArray(overview?.reports?.monthly_trend) &&
-                  overview.reports.monthly_trend.length ? (
-                    <div className="space-y-3">
-                      {overview.reports.monthly_trend.map((item) => {
-                        const sales = Number(item.sales || 0);
-                        const expenses = Number(item.expenses || 0);
-                        const max = Math.max(sales, expenses, 1);
-
+                ) : (
+                  <>
+                    {/* ALL 9 METRIC CARDS WITH DRILLDOWN */}
+                    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+                      {userReportCards.map((card) => {
+                        const Icon = card.icon;
                         return (
-                          <div key={item.month}>
-                            <div className="mb-1 flex items-center justify-between gap-3 text-xs">
-                              <span className="font-semibold text-slate-700">
-                                {item.month}
-                              </span>
-                              <span className="text-slate-500">
-                                Sales {formatMoney(sales)} · Expenses{" "}
-                                {formatMoney(expenses)}
-                              </span>
+                          <div
+                            key={card.key}
+                            onClick={() => handleOpenUserDrilldown(card.key, card.title)}
+                            className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-emerald-500 hover:shadow-md"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                handleOpenUserDrilldown(card.key, card.title);
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={`shrink-0 rounded-xl p-2 sm:p-2.5 ${card.bg} ${card.text}`}>
+                                <Icon size={18} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold text-slate-600 truncate">
+                                  {card.title}
+                                </p>
+                                <p
+                                  className={`mt-0.5 text-base sm:text-lg font-bold truncate ${card.valColor}`}
+                                  title={formatMoney(card.value)}
+                                >
+                                  {formatMoney(card.value)}
+                                </p>
+                              </div>
                             </div>
-
-                            <div className="space-y-1">
-                              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                                <div
-                                  className="h-full rounded-full bg-emerald-500"
-                                  style={{
-                                    width: `${Math.max(
-                                      (sales / max) * 100,
-                                      sales > 0 ? 3 : 0
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-
-                              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                                <div
-                                  className="h-full rounded-full bg-red-400"
-                                  style={{
-                                    width: `${Math.max(
-                                      (expenses / max) * 100,
-                                      expenses > 0 ? 3 : 0
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
+                            <div className="mt-2.5 sm:mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] font-medium text-slate-400 group-hover:text-emerald-600 transition">
+                              <span className="truncate pr-1">{card.subtext || "Click to drilldown"}</span>
+                              <span className="font-bold shrink-0">→</span>
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  ) : (
-                    <p className="py-8 text-center text-sm text-slate-500">
-                      No data yet for this period.
-                    </p>
-                  )}
 
-                  <p className="mt-4 text-xs font-semibold text-slate-500">
-                    Last 6 Months
-                  </p>
-                </div>
+                    {/* SALES VS TOTAL EXPENSE COMPARATIVE GRAPH (AGGREGATE FOR SELECTED PERIOD) */}
+                    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-800">
+                            Sales vs Total Expense
+                          </h3>
+                          <p className="mt-1 text-xs text-slate-400">
+                            Aggregate comparison for the selected period
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs font-semibold">
+                          <span className="flex items-center gap-1.5 text-emerald-700">
+                            <span className="h-3 w-3 rounded-md bg-emerald-500" /> Sales: {formatMoney(userMetrics.sales)}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-rose-700">
+                            <span className="h-3 w-3 rounded-md bg-rose-500" /> Total Expense: {formatMoney(userMetrics.totalExpense)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 space-y-5">
+                        {(() => {
+                          const maxVal = Math.max(userMetrics.sales, userMetrics.totalExpense, 1);
+                          const salesPct = Math.round((userMetrics.sales / maxVal) * 100);
+                          const expPct = Math.round((userMetrics.totalExpense / maxVal) * 100);
+                          const netDiff = userMetrics.sales - userMetrics.totalExpense;
+
+                          return (
+                            <div className="space-y-4">
+                              {/* Comparative Bars */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-xs font-semibold">
+                                  <span className="text-slate-700">Total Sales</span>
+                                  <span className="text-emerald-600 font-bold">{formatMoney(userMetrics.sales)}</span>
+                                </div>
+                                <div className="h-5 w-full overflow-hidden rounded-xl bg-slate-100">
+                                  <div
+                                    className="h-full rounded-xl bg-emerald-500 transition-all duration-500"
+                                    style={{ width: `${Math.max(userMetrics.sales > 0 ? 3 : 0, salesPct)}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-xs font-semibold">
+                                  <span className="text-slate-700">Total Expense</span>
+                                  <span className="text-rose-600 font-bold">{formatMoney(userMetrics.totalExpense)}</span>
+                                </div>
+                                <div className="h-5 w-full overflow-hidden rounded-xl bg-slate-100">
+                                  <div
+                                    className="h-full rounded-xl bg-rose-500 transition-all duration-500"
+                                    style={{ width: `${Math.max(userMetrics.totalExpense > 0 ? 3 : 0, expPct)}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="mt-4 flex flex-wrap items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs">
+                                <div>
+                                  <span className="text-slate-500">Period Result: </span>
+                                  <span className={`font-bold ${netDiff >= 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                                    {netDiff >= 0 ? "Net Profit" : "Net Loss"} of {formatMoney(Math.abs(netDiff))}
+                                  </span>
+                                </div>
+                                <div className="text-slate-400">
+                                  Expense Ratio: {userMetrics.sales > 0 ? `${Math.round((userMetrics.totalExpense / userMetrics.sales) * 100)}%` : "N/A"}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="mt-5">
                   <h3 className="mb-3 text-base font-bold text-slate-800">
@@ -1882,13 +3150,14 @@ const MyUserDetails = () => {
                       onClick={() => {
                         setShowReports(false);
                         setRecordSearch("");
+                        setKhataFilter("credit");
                         loadRecords("khata");
                       }}
-                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
                     >
-                      <p className="text-xs text-slate-500">Credit Entries</p>
-                      <p className="mt-1 text-xl font-bold text-emerald-600">
-                        {Number(overview?.credit_entries || 0).toLocaleString("en-IN")}
+                      <p className="text-xs text-slate-500 truncate">Credit Entries</p>
+                      <p className="mt-1 text-xl font-bold text-emerald-600 truncate" title={actualCreditCount.toLocaleString("en-IN")}>
+                        {actualCreditCount.toLocaleString("en-IN")}
                       </p>
                     </button>
 
@@ -1897,13 +3166,14 @@ const MyUserDetails = () => {
                       onClick={() => {
                         setShowReports(false);
                         setRecordSearch("");
+                        setKhataFilter("debit");
                         loadRecords("khata");
                       }}
-                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-red-300 hover:bg-red-50"
+                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-red-300 hover:bg-red-50"
                     >
-                      <p className="text-xs text-slate-500">Debit Entries</p>
-                      <p className="mt-1 text-xl font-bold text-red-600">
-                        {Number(overview?.debit_entries || 0).toLocaleString("en-IN")}
+                      <p className="text-xs text-slate-500 truncate">Debit Entries</p>
+                      <p className="mt-1 text-xl font-bold text-red-600 truncate" title={actualDebitCount.toLocaleString("en-IN")}>
+                        {actualDebitCount.toLocaleString("en-IN")}
                       </p>
                     </button>
 
@@ -1914,10 +3184,10 @@ const MyUserDetails = () => {
                         setRecordSearch("");
                         loadRecords("customers");
                       }}
-                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
                     >
-                      <p className="text-xs text-slate-500">Total Customers</p>
-                      <p className="mt-1 text-xl font-bold text-slate-800">
+                      <p className="text-xs text-slate-500 truncate">Total Customers</p>
+                      <p className="mt-1 text-xl font-bold text-slate-800 truncate" title={Number(overview?.customer_count || 0).toLocaleString("en-IN")}>
                         {Number(overview?.customer_count || 0).toLocaleString("en-IN")}
                       </p>
                     </button>
@@ -2015,6 +3285,268 @@ const MyUserDetails = () => {
           }}
           onDeleteCustomer={handleDeleteCustomer}
         />
+      )}
+
+      {userDrilldownOpen && (
+        <div
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-950/60 p-4"
+          onClick={() => setUserDrilldownOpen(false)}
+        >
+          <div
+            className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">
+                  {userActiveMetricLabel} Drill-Down
+                </h3>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  {user?.business_name || user?.name || "Selected User"} · Detailed transaction breakdown
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUserDrilldownOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {userDrilldownLoading ? (
+                <div className="py-12 text-center text-sm font-medium text-slate-400">
+                  Loading {userActiveMetricLabel} transactions...
+                </div>
+              ) : (
+                <>
+                  {/* Header summary */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4 border border-slate-100">
+                    <div>
+                      <p className="text-xs uppercase font-semibold tracking-wider text-slate-500">
+                        Total Amount
+                      </p>
+                      <p className="text-xl font-bold text-slate-900 mt-0.5">
+                        {formatMoney(
+                          userDrilldownData?.total_amount ??
+                            userDrilldownData?.net_profit ??
+                            0
+                        )}
+                      </p>
+                    </div>
+                    <div className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      {filteredUserDrilldownTransactions.length} Transactions
+                    </div>
+                  </div>
+
+                  {/* Total Expense Breakdown & Categories */}
+                  {(userActiveMetricSlug === "expenses" || userActiveMetricSlug === "total-expenses") && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Total Expense Breakdown
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        {(() => {
+                          const allTxs = userDrilldownData?.transactions || [];
+                          const getSubtotal = (catName) => {
+                            const targetKey = String(catName || "").toLowerCase().replace(/[\s_-]+/g, "");
+                            return allTxs
+                              .filter((tx) => {
+                                const catKey = String(tx.structure_category || tx.category || "").toLowerCase().replace(/[\s_-]+/g, "");
+                                const srcKey = String(tx.source || "").toLowerCase().replace(/[\s_-]+/g, "");
+                                if (targetKey === "purchases" || targetKey === "purchase") {
+                                  return catKey.includes("purchase") || srcKey.includes("purchase");
+                                }
+                                if (targetKey === "debitentries" || targetKey === "debitentry" || targetKey === "debits" || targetKey === "debit") {
+                                  return catKey.includes("debit") || srcKey.includes("debit");
+                                }
+                                if (targetKey === "businesspayout" || targetKey === "paidbybusiness" || targetKey === "payout") {
+                                  return catKey.includes("businesspayout") || catKey.includes("paidbybusiness") || srcKey.includes("paidbybusiness") || srcKey.includes("payout");
+                                }
+                                if (targetKey === "advancepayable") {
+                                  return catKey.includes("advancepayable") || srcKey.includes("advancepayable");
+                                }
+                                if (targetKey === "otherexpenses" || targetKey === "otherexpense" || targetKey === "directexpenses" || targetKey === "directexpense") {
+                                  return catKey.includes("other") || catKey.includes("direct") || catKey.includes("expense") || srcKey.includes("directexpense") || srcKey.includes("expense");
+                                }
+                                return catKey.includes(targetKey) || catKey === targetKey;
+                              })
+                              .reduce((s, tx) => s + Number(tx.amount || tx.total_amount || 0), 0);
+                          };
+
+                          return [
+                            { label: "Purchases", amount: getSubtotal("Purchases") },
+                            { label: "Debit Entries", amount: getSubtotal("Debit Entries") },
+                            { label: "Business Pay Out", amount: getSubtotal("Business Pay Out") },
+                            { label: "Advance Payable", amount: getSubtotal("Advance Payable") },
+                            { label: "Other Expenses", amount: getSubtotal("Other Expenses") },
+                          ].map((item) => (
+                            <div key={item.label} className="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+                              <p className="text-[11px] text-slate-500">{item.label}</p>
+                              <p className="font-bold text-slate-800">{formatMoney(item.amount)}</p>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Filter by Category:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {USER_EXPENSE_CATEGORIES.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setUserExpenseFilterCategory(cat.id)}
+                              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                                userExpenseFilterCategory === cat.id
+                                  ? "bg-rose-600 text-white shadow-sm"
+                                  : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              {cat.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Net Profit Summary */}
+                  {userActiveMetricSlug === "net-profit" && userDrilldownData?.breakdown && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Profit &amp; Loss Summary
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3 text-sm pt-2">
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Total Sales:</span>
+                          <span className="font-semibold text-emerald-600">
+                            {formatMoney(userDrilldownData.total_sales)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Total Expense:</span>
+                          <span className="font-semibold text-rose-600">
+                            {formatMoney(userDrilldownData.total_expenses)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Direct Expenses:</span>
+                          <span className="font-medium text-slate-700">
+                            {formatMoney(userDrilldownData.breakdown.directExpenses)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Khata Debits:</span>
+                          <span className="font-medium text-slate-700">
+                            {formatMoney(userDrilldownData.breakdown.khataDebits)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Business Payouts:</span>
+                          <span className="font-medium text-slate-700">
+                            {formatMoney(userDrilldownData.breakdown.unlinkedBusinessPayouts)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-slate-600">Advance Payable:</span>
+                          <span className="font-medium text-slate-700">
+                            {formatMoney(userDrilldownData.breakdown.advancePayable)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex justify-between border-t border-slate-200 pt-2 text-base font-bold">
+                        <span className="text-slate-800">Net Profit / (Loss):</span>
+                        <span
+                          className={
+                            userDrilldownData.net_profit < 0
+                              ? "text-rose-600"
+                              : "text-emerald-600"
+                          }
+                        >
+                          {formatMoney(userDrilldownData.net_profit)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Transactions list */}
+                  <div className="max-h-96 overflow-y-auto rounded-xl border border-slate-200">
+                    {filteredUserDrilldownTransactions.length === 0 ? (
+                      <div className="p-8 text-center text-sm text-slate-400">
+                        No transactions recorded for this metric in the selected period.
+                      </div>
+                    ) : (
+                      <table className="w-full text-left text-sm">
+                        <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+                          <tr>
+                            <th className="px-4 py-3">Date &amp; Time</th>
+                            <th className="px-4 py-3">Party</th>
+                            <th className="px-4 py-3">Description / Purpose</th>
+                            <th className="px-4 py-3">Mode</th>
+                            <th className="px-4 py-3">Category / Source</th>
+                            <th className="px-4 py-3 text-right">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredUserDrilldownTransactions.map((tx, idx) => (
+                            <tr key={`${tx.source || tx.structure_category || tx.category || "tx"}-${tx.id ?? idx}`} className="hover:bg-slate-50">
+                              <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
+                                <div className="font-medium text-slate-700">
+                                  {formatTxDate(tx)}
+                                </div>
+                                <div className="text-[11px] text-slate-400">
+                                  {formatTxTime(tx)}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-slate-800">
+                                <div>
+                                  {tx.party ||
+                                    tx.party_name ||
+                                    tx.customer_name ||
+                                    tx.vendor_name ||
+                                    tx.customer ||
+                                    tx.name ||
+                                    "Walk-in / General"}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-xs text-slate-600">
+                                {tx.description ||
+                                  tx.purpose ||
+                                  tx.category ||
+                                  tx.notes ||
+                                  tx.item_name ||
+                                  "—"}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-slate-600 whitespace-nowrap">
+                                <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 font-medium capitalize text-slate-700">
+                                  {tx.payment_mode ||
+                                    tx.mode ||
+                                    "—"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
+                                <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                                  {tx.structure_category ||
+                                    tx.category ||
+                                    String(tx.source || "—").replace(/_/g, " ")}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right font-semibold text-slate-900 whitespace-nowrap">
+                                {formatMoney(tx.amount || tx.total_amount || 0)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -20,6 +20,7 @@ import StatCard from "../components/StatCard";
 import TransactionCard from "../components/TransactionCard";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+import ProfileDropdown from "../components/ProfileDropdown";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 
@@ -206,15 +207,8 @@ const Dashboard = () => {
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            {/* Profile Button */}
-            <button
-              onClick={handleProfileClick}
-              className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-200 sm:ml-2 sm:h-9 sm:w-9"
-              aria-label="Profile"
-              title="Go to Profile"
-            >
-              {(user?.name || "S").charAt(0).toUpperCase()}
-            </button>
+            {/* Profile Dropdown */}
+            <ProfileDropdown />
           </div>
         </header>
 

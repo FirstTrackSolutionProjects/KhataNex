@@ -9,11 +9,14 @@ import {
   IndianRupee,
   Trash2,
   ChevronDown,
+  Eye,
+  Pencil,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -677,6 +680,15 @@ const Inventory = () => {
     setShowPurchaseModal(true);
   };
 
+  const handleViewPurchaseBill = async (bill) => {
+    try {
+      const data = await api.get(`/api/purchase-bills/${bill.id}`);
+      setViewPurchaseBill(data.purchase_bill || data.bill || bill);
+    } catch (_) {
+      setViewPurchaseBill(bill);
+    }
+  };
+
   const openEditPurchaseBill = async (bill) => {
     setPurchaseError("");
 
@@ -847,6 +859,63 @@ const Inventory = () => {
           "/api/purchase-bills",
           purchasePayload
         );
+
+        // Auto-update/create inventory stock items
+        for (const it of validItems) {
+          const itemName = (it.item_name || "").trim();
+          if (!itemName) continue;
+          const existing = (stock || []).find(
+            (p) =>
+              (p.product_name || p.name || "").trim().toLowerCase() ===
+              itemName.toLowerCase()
+          );
+          if (existing) {
+            try {
+              await api.patch(`/api/stock/${existing.id}`, {
+                quantity:
+                  Number(existing.quantity || 0) + Number(it.quantity || 0),
+              });
+            } catch (_) {}
+          } else if (it.item_type !== "service") {
+            try {
+              await api.post("/api/stock", {
+                product_name: itemName,
+                item_type: it.item_type || "goods",
+                type: it.item_type || "goods",
+                unit: it.unit || "Unit",
+                hsn_code: it.hsn_code || "",
+                gst_rate: String(it.gst_rate || 0),
+                quantity: Number(it.quantity || 0),
+                price: Number(it.price || 0),
+                category: "Purchases",
+              });
+            } catch (_) {}
+          }
+        }
+
+        // Trigger payment workflow for purchase bill
+        if (grandTotal > 0) {
+          try {
+            await api.post("/api/payments", {
+              party_type: "vendor",
+              vendor_name: purchaseForm.vendor_name || "Vendor",
+              recipient_name: purchaseForm.vendor_name || "Vendor",
+              category: "purchase_bill",
+              type: "out",
+              payment_mode: "bank_transfer",
+              amount: grandTotal,
+              payment_date: purchaseForm.bill_date
+                ? String(purchaseForm.bill_date).slice(0, 10)
+                : new Date().toISOString().slice(0, 10),
+              bill_number: purchaseForm.bill_number,
+              purpose: `Purchase Bill ${
+                purchaseForm.bill_number
+                  ? `#${purchaseForm.bill_number}`
+                  : ""
+              }`.trim(),
+            });
+          } catch (_) {}
+        }
       }
 
       setShowPurchaseModal(false);
@@ -865,7 +934,18 @@ const Inventory = () => {
     }
   };
 
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setEditingProductId(null);
+    setProductError("");
+    setProductPurchaseSearch("");
+    setProductForm({
+      ...emptyProduct,
+    });
+  };
+
   const openProductModal = () => {
+    setEditingProductId(null);
     setProductError("");
     setProductPurchaseSearch("");
 
@@ -904,55 +984,65 @@ const Inventory = () => {
     <div className="min-h-screen bg-slate-50">
       <Sidebar
         isOpen={sidebarOpen}
-        onClose={() =>
-          setSidebarOpen(false)
-        }
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onCancel={() => setSidebarOpen(false)}
       />
 
       <div className="lg:pl-64">
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() =>
-                setSidebarOpen(true)
-              }
-              className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
-            >
-              <Menu size={22} />
-            </button>
-
-            <div>
-              <h1 className="text-lg font-bold">
-                Inventory
-              </h1>
-              <p className="hidden text-xs text-slate-400 sm:block">
-                Manage products and stock
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
+        <PageHeader
+          title="Inventory"
+          subtitle="Manage products and stock"
+          onMenuClick={() => setSidebarOpen(true)}
+          showHome={true}
+          showSearch={true}
+          showProfile={true}
+        >
+          <div className="hidden sm:flex items-center gap-2">
             <Button
               icon={ClipboardList}
               size="sm"
               variant="outline"
               onClick={openPurchaseModal}
+              className="px-2.5 py-1.5 text-xs font-medium"
             >
-              Record Purchase Bill
+              Record Bill
             </Button>
 
             <Button
               icon={Plus}
               size="sm"
               onClick={openProductModal}
+              className="px-2.5 py-1.5 text-xs font-semibold"
             >
               Add Product
             </Button>
           </div>
-        </header>
+        </PageHeader>
 
         <main className="p-4 sm:p-6 lg:p-8">
+          {/* Mobile Action Bar */}
+          <div className="mb-4 flex items-center gap-2.5 sm:hidden">
+            <Button
+              icon={ClipboardList}
+              size="sm"
+              variant="outline"
+              onClick={openPurchaseModal}
+              className="flex-1 justify-center px-2 py-2 text-xs font-medium"
+            >
+              Record Bill
+            </Button>
+
+            <Button
+              icon={Plus}
+              size="sm"
+              onClick={openProductModal}
+              className="flex-1 justify-center px-2 py-2 text-xs font-semibold"
+            >
+              Add Product
+            </Button>
+          </div>
+
           {error && (
             <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
@@ -1212,13 +1302,9 @@ const Inventory = () => {
               </tbody>
             </table>
           </div>
-        </main>
-      </div>
 
-
-      {/* PURCHASE BILLS */}
-      <section className="px-4 pb-6 sm:px-6 lg:ml-64 lg:px-8">
-        <div className="rounded-2xl border border-slate-200 bg-white">
+          {/* PURCHASE BILLS */}
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
           <button
             type="button"
             onClick={() =>
@@ -1301,13 +1387,11 @@ const Inventory = () => {
                       })();
 
                       return (
-                        <button
+                        <div
                           key={bill.id}
-                          type="button"
-                          onClick={() => openEditPurchaseBill(bill)}
-                          className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-emerald-50"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 transition hover:bg-slate-50"
                         >
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-sm font-semibold text-slate-800">
                                 {bill.bill_number || "#" + bill.id}
@@ -1348,10 +1432,35 @@ const Inventory = () => {
                             )}
                           </div>
 
-                          <span className="shrink-0 text-xs font-semibold text-emerald-700">
-                            View / Edit
-                          </span>
-                        </button>
+                          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleViewPurchaseBill(bill)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700"
+                              title="View Bill"
+                            >
+                              <Eye size={15} /> View
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => openEditPurchaseBill(bill)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                              title="Edit Bill"
+                            >
+                              <Pencil size={15} /> Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePurchaseBill(bill)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100"
+                              title="Delete Bill"
+                            >
+                              <Trash2 size={15} /> Delete
+                            </button>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
@@ -1360,14 +1469,13 @@ const Inventory = () => {
             </div>
           )}
         </div>
-      </section>
+      </main>
+    </div>
 
       {/* ADD PRODUCT */}
       <Modal
         open={showProductModal}
-        onClose={() =>
-          setShowProductModal(false)
-        }
+        onClose={closeProductModal}
         title={
           editingProductId
             ? "Update Product"
@@ -1381,6 +1489,78 @@ const Inventory = () => {
           {productError && (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
               {productError}
+            </div>
+          )}
+
+          {/* SEARCH PURCHASE / AUTO-FETCH */}
+          {!editingProductId && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Search Purchase Bills / Items
+              </label>
+
+              <div className="relative">
+                <input
+                  value={productPurchaseSearch}
+                  onChange={(e) =>
+                    setProductPurchaseSearch(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Search previous purchase or enter item name manually"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                />
+
+                {productPurchaseSearch.trim() &&
+                  getProductPurchaseMatches(
+                    productPurchaseSearch
+                  ).length > 0 && (
+                    <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                      {getProductPurchaseMatches(
+                        productPurchaseSearch
+                      ).map((item, index) => (
+                        <button
+                          key={
+                            `${item.purchase_bill_id || "purchase"}-${item.id || index}`
+                          }
+                          type="button"
+                          onClick={() =>
+                            handleProductPurchaseSelect(
+                              item
+                            )
+                          }
+                          className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-emerald-50"
+                        >
+                          <div className="text-sm font-semibold text-slate-800">
+                            {item.item_name ||
+                              item.product_name ||
+                              "Unnamed item"}
+                          </div>
+
+                          <div className="mt-1 text-xs text-slate-500">
+                            {item.bill_number
+                              ? `Bill ${item.bill_number}`
+                              : "Previous purchase"}
+                            {item.vendor_name
+                              ? ` • ${item.vendor_name}`
+                              : ""}
+                            {item.hsn_code
+                              ? ` • HSN/SAC ${item.hsn_code}`
+                              : ""}
+                            {item.price
+                              ? ` • Purchase: ₹${Number(item.price).toLocaleString("en-IN")}`
+                              : ""}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+              </div>
+
+              <p className="mt-2 text-xs text-slate-500">
+                Search a previous purchase to autofill product details, or enter a new product/service manually.
+                Purchase price is never copied as selling price. Set your selling price separately.
+              </p>
             </div>
           )}
 
@@ -1415,73 +1595,6 @@ const Inventory = () => {
                 )
               )}
             </div>
-          </div>
-
-          {/* SEARCH PURCHASE / MANUAL ENTRY */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
-              Search Purchase / Manual Entry
-            </label>
-
-            <div className="relative">
-              <input
-                value={productPurchaseSearch}
-                onChange={(e) =>
-                  setProductPurchaseSearch(
-                    e.target.value
-                  )
-                }
-                placeholder="Search previous purchase or enter item name manually"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
-              />
-
-              {productPurchaseSearch.trim() &&
-                getProductPurchaseMatches(
-                  productPurchaseSearch
-                ).length > 0 && (
-                  <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
-                    {getProductPurchaseMatches(
-                      productPurchaseSearch
-                    ).map((item, index) => (
-                      <button
-                        key={
-                          `${item.purchase_bill_id || "purchase"}-${item.id || index}`
-                        }
-                        type="button"
-                        onClick={() =>
-                          handleProductPurchaseSelect(
-                            item
-                          )
-                        }
-                        className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-emerald-50"
-                      >
-                        <div className="text-sm font-semibold text-slate-800">
-                          {item.item_name ||
-                            item.product_name ||
-                            "Unnamed item"}
-                        </div>
-
-                        <div className="mt-1 text-xs text-slate-500">
-                          {item.bill_number
-                            ? `Bill ${item.bill_number}`
-                            : "Previous purchase"}
-                          {item.vendor_name
-                            ? ` • ${item.vendor_name}`
-                            : ""}
-                          {item.hsn_code
-                            ? ` • HSN/SAC ${item.hsn_code}`
-                            : ""}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-            </div>
-
-            <p className="mt-2 text-xs text-slate-500">
-              Search a previous purchase to autofill product details, or enter a new product/service manually.
-              Purchase price is never copied as selling price. Quantity can be copied from purchase history because it represents stock.
-            </p>
           </div>
 
           {/* PRODUCT NAME */}
@@ -2259,6 +2372,108 @@ const Inventory = () => {
               : "Record Purchase Bill"}
           </button>
         </form>
+      </Modal>
+
+      {/* VIEW PURCHASE BILL MODAL */}
+      <Modal
+        open={Boolean(viewPurchaseBill)}
+        onClose={() => setViewPurchaseBill(null)}
+        title={`Purchase Bill ${viewPurchaseBill?.bill_number || (viewPurchaseBill?.id ? `#${viewPurchaseBill.id}` : "")}`}
+      >
+        {viewPurchaseBill && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm">
+              <div>
+                <p className="text-xs text-slate-500">Vendor</p>
+                <p className="font-semibold text-slate-800">{viewPurchaseBill.vendor_name || "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Bill Date</p>
+                <p className="font-semibold text-slate-800">
+                  {viewPurchaseBill.bill_date ? new Date(viewPurchaseBill.bill_date).toLocaleDateString("en-IN") : "-"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Items</p>
+              <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">Item</th>
+                      <th className="px-3 py-2 font-medium">Qty</th>
+                      <th className="px-3 py-2 font-medium">Price</th>
+                      <th className="px-3 py-2 font-medium">GST</th>
+                      <th className="px-3 py-2 font-medium text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(() => {
+                      let items = [];
+                      if (Array.isArray(viewPurchaseBill.items)) {
+                        items = viewPurchaseBill.items;
+                      } else if (typeof viewPurchaseBill.items === "string") {
+                        try {
+                          items = JSON.parse(viewPurchaseBill.items);
+                        } catch (_) {}
+                      }
+                      if (!items.length) {
+                        return (
+                          <tr>
+                            <td colSpan={5} className="px-3 py-4 text-center text-slate-400">
+                              No item details available
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return items.map((item, idx) => {
+                        const qty = Number(item.quantity || 1);
+                        const price = Number(item.price || 0);
+                        const discount = Number(item.discount || 0);
+                        const gstRate = Number(item.gst_rate || 0);
+                        const base = qty * price - discount;
+                        const total = base + base * (gstRate / 100);
+                        return (
+                          <tr key={idx}>
+                            <td className="px-3 py-2 font-medium text-slate-800">
+                              {item.item_name || item.product_name || item.name || `Item ${idx + 1}`}
+                            </td>
+                            <td className="px-3 py-2 text-slate-600">{qty} {item.unit || ""}</td>
+                            <td className="px-3 py-2 text-slate-600">₹{price.toLocaleString("en-IN")}</td>
+                            <td className="px-3 py-2 text-slate-600">{gstRate}%</td>
+                            <td className="px-3 py-2 text-right font-semibold text-slate-800">₹{total.toFixed(2)}</td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  const billToEdit = viewPurchaseBill;
+                  setViewPurchaseBill(null);
+                  openEditPurchaseBill(billToEdit);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+              >
+                <Pencil size={14} /> Edit Bill
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewPurchaseBill(null)}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

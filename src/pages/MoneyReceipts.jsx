@@ -11,10 +11,14 @@ import {
   FileText,
   RefreshCw,
   Trash2,
+  Pencil,
+  Eye,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
 import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 
 const money = (value) =>
@@ -45,11 +49,17 @@ const formatDate = (value) => {
     return String(value);
   }
 
-  return date.toLocaleDateString("en-IN", {
+  const d = date.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+  const t = date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${d} at ${t}`;
 };
 
 const getCustomerLabel = (customer) =>
@@ -691,50 +701,200 @@ function InvoiceAllocation({
 }
 
 function MoneyReceiptForm({
+  initialData = null,
   customers,
   banking,
   invoices,
   onCreated,
   onCancel,
 }) {
-  const [customerMode, setCustomerMode] =
-    useState("existing");
+  const isEditing = Boolean(initialData);
 
-  const [selectedCustomer, setSelectedCustomer] =
-    useState(null);
+  const [customerMode, setCustomerMode] = useState(() =>
+    initialData?.customer_id
+      ? "existing"
+      : initialData?.received_from_name || initialData?.customer_name
+      ? "manual"
+      : "existing"
+  );
 
-  const [manualCustomer, setManualCustomer] = useState({
-    name: "",
+  const [selectedCustomer, setSelectedCustomer] = useState(() => {
+    if (initialData?.customer_id && Array.isArray(customers)) {
+      return (
+        customers.find(
+          (c) => String(c.id) === String(initialData.customer_id)
+        ) || null
+      );
+    }
+    return null;
   });
 
-  const [receiptDate, setReceiptDate] =
-    useState(todayString());
+  const [manualCustomer, setManualCustomer] = useState(() => ({
+    name:
+      initialData?.received_from_name ||
+      initialData?.customer_name ||
+      "",
+  }));
 
-  const [amount, setAmount] = useState("");
+  const [receiptDate, setReceiptDate] = useState(() =>
+    initialData?.receipt_date
+      ? initialData.receipt_date.slice(0, 10)
+      : todayString()
+  );
 
-  const [againstType, setAgainstType] =
-    useState("invoice");
+  const [amount, setAmount] = useState(() =>
+    initialData
+      ? String(
+          initialData.amount_received ??
+            initialData.amount ??
+            ""
+        )
+      : ""
+  );
 
-  const [allocations, setAllocations] =
-    useState([]);
+  const [againstType, setAgainstType] = useState(
+    () => initialData?.against_type || "invoice"
+  );
 
-  const [paymentMode, setPaymentMode] =
-    useState("cash");
+  const [allocations, setAllocations] = useState(() => {
+    if (
+      initialData?.allocations &&
+      Array.isArray(initialData.allocations) &&
+      initialData.allocations.length > 0
+    ) {
+      return initialData.allocations.map((a) => ({
+        invoice_id: a.invoice_id ? String(a.invoice_id) : "",
+        amount_applied:
+          a.amount_applied !== undefined
+            ? String(a.amount_applied)
+            : "",
+      }));
+    }
+    if (initialData?.invoice_id) {
+      return [
+        {
+          invoice_id: String(initialData.invoice_id),
+          amount_applied: String(
+            initialData.amount_received ??
+              initialData.amount ??
+              ""
+          ),
+        },
+      ];
+    }
+    return [];
+  });
 
-  const [transactionReference, setTransactionReference] =
-    useState("");
+  const [paymentMode, setPaymentMode] = useState(
+    () => initialData?.payment_mode || "cash"
+  );
 
-  const [bankAccountId, setBankAccountId] =
-    useState("");
+  const [transferType, setTransferType] = useState(
+    () => initialData?.transfer_type || ""
+  );
 
-  const [description, setDescription] =
-    useState("");
+  const [transactionReference, setTransactionReference] = useState(
+    () => initialData?.transaction_reference || ""
+  );
 
-  const [notes, setNotes] =
-    useState("");
+  const [bankAccountId, setBankAccountId] = useState(() =>
+    initialData?.bank_account_id
+      ? String(initialData.bank_account_id)
+      : ""
+  );
+
+  const [description, setDescription] = useState(
+    () => initialData?.description || ""
+  );
+
+  const [notes, setNotes] = useState(
+    () => initialData?.notes || ""
+  );
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!initialData) return;
+    if (initialData.customer_id) {
+      setCustomerMode("existing");
+      if (Array.isArray(customers)) {
+        setSelectedCustomer(
+          customers.find(
+            (c) => String(c.id) === String(initialData.customer_id)
+          ) || null
+        );
+      }
+    } else if (
+      initialData.received_from_name ||
+      initialData.customer_name
+    ) {
+      setCustomerMode("manual");
+      setManualCustomer({
+        name:
+          initialData.received_from_name ||
+          initialData.customer_name ||
+          "",
+      });
+    }
+
+    if (initialData.receipt_date) {
+      setReceiptDate(initialData.receipt_date.slice(0, 10));
+    }
+    if (
+      initialData.amount_received !== undefined ||
+      initialData.amount !== undefined
+    ) {
+      setAmount(
+        String(
+          initialData.amount_received ?? initialData.amount
+        )
+      );
+    }
+    if (initialData.against_type) {
+      setAgainstType(initialData.against_type);
+    }
+    if (initialData.payment_mode) {
+      setPaymentMode(initialData.payment_mode);
+    }
+    if (initialData.transaction_reference) {
+      setTransactionReference(initialData.transaction_reference);
+    }
+    if (initialData.bank_account_id) {
+      setBankAccountId(String(initialData.bank_account_id));
+    }
+    if (initialData.description) {
+      setDescription(initialData.description);
+    }
+    if (initialData.notes) {
+      setNotes(initialData.notes);
+    }
+    if (
+      Array.isArray(initialData.allocations) &&
+      initialData.allocations.length > 0
+    ) {
+      setAllocations(
+        initialData.allocations.map((a) => ({
+          invoice_id: a.invoice_id ? String(a.invoice_id) : "",
+          amount_applied:
+            a.amount_applied !== undefined
+              ? String(a.amount_applied)
+              : "",
+        }))
+      );
+    } else if (initialData.invoice_id) {
+      setAllocations([
+        {
+          invoice_id: String(initialData.invoice_id),
+          amount_applied: String(
+            initialData.amount_received ??
+              initialData.amount ??
+              ""
+          ),
+        },
+      ]);
+    }
+  }, [initialData, customers]);
 
   const selectedBank = banking.find(
     (account) =>
@@ -860,6 +1020,10 @@ function MoneyReceiptForm({
         amount_received: numericAmount,
         amount: numericAmount,
         payment_mode: paymentMode,
+        transfer_type:
+          paymentMode === "bank_transfer"
+            ? transferType.trim() || null
+            : null,
         transaction_reference:
           transactionReference.trim() || null,
 
@@ -881,10 +1045,32 @@ function MoneyReceiptForm({
             : [],
       };
 
-      const response = await api.post(
-        "/api/documents/money-receipts",
-        payload
-      );
+      let response;
+      if (initialData) {
+        try {
+          response = await api.patch(
+            `/api/documents/money-receipts/${initialData.id}`,
+            payload
+          );
+        } catch (_) {
+          try {
+            response = await api.put(
+              `/api/documents/money-receipts/${initialData.id}`,
+              payload
+            );
+          } catch (__) {
+            response = await api.patch(
+              `/api/documents/${initialData.id}`,
+              payload
+            );
+          }
+        }
+      } else {
+        response = await api.post(
+          "/api/documents/money-receipts",
+          payload
+        );
+      }
 
       const receipt =
         response?.data?.receipt ||
@@ -903,7 +1089,9 @@ function MoneyReceiptForm({
 
       if (!receipt) {
         throw new Error(
-          "Receipt was created but the server returned no receipt data."
+          isEditing
+            ? "Receipt was updated but the server returned no receipt data."
+            : "Receipt was created but the server returned no receipt data."
         );
       }
 
@@ -929,7 +1117,7 @@ function MoneyReceiptForm({
       setError(
         err?.response?.data?.message ||
         err?.message ||
-        "Unable to create money receipt."
+        (isEditing ? "Unable to update money receipt." : "Unable to create money receipt.")
       );
     } finally {
       setSaving(false);
@@ -950,11 +1138,13 @@ function MoneyReceiptForm({
           <div className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-5 py-4 sm:px-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                Create Money Receipt
+                {isEditing ? "Edit Money Receipt" : "Create Money Receipt"}
               </h2>
 
               <p className="mt-1 text-xs text-gray-500">
-                Record a payment received from a customer.
+                {isEditing
+                  ? `Editing ${initialData?.receipt_number || "Receipt"}`
+                  : "Record a payment received from a customer."}
               </p>
             </div>
 
@@ -1063,11 +1253,29 @@ function MoneyReceiptForm({
                       <option value="bank_transfer">
                         Bank Transfer
                       </option>
-                      <option value="cheque">Cheque</option>
-                      <option value="card">Card</option>
-                      <option value="other">Other</option>
                     </select>
                   </div>
+
+                  {paymentMode === "bank_transfer" && (
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                        Transfer Type <span className="text-gray-400 font-normal">(optional)</span>
+                      </label>
+
+                      <select
+                        value={transferType}
+                        onChange={(e) =>
+                          setTransferType(e.target.value)
+                        }
+                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      >
+                        <option value="">None / Standard</option>
+                        <option value="RTGS">RTGS</option>
+                        <option value="IMPS">IMPS</option>
+                        <option value="NEFT">NEFT</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -1214,7 +1422,7 @@ function MoneyReceiptForm({
                   disabled={saving}
                   className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : "Save Draft"}
+                  {saving ? "Saving..." : (isEditing ? "Update as Draft" : "Save Draft")}
                 </button>
 
                 <button
@@ -1225,8 +1433,8 @@ function MoneyReceiptForm({
                 >
                   <Download size={17} />
                   {saving
-                    ? "Creating..."
-                    : "Create & Download"}
+                    ? (isEditing ? "Updating..." : "Creating...")
+                    : (isEditing ? "Update & Download" : "Create & Download")}
                 </button>
               </div>
             </div>
@@ -1250,6 +1458,8 @@ const MoneyReceipts = () => {
 
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [editingReceipt, setEditingReceipt] = useState(null);
+  const [viewingReceipt, setViewingReceipt] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -1324,6 +1534,7 @@ const MoneyReceipts = () => {
         receipt?.customer_business_name,
         receipt?.against_type,
         receipt?.payment_mode,
+        receipt?.transfer_type,
         receipt?.transaction_reference,
         receipt?.amount_received,
         receipt?.amount,
@@ -1384,51 +1595,72 @@ const MoneyReceipts = () => {
     }
   };
 
+  const handleEditReceipt = async (receipt) => {
+    try {
+      let fullReceipt = receipt;
+      try {
+        const res = await api.get(`/api/documents/money-receipts/${receipt.id}`);
+        if (res?.data?.receipt || res?.receipt || res?.data) {
+          fullReceipt = res.data?.receipt || res.receipt || res.data;
+        } else if (res?.id) {
+          fullReceipt = res;
+        }
+      } catch (_) {
+        // Fallback to receipt from list
+      }
+      setEditingReceipt(fullReceipt);
+      setShowCreate(true);
+    } catch (err) {
+      setEditingReceipt(receipt);
+      setShowCreate(true);
+    }
+  };
+
   const handleCreated = async () => {
     setShowCreate(false);
+    setEditingReceipt(null);
     await loadData();
+  };
+
+  const handleDeleteReceipt = async (receipt) => {
+    const num = receipt.receipt_number || `#${receipt.id}`;
+    if (!window.confirm(`Are you sure you want to delete Money Receipt ${num}?`)) return;
+    try {
+      try {
+        await api.del(`/api/documents/money-receipts/${receipt.id}`);
+      } catch (_) {
+        await api.del(`/api/documents/${receipt.id}`);
+      }
+      setDocuments((prev) => prev.filter((r) => r.id !== receipt.id));
+      if (viewingReceipt?.id === receipt.id) setViewingReceipt(null);
+    } catch (err) {
+      window.alert(err.message || "Failed to delete Money Receipt.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
+        isOpen={sidebarOpen}
         open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         onCancel={() => setSidebarOpen(false)}
       />
 
       <main className="lg:ml-64">
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur">
-          <div className="flex items-center justify-between px-4 py-4 sm:px-6">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-              >
-                <Menu size={21} />
-              </button>
-
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Receipts
-                </h1>
-
-                <p className="text-xs text-gray-500">
-                  Create and manage money receipts
-                </p>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus size={17} />
-              Create Receipt
-            </Button>
-          </div>
-        </header>
+        <PageHeader
+          title="Receipts"
+          subtitle="Create and manage money receipts"
+          onMenuClick={() => setSidebarOpen(true)}
+          showHome={true}
+          showSearch={true}
+          showProfile={true}
+          onNew={() => {
+            setEditingReceipt(null);
+            setShowCreate(true);
+          }}
+          newLabel="Create Receipt"
+        />
 
         <div className="p-4 sm:p-6">
           {error && (
@@ -1638,9 +1870,11 @@ const MoneyReceipts = () => {
 
                           <td className="px-5 py-4">
                             <p className="text-sm font-medium capitalize text-slate-800">
-                              {String(
-                                receipt?.payment_mode || "cash"
-                              ).replace(/_/g, " ")}
+                              {receipt?.payment_mode === "bank_transfer" && receipt?.transfer_type
+                                ? `Bank Transfer · ${receipt.transfer_type}`
+                                : String(
+                                    receipt?.payment_mode || "cash"
+                                  ).replace(/_/g, " ")}
                             </p>
 
                             {receipt?.transaction_reference && (
@@ -1670,14 +1904,50 @@ const MoneyReceipts = () => {
                           </td>
 
                           <td className="whitespace-nowrap px-5 py-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() => downloadReceipt(receipt)}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
-                            >
-                              <Download size={14} />
-                              PDF
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                              {/* VIEW */}
+                              <button
+                                type="button"
+                                onClick={() => setViewingReceipt(receipt)}
+                                title="View Receipt"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              >
+                                <Eye size={14} className="sm:w-4 sm:h-4" />
+                                View
+                              </button>
+
+                              {/* EDIT */}
+                              <button
+                                type="button"
+                                onClick={() => handleEditReceipt(receipt)}
+                                title="Edit Receipt"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              >
+                                <Pencil size={14} className="sm:w-4 sm:h-4" />
+                                Edit
+                              </button>
+
+                              {/* DELETE */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteReceipt(receipt)}
+                                title="Delete Receipt"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-rose-700 hover:bg-rose-50 hover:text-rose-600 transition"
+                              >
+                                <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                                Delete
+                              </button>
+
+                              {/* PDF */}
+                              <button
+                                type="button"
+                                onClick={() => downloadReceipt(receipt)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              >
+                                <Download size={14} className="sm:w-4 sm:h-4" />
+                                PDF
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1692,13 +1962,134 @@ const MoneyReceipts = () => {
 
       {showCreate && (
         <MoneyReceiptForm
+          initialData={editingReceipt}
           customers={customers}
           banking={banking}
           invoices={invoices}
-          onCancel={() => setShowCreate(false)}
+          onCancel={() => {
+            setShowCreate(false);
+            setEditingReceipt(null);
+          }}
           onCreated={handleCreated}
         />
       )}
+
+      {/* IN-PAGE VIEW RECEIPT DETAIL MODAL */}
+      <Modal
+        open={Boolean(viewingReceipt)}
+        onClose={() => setViewingReceipt(null)}
+        title="Money Receipt Details"
+      >
+        {viewingReceipt && (
+          <div className="space-y-5">
+            {/* Amount Banner */}
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                Amount Received
+              </p>
+              <p className="mt-1 text-3xl font-extrabold text-slate-900">
+                {money(viewingReceipt.amount_received ?? viewingReceipt.amount ?? 0)}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  {viewingReceipt.receipt_number || `Receipt #${viewingReceipt.id}`}
+                </span>
+                <span className="rounded-full bg-slate-200/80 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+                  Mode: {viewingReceipt.payment_mode || "Cash"}
+                </span>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  {String(viewingReceipt.document_status || "").toLowerCase() === "draft" ? "Draft" : "Issued"}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid gap-3 sm:grid-cols-2 text-sm">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <p className="text-xs font-medium text-slate-400">Received From</p>
+                <p className="mt-1 font-semibold text-slate-800">
+                  {viewingReceipt.customer_name || viewingReceipt.received_from_name || "—"}
+                </p>
+                {viewingReceipt.customer_phone && (
+                  <p className="text-xs text-slate-500 mt-0.5">Phone: {viewingReceipt.customer_phone}</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <p className="text-xs font-medium text-slate-400">Date & Time</p>
+                <p className="mt-1 font-semibold text-slate-800">
+                  {viewingReceipt.receipt_date || viewingReceipt.created_at
+                    ? new Date(viewingReceipt.receipt_date || viewingReceipt.created_at).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                <p className="text-xs font-medium text-slate-400">Against / Purpose</p>
+                <p className="mt-1 font-medium text-slate-800 break-words">
+                  {viewingReceipt.against_type === "invoice" && viewingReceipt.invoice_number
+                    ? `Against Invoice #${viewingReceipt.invoice_number}`
+                    : viewingReceipt.against_type === "advance"
+                    ? "Advance from Customer / Investor"
+                    : viewingReceipt.purpose || viewingReceipt.description || "General Payment"}
+                </p>
+              </div>
+
+              {viewingReceipt.notes && (
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                  <p className="text-xs font-medium text-slate-400">Notes / Remarks</p>
+                  <p className="mt-1 text-slate-700">{viewingReceipt.notes}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Actions Footer */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+              <button
+                type="button"
+                onClick={() => handleDeleteReceipt(viewingReceipt)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+              >
+                <Trash2 size={15} className="sm:w-4 sm:h-4" /> Delete
+              </button>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const r = viewingReceipt;
+                    setViewingReceipt(null);
+                    handleEditReceipt(r);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <Pencil size={15} className="sm:w-4 sm:h-4" /> Edit
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => downloadReceipt(viewingReceipt)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  <Download size={15} className="sm:w-4 sm:h-4" /> PDF
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewingReceipt(null)}
+                  className="rounded-xl bg-slate-900 px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

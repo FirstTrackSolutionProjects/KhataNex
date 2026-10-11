@@ -13,26 +13,38 @@ import {
   Check,
   AlertCircle,
   BookOpen,
+  Eye,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
 
 const CATEGORY_LABEL = {
+  money_received: "Money Received",
+  advance_receivable: "Advance Receivable",
+  advance_payable: "Advance Payable",
+  paid_out: "Paid Out",
   due_received: "Due Received",
-  normal_received: "Normal Received",
-  amount_received: "Normal Received",
+  normal_received: "Money Received",
+  amount_received: "Money Received",
   paid_by_business: "Paid Out",
   purchase_bill: "Purchase Bill",
-  advance_from_investor: "Investor Advance",
+  advance_from_investor: "Advance Receivable",
 };
 
 const CATEGORY_STYLE = {
-  due_received: "bg-emerald-100 text-emerald-700",
-  normal_received: "bg-teal-100 text-teal-700",
-  amount_received: "bg-teal-100 text-teal-700",
+  money_received: "bg-emerald-100 text-emerald-700",
+  advance_receivable: "bg-blue-100 text-blue-700",
+  advance_payable: "bg-purple-100 text-purple-700",
+  paid_out: "bg-red-100 text-red-700",
+  due_received: "bg-teal-100 text-teal-700",
+  normal_received: "bg-emerald-100 text-emerald-700",
+  amount_received: "bg-emerald-100 text-emerald-700",
   paid_by_business: "bg-red-100 text-red-700",
   purchase_bill: "bg-amber-100 text-amber-700",
   advance_from_investor: "bg-blue-100 text-blue-700",
@@ -40,23 +52,12 @@ const CATEGORY_STYLE = {
 
 export const getEffectiveCategory = (p) => {
   const cat = (p.payment_category || "").toLowerCase();
-  const purpose = (p.purpose || "").toLowerCase();
-  if (cat === "normal_received" || cat === "amount_received") return "normal_received";
-  if (cat === "due_received") {
-    if (
-      purpose.startsWith("product sale") ||
-      purpose.startsWith("new payment") ||
-      purpose.includes("amount received") ||
-      purpose.includes("normal received")
-    ) {
-      return "normal_received";
-    }
-    return "due_received";
-  }
-  if (cat === "paid_by_business") return "paid_by_business";
-  if (cat === "purchase_bill") return "purchase_bill";
-  if (cat === "advance_from_investor") return "advance_from_investor";
-  return cat || "normal_received";
+  if (cat === "money_received" || cat === "normal_received" || cat === "amount_received") return "money_received";
+  if (cat === "advance_receivable" || cat === "advance_from_investor") return "advance_receivable";
+  if (cat === "advance_payable") return "advance_payable";
+  if (cat === "paid_out" || cat === "paid_by_business" || cat === "purchase_bill") return "paid_out";
+  if (cat === "due_received") return "due_received";
+  return cat || "money_received";
 };
 
 const Payments = () => {
@@ -87,10 +88,12 @@ const Payments = () => {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [viewingPayment, setViewingPayment] = useState(null);
+  const [editingPayment, setEditingPayment] = useState(null);
 
   // Form State
   const [form, setForm] = useState({
-    payment_category: "due_received",
+    payment_category: "money_received",
     party_name: "",
     purpose: "",
     amount: "",
@@ -101,8 +104,8 @@ const Payments = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
 
-  // Purpose choice when customer is selected: "due_received" | "product_sale" | "advance" | "new_payment"
-  const [purposeType, setPurposeType] = useState("due_received");
+  // Purpose choice when customer is selected: "new_payment" | "due_received" | "product_sale" | "advance"
+  const [purposeType, setPurposeType] = useState("new_payment");
 
   // Outstanding dues for the selected customer
   const [customerDues, setCustomerDues] = useState([]);
@@ -205,7 +208,7 @@ const Payments = () => {
       ...prev,
       party_name: customer ? customer.name || customer.business_name || "" : "",
     }));
-    if (customer && purposeType === "due_received") {
+    if (customer && form.payment_category === "due_received") {
       loadCustomerDues(customer.id);
     } else {
       setCustomerDues([]);
@@ -286,13 +289,13 @@ const Payments = () => {
       }
     } else if (type === "product_sale") {
       setCustomerDues([]);
-      setForm((prev) => ({ ...prev, payment_category: "normal_received" }));
+      setForm((prev) => ({ ...prev, payment_category: "money_received" }));
       if (selectedProduct) {
         handleSelectProduct(selectedProduct);
       } else {
         setForm((prev) => ({
           ...prev,
-          payment_category: "normal_received",
+          payment_category: "money_received",
           purpose: "Product Sale",
           amount: "",
         }));
@@ -302,7 +305,7 @@ const Payments = () => {
       setSelectedProduct(null);
       setForm((prev) => ({
         ...prev,
-        payment_category: "advance_from_investor",
+        payment_category: "advance_receivable",
         purpose: "Advance Payment",
         amount: "",
       }));
@@ -311,8 +314,8 @@ const Payments = () => {
       setSelectedProduct(null);
       setForm((prev) => ({
         ...prev,
-        payment_category: "normal_received",
-        purpose: "Normal Received",
+        payment_category: "money_received",
+        purpose: "Money Received",
         amount: "",
       }));
     }
@@ -320,21 +323,55 @@ const Payments = () => {
 
   const resetModalState = () => {
     setForm({
-      payment_category: "due_received",
+      payment_category: "money_received",
       party_name: "",
       purpose: "",
       amount: "",
       payment_mode: "cash",
     });
+    setEditingPayment(null);
     setSelectedCustomer(null);
     setCustomerSearch("");
-    setPurposeType("due_received");
+    setPurposeType("new_payment");
     setCustomerDues([]);
     setSelectedProduct(null);
     setProductSearch("");
     setProductQuantity(1);
     setSelectedPurchaseBill(null);
     setSaveError("");
+  };
+
+  const openEditModal = (payment) => {
+    setEditingPayment(payment);
+    const cat = getEffectiveCategory(payment);
+    setForm({
+      payment_category: cat,
+      party_name: payment.customer_name || payment.party_name || "",
+      purpose: payment.purpose || "",
+      amount: String(payment.amount || ""),
+      payment_mode: payment.payment_mode || "cash",
+    });
+    if (payment.customer_id) {
+      const cust = customers.find((c) => String(c.id) === String(payment.customer_id));
+      setSelectedCustomer(cust || { id: payment.customer_id, name: payment.customer_name });
+      setCustomerSearch(payment.customer_name || "");
+    } else {
+      setSelectedCustomer(null);
+      setCustomerSearch(payment.party_name || "");
+    }
+    setSaveError("");
+    setShowModal(true);
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!window.confirm("Are you sure you want to delete this payment record?")) return;
+    try {
+      await api.del(`/api/payments/${paymentId}`);
+      setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+      if (viewingPayment?.id === paymentId) setViewingPayment(null);
+    } catch (err) {
+      window.alert(err.message || "Could not delete payment.");
+    }
   };
 
   const handleAddPayment = async (e) => {
@@ -359,7 +396,15 @@ const Payments = () => {
             : undefined,
       };
 
-      await api.post("/api/payments", payload);
+      if (editingPayment) {
+        try {
+          await api.patch(`/api/payments/${editingPayment.id}`, payload);
+        } catch (_) {
+          await api.put(`/api/payments/${editingPayment.id}`, payload);
+        }
+      } else {
+        await api.post("/api/payments", payload);
+      }
 
       setShowModal(false);
       resetModalState();
@@ -371,73 +416,26 @@ const Payments = () => {
     }
   };
 
-  const unlinkedDebits = khataDebits.filter((d) => {
-    const idStr = String(d.id);
-    if (skippedKhataDebits.includes(idStr) || linkedKhataDebits.includes(idStr)) {
-      return false;
-    }
-    const isRecorded = payments.some(
-      (p) =>
-        p.payment_category === "paid_by_business" &&
-        p.party_name === (d.name || d.party_name) &&
-        Number(p.amount) === Number(d.amount)
-    );
-    return !isRecorded;
-  });
-
   const unlinkedReceipts = moneyReceipts.filter((r) => {
     const idStr = String(r.id);
     if (skippedReceipts.includes(idStr) || linkedReceipts.includes(idStr)) {
       return false;
     }
+    if (r.is_linked_to_payment === 1 || r.payment_id) {
+      return false;
+    }
     const receiptNum = r.receipt_number || `#${r.id}`;
     const isRecorded = payments.some(
-      (p) => p.purpose && p.purpose.includes(receiptNum)
+      (p) =>
+        (p.money_receipt_id && String(p.money_receipt_id) === idStr) ||
+        (p.purpose && p.purpose.includes(receiptNum))
     );
     return !isRecorded;
   });
 
-  const handleAddKhataDebitToPayment = async (debit) => {
-    try {
-      await api.post("/api/payments", {
-        payment_category: "paid_by_business",
-        party_name: debit.name || debit.party_name || "Vendor",
-        purpose: debit.description ? `Khata debit: ${debit.description}` : "Khata debit payment",
-        amount: Number(debit.amount || 0),
-        payment_mode: "cash",
-      });
-      const idStr = String(debit.id);
-      const nextLinked = [...linkedKhataDebits, idStr];
-      setLinkedKhataDebits(nextLinked);
-      localStorage.setItem("khatanex_linked_khata_debits", JSON.stringify(nextLinked));
-      await loadData();
-    } catch (err) {
-      window.alert(err.message || "Failed to create payment from Khata debit.");
-    }
-  };
-
-  const handleSkipKhataDebit = (debitId) => {
-    const idStr = String(debitId);
-    const nextSkipped = [...skippedKhataDebits, idStr];
-    setSkippedKhataDebits(nextSkipped);
-    localStorage.setItem("khatanex_skipped_khata_debits", JSON.stringify(nextSkipped));
-  };
-
   const handleAddMoneyReceiptToPayment = async (receipt) => {
     try {
-      const isAdvance =
-        receipt.against_type === "advance" ||
-        String(receipt.description || "").toLowerCase().includes("advance");
-      const amt = Number(receipt.amount_received ?? receipt.amount ?? 0);
-      await api.post("/api/payments", {
-        payment_category: isAdvance ? "advance_from_investor" : "due_received",
-        party_name:
-          receipt.customer_name ||
-          receipt.received_from_name ||
-          receipt.customer_business_name ||
-          "Customer",
-        purpose: `Money Receipt: ${receipt.receipt_number || `#${receipt.id}`}`,
-        amount: amt,
+      await api.post(`/api/payments/link-money-receipt/${receipt.id}`, {
         payment_mode: receipt.payment_mode || "cash",
       });
       const idStr = String(receipt.id);
@@ -446,7 +444,7 @@ const Payments = () => {
       localStorage.setItem("khatanex_linked_receipts", JSON.stringify(nextLinked));
       await loadData();
     } catch (err) {
-      window.alert(err.message || "Failed to create payment from Money Receipt.");
+      window.alert(err.message || "Failed to link Money Receipt.");
     }
   };
 
@@ -457,11 +455,62 @@ const Payments = () => {
     localStorage.setItem("khatanex_skipped_receipts", JSON.stringify(nextSkipped));
   };
 
-  const filtered = payments.filter((p) =>
-    (p.customer_name || p.party_name || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const formatTransactionTime = (timeStr, createdAt) => {
+    if (timeStr && typeof timeStr === "string") {
+      const parts = timeStr.trim().split(":");
+      if (parts.length >= 2) {
+        let hours = parseInt(parts[0], 10);
+        const minutes = parts[1];
+        if (!isNaN(hours)) {
+          const ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12 || 12;
+          return `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+        }
+      }
+    }
+    if (createdAt) {
+      const d = new Date(createdAt);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+    }
+    return "";
+  };
+
+  const filtered = payments
+    .filter((p) =>
+      (p.customer_name || p.party_name || "")
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = a.payment_date || a.effective_date || a.created_at || "";
+      const dateB = b.payment_date || b.effective_date || b.created_at || "";
+      const timeA =
+        a.time ||
+        a.payment_time ||
+        (a.created_at && String(a.created_at).includes("T")
+          ? String(a.created_at).split("T")[1]
+          : "") ||
+        "00:00:00";
+      const timeB =
+        b.time ||
+        b.payment_time ||
+        (b.created_at && String(b.created_at).includes("T")
+          ? String(b.created_at).split("T")[1]
+          : "") ||
+        "00:00:00";
+      const dtA =
+        new Date(`${String(dateA).slice(0, 10)}T${String(timeA).slice(0, 8)}`).getTime() || 0;
+      const dtB =
+        new Date(`${String(dateB).slice(0, 10)}T${String(timeB).slice(0, 8)}`).getTime() || 0;
+      if (dtB !== dtA) return dtB - dtA;
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
 
   const sumByCategory = (cat) =>
     payments
@@ -492,34 +541,19 @@ const Payments = () => {
       />
 
       <div className="lg:pl-64">
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
-            >
-              <Menu size={22} />
-            </button>
-
-            <div>
-              <h1 className="text-lg font-bold">Payments</h1>
-              <p className="hidden text-xs text-slate-400 sm:block">
-                Track and record your business payments
-              </p>
-            </div>
-          </div>
-
-          <Button
-            icon={Plus}
-            size="sm"
-            onClick={() => {
-              resetModalState();
-              setShowModal(true);
-            }}
-          >
-            Add Payment
-          </Button>
-        </header>
+        <PageHeader
+          title="Payments"
+          subtitle="Track and record your business payments"
+          onMenuClick={() => setSidebarOpen(true)}
+          showHome={true}
+          showSearch={true}
+          showProfile={true}
+          onNew={() => {
+            resetModalState();
+            setShowModal(true);
+          }}
+          newLabel="Add Payment"
+        />
 
         <main className="p-4 sm:p-6 lg:p-8">
           {error && (
@@ -527,45 +561,6 @@ const Payments = () => {
               {error}
             </div>
           )}
-
-          {/* NOTIFICATION: KHATA DEBITS AVAILABLE */}
-          {unlinkedDebits.map((debit) => (
-            <div
-              key={`khata-debit-${debit.id}`}
-              className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-amber-100 p-2.5 text-amber-700">
-                  <BookOpen size={20} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-amber-900">
-                    Khata debit available
-                  </p>
-                  <p className="text-xs text-amber-700">
-                    {debit.name || debit.party_name || "Vendor"} · ₹{Number(debit.amount || 0).toLocaleString("en-IN")}
-                    {debit.description ? ` (${debit.description})` : ""}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => handleAddKhataDebitToPayment(debit)}
-                  className="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-                >
-                  Add to Payment
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSkipKhataDebit(debit.id)}
-                  className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
-                  Skip
-                </button>
-              </div>
-            </div>
-          ))}
 
           {/* NOTIFICATION: MONEY RECEIPTS AVAILABLE */}
           {unlinkedReceipts.map((receipt) => {
@@ -615,35 +610,36 @@ const Payments = () => {
 
           {/* SUMMARY CARDS */}
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
                   <CheckCircle2 size={21} />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Due Received</p>
+                  <p className="text-xs text-slate-500">Money Received</p>
                   <p className="text-xl font-bold text-emerald-600">
                     {loading
                       ? "..."
-                      : `₹${sumByCategory("due_received").toLocaleString(
-                          "en-IN"
-                        )}`}
+                      : `₹${(
+                          sumByCategory("money_received") +
+                          sumByCategory("due_received")
+                        ).toLocaleString("en-IN")}`}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-teal-100 p-3 text-teal-600">
+                <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
                   <CreditCard size={21} />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Normal Received</p>
-                  <p className="text-xl font-bold text-teal-600">
+                  <p className="text-xs text-slate-500">Advance Receivable</p>
+                  <p className="text-xl font-bold text-blue-600">
                     {loading
                       ? "..."
-                      : `₹${sumByCategory("normal_received").toLocaleString(
+                      : `₹${sumByCategory("advance_receivable").toLocaleString(
                           "en-IN"
                         )}`}
                   </p>
@@ -651,7 +647,25 @@ const Payments = () => {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-purple-100 p-3 text-purple-600">
+                  <TrendingUp size={21} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Advance Payable</p>
+                  <p className="text-xl font-bold text-purple-600">
+                    {loading
+                      ? "..."
+                      : `₹${sumByCategory("advance_payable").toLocaleString(
+                          "en-IN"
+                        )}`}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-red-100 p-3 text-red-600">
                   <ArrowUpFromLine size={21} />
@@ -661,28 +675,7 @@ const Payments = () => {
                   <p className="text-xl font-bold text-red-600">
                     {loading
                       ? "..."
-                      : `₹${(
-                          sumByCategory("paid_by_business") +
-                          sumByCategory("purchase_bill")
-                        ).toLocaleString("en-IN")}`}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
-                  <TrendingUp size={21} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Investor Advance</p>
-                  <p className="text-xl font-bold text-blue-600">
-                    {loading
-                      ? "..."
-                      : `₹${sumByCategory("advance_from_investor").toLocaleString(
-                          "en-IN"
-                        )}`}
+                      : `₹${sumByCategory("paid_out").toLocaleString("en-IN")}`}
                   </p>
                 </div>
               </div>
@@ -718,13 +711,16 @@ const Payments = () => {
                     Amount
                   </th>
                   <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Date
+                    Date &amp; Time
                   </th>
                   <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
                     Mode
                   </th>
                   <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
                     Category
+                  </th>
+                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500 text-right">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -733,7 +729,7 @@ const Payments = () => {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-5 py-6 text-center text-sm text-slate-400"
                     >
                       Loading payments...
@@ -742,7 +738,7 @@ const Payments = () => {
                 ) : filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-5 py-6 text-center text-sm text-slate-400"
                     >
                       No payments recorded yet.
@@ -765,12 +761,27 @@ const Payments = () => {
                         ₹{Number(payment.amount).toLocaleString("en-IN")}
                       </td>
 
-                      <td className="px-5 py-4 text-sm text-slate-500">
-                        {payment.payment_date
-                          ? new Date(
-                              payment.payment_date
-                            ).toLocaleDateString("en-IN")
-                          : "—"}
+                      <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                        <div className="font-medium text-slate-700">
+                          {payment.payment_date || payment.effective_date
+                            ? new Date(
+                                payment.payment_date || payment.effective_date
+                              ).toLocaleDateString("en-IN")
+                            : payment.created_at
+                            ? new Date(payment.created_at).toLocaleDateString("en-IN")
+                            : "—"}
+                        </div>
+                        {formatTransactionTime(
+                          payment.time || payment.payment_time,
+                          payment.created_at
+                        ) ? (
+                          <div className="text-xs text-slate-400">
+                            {formatTransactionTime(
+                              payment.time || payment.payment_time,
+                              payment.created_at
+                            )}
+                          </div>
+                        ) : null}
                       </td>
 
                       <td className="px-5 py-4 text-sm capitalize text-slate-500">
@@ -791,6 +802,40 @@ const Payments = () => {
                           );
                         })()}
                       </td>
+
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setViewingPayment(payment)}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-emerald-600"
+                            title="View Details"
+                            aria-label="View Details"
+                          >
+                            <Eye size={18} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(payment)}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                            title="Edit Payment"
+                            aria-label="Edit Payment"
+                          >
+                            <Pencil size={18} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePayment(payment.id)}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                            title="Delete Payment"
+                            aria-label="Delete Payment"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -806,7 +851,7 @@ const Payments = () => {
         onClose={() => {
           if (!saving) setShowModal(false);
         }}
-        title="Record Payment"
+        title={editingPayment ? "Edit Payment" : "Record Payment"}
       >
         <form onSubmit={handleAddPayment} className="space-y-4">
           {saveError && (
@@ -823,26 +868,46 @@ const Payments = () => {
             <select
               value={form.payment_category}
               onChange={(e) => {
-                setForm({ ...form, payment_category: e.target.value });
-                if (e.target.value !== "due_received") {
+                const val = e.target.value;
+                let defaultPurpose = "Payment";
+                if (val === "money_received") defaultPurpose = "Money Received";
+                else if (val === "due_received") defaultPurpose = "Due Received";
+                else if (val === "advance_receivable") defaultPurpose = "Advance Payment";
+                else if (val === "advance_payable") defaultPurpose = "Advance Payable";
+                else if (val === "paid_out") defaultPurpose = "Paid Out";
+                else if (val === "purchase_bill") defaultPurpose = "Purchase Bill";
+
+                setForm((prev) => ({
+                  ...prev,
+                  payment_category: val,
+                  purpose: defaultPurpose,
+                }));
+
+                if (val !== "due_received" && val !== "money_received" && val !== "advance_receivable") {
                   setSelectedCustomer(null);
                   setCustomerDues([]);
+                } else if (val === "due_received" && selectedCustomer) {
+                  loadCustomerDues(selectedCustomer.id);
+                } else {
+                  setCustomerDues([]);
                 }
-                if (e.target.value !== "purchase_bill") {
+
+                if (val !== "purchase_bill") {
                   setSelectedPurchaseBill(null);
                 }
               }}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
-              <option value="due_received">Due Received (customer paid)</option>
-              <option value="normal_received">Normal Received (amount received)</option>
-              <option value="paid_by_business">Paid Out (business pays someone)</option>
-              <option value="purchase_bill">Purchase Bill (recorded bill)</option>
-              <option value="advance_from_investor">Investor Advance</option>
+              <option value="money_received">Money Received</option>
+              <option value="due_received">Due Received</option>
+              <option value="advance_receivable">Advance Receivable</option>
+              <option value="advance_payable">Advance Payable</option>
+              <option value="paid_out">Paid Out</option>
+              <option value="purchase_bill">Purchase Bill</option>
             </select>
           </div>
 
-          {/* PURCHASE BILL PICKER (When Purchase Bill category) */}
+          {/* PURCHASE BILL PICKER */}
           {form.payment_category === "purchase_bill" && (
             <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 space-y-3">
               <div className="flex items-center justify-between">
@@ -854,7 +919,7 @@ const Payments = () => {
                     type="button"
                     onClick={() => {
                       setSelectedPurchaseBill(null);
-                      setForm((f) => ({ ...f, party_name: "", amount: "", purpose: "" }));
+                      setForm((f) => ({ ...f, party_name: "", amount: "", purpose: "Purchase Bill" }));
                     }}
                     className="text-xs font-medium text-red-600 hover:underline"
                   >
@@ -910,8 +975,8 @@ const Payments = () => {
             </div>
           )}
 
-          {/* CUSTOMER SEARCH & SELECT (When Due Received) */}
-          {form.payment_category === "due_received" && (
+          {/* ADVANCE RECEIVABLE: CUSTOMER SEARCH / SELECT ONLY */}
+          {form.payment_category === "advance_receivable" && (
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-slate-800">
@@ -920,7 +985,188 @@ const Payments = () => {
                 {selectedCustomer && (
                   <button
                     type="button"
-                    onClick={() => handleSelectCustomer(null)}
+                    onClick={() => {
+                      handleSelectCustomer(null);
+                      setCustomerSearch("");
+                    }}
+                    className="text-xs font-medium text-red-600 hover:underline"
+                  >
+                    Clear selection
+                  </button>
+                )}
+              </div>
+
+              {!selectedCustomer ? (
+                <div>
+                  <div className="relative mb-2">
+                    <Search
+                      size={15}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="text"
+                      value={customerSearch || form.party_name}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomerSearch(val);
+                        setForm((prev) => ({ ...prev, party_name: val }));
+                      }}
+                      placeholder="Search existing customer or type customer name..."
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {customerSearch.trim() && (
+                    <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+                      {filteredCustomers.length === 0 ? (
+                        <div className="p-3 text-center text-xs text-slate-500">
+                          Unknown customer: "{customerSearch}". Will record as new party.
+                        </div>
+                      ) : (
+                        filteredCustomers.map((cust) => (
+                          <button
+                            key={cust.id}
+                            type="button"
+                            onClick={() => {
+                              handleSelectCustomer(cust);
+                              setCustomerSearch("");
+                            }}
+                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
+                          >
+                            <div>
+                              <p className="font-semibold text-slate-800">
+                                {cust.name || cust.business_name || `Customer #${cust.id}`}
+                              </p>
+                              {cust.phone && (
+                                <p className="text-slate-400">{cust.phone}</p>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-emerald-600 font-semibold">Select</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs">
+                  <div>
+                    <p className="font-semibold text-emerald-900">
+                      {selectedCustomer.name || selectedCustomer.business_name}
+                    </p>
+                    {selectedCustomer.phone && (
+                      <p className="text-emerald-700">{selectedCustomer.phone}</p>
+                    )}
+                  </div>
+                  <span className="font-semibold text-emerald-700">Linked Customer</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MONEY RECEIVED: NORMAL CUSTOMER PAYMENT (DO NOT LOAD/FORCE DUES) */}
+          {form.payment_category === "money_received" && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-slate-800">
+                  Customer
+                </label>
+                {selectedCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSelectCustomer(null);
+                      setCustomerSearch("");
+                    }}
+                    className="text-xs font-medium text-red-600 hover:underline"
+                  >
+                    Clear selection
+                  </button>
+                )}
+              </div>
+
+              {!selectedCustomer ? (
+                <div>
+                  <div className="relative mb-2">
+                    <Search
+                      size={15}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="text"
+                      value={customerSearch || form.party_name}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomerSearch(val);
+                        setForm((prev) => ({ ...prev, party_name: val }));
+                      }}
+                      placeholder="Search existing customer or type customer name..."
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {customerSearch.trim() && (
+                    <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+                      {filteredCustomers.length === 0 ? (
+                        <div className="p-3 text-center text-xs text-slate-500">
+                          Unknown customer: "{customerSearch}". Will record as new customer name.
+                        </div>
+                      ) : (
+                        filteredCustomers.map((cust) => (
+                          <button
+                            key={cust.id}
+                            type="button"
+                            onClick={() => {
+                              handleSelectCustomer(cust);
+                              setCustomerSearch("");
+                            }}
+                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
+                          >
+                            <div>
+                              <p className="font-semibold text-slate-800">
+                                {cust.name || cust.business_name || `Customer #${cust.id}`}
+                              </p>
+                              {cust.phone && (
+                                <p className="text-slate-400">{cust.phone}</p>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-emerald-600 font-semibold">Select</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs">
+                  <div>
+                    <p className="font-semibold text-emerald-900">
+                      {selectedCustomer.name || selectedCustomer.business_name}
+                    </p>
+                    {selectedCustomer.phone && (
+                      <p className="text-emerald-700">{selectedCustomer.phone}</p>
+                    )}
+                  </div>
+                  <span className="font-semibold text-emerald-700">Linked Customer</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* DUE RECEIVED: ONLY CATEGORY WHERE CUSTOMER DUES ARE LOADED/AUTOFILLED */}
+          {form.payment_category === "due_received" && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-slate-800">
+                  Customer <span className="text-red-500">* </span>
+                </label>
+                {selectedCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSelectCustomer(null);
+                      setCustomerSearch("");
+                    }}
                     className="text-xs font-medium text-red-600 hover:underline"
                   >
                     Clear selection
@@ -939,7 +1185,7 @@ const Payments = () => {
                       type="text"
                       value={customerSearch}
                       onChange={(e) => setCustomerSearch(e.target.value)}
-                      placeholder="Search customer by name or phone..."
+                      placeholder="Search customer with dues..."
                       className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
                     />
                   </div>
@@ -947,14 +1193,17 @@ const Payments = () => {
                   <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
                     {filteredCustomers.length === 0 ? (
                       <div className="p-3 text-center text-xs text-slate-400">
-                        No customers found. Enter name manually below.
+                        No customers found. Please select an existing customer with dues.
                       </div>
                     ) : (
                       filteredCustomers.map((cust) => (
                         <button
                           key={cust.id}
                           type="button"
-                          onClick={() => handleSelectCustomer(cust)}
+                          onClick={() => {
+                            handleSelectCustomer(cust);
+                            setCustomerSearch("");
+                          }}
                           className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
                         >
                           <div>
@@ -993,38 +1242,8 @@ const Payments = () => {
                 </div>
               )}
 
-              {/* PURPOSE SELECTOR (Due Received / Product Sale / Advance / New Payment) */}
+              {/* DUES TABLE (ONLY FOR DUE_RECEIVED) */}
               {selectedCustomer && (
-                <div className="mt-3 pt-3 border-t border-slate-200">
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                    Payment Purpose
-                  </label>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {[
-                      { id: "due_received", label: "Due Received" },
-                      { id: "product_sale", label: "Product Sale" },
-                      { id: "advance", label: "Advance" },
-                      { id: "new_payment", label: "New Payment" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => handlePurposeTypeChange(opt.id)}
-                        className={`rounded-lg border py-2 text-xs font-semibold transition ${
-                          purposeType === opt.id
-                            ? "border-emerald-500 bg-emerald-600 text-white"
-                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* IF PURPOSE === 'due_received': DISPLAY CUSTOMER'S INDIVIDUAL DUES */}
-              {selectedCustomer && purposeType === "due_received" && (
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-slate-700">
@@ -1039,7 +1258,7 @@ const Payments = () => {
                     <p className="text-xs text-slate-400 py-2">Loading customer dues...</p>
                   ) : customerDues.length === 0 ? (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800">
-                      No individual pending dues found for this customer. Enter the amount directly below.
+                      No individual pending dues recorded for this customer. Enter the amount directly below.
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white max-h-48 overflow-y-auto">
@@ -1088,84 +1307,16 @@ const Payments = () => {
                   )}
                 </div>
               )}
-
-              {/* IF PURPOSE === 'product_sale': PRODUCT MASTER LOOKUP */}
-              {selectedCustomer && purposeType === "product_sale" && (
-                <div className="mt-3 space-y-2">
-                  <label className="text-xs font-semibold text-slate-700">
-                    Product Master (Search Product)
-                  </label>
-
-                  <div className="relative">
-                    <Search
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-                    <input
-                      type="text"
-                      value={productSearch}
-                      onChange={(e) => setProductSearch(e.target.value)}
-                      placeholder="Search product from inventory..."
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
-                    />
-                  </div>
-
-                  <div className="max-h-36 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
-                    {filteredStock.length === 0 ? (
-                      <p className="p-3 text-center text-xs text-slate-400">
-                        No matching products in inventory.
-                      </p>
-                    ) : (
-                      filteredStock.map((prod) => (
-                        <button
-                          key={prod.id}
-                          type="button"
-                          onClick={() => handleSelectProduct(prod)}
-                          className={`flex w-full items-center justify-between p-2 text-left text-xs transition ${
-                            selectedProduct?.id === prod.id
-                              ? "bg-emerald-50 font-semibold text-emerald-800"
-                              : "hover:bg-slate-50 text-slate-700"
-                          }`}
-                        >
-                          <span>{prod.product_name}</span>
-                          <span className="font-bold text-emerald-600">
-                            Selling Price: ₹{Number(prod.price || 0).toLocaleString("en-IN")}
-                          </span>
-                        </button>
-                      ))
-                    )}
-                  </div>
-
-                  {selectedProduct && (
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-xs text-slate-600">
-                        Quantity:
-                      </span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={productQuantity}
-                        onChange={(e) => handleProductQuantityChange(e.target.value)}
-                        className="w-20 rounded border border-slate-200 px-2 py-1 text-xs text-center font-bold"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
 
-          {/* PARTY NAME (When NOT Due Received or fallback) */}
-          {form.payment_category !== "due_received" && (
+          {/* PAYEE NAME FOR ADVANCE PAYABLE & PAID OUT */}
+          {(form.payment_category === "advance_payable" || form.payment_category === "paid_out") && (
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                {form.payment_category === "purchase_bill"
-                  ? "Vendor / Supplier Name"
-                  : form.payment_category === "paid_by_business"
-                  ? "Paid To (Vendor / Person)"
-                  : form.payment_category === "normal_received"
-                  ? "Received From (Customer / Party)"
-                  : "Investor Name"}
+                {form.payment_category === "advance_payable"
+                  ? "Payee / Recipient / Vendor Name"
+                  : "Paid To (Vendor / Payee / Person)"}
               </label>
               <input
                 type="text"
@@ -1173,11 +1324,9 @@ const Payments = () => {
                 value={form.party_name}
                 onChange={(e) => setForm({ ...form, party_name: e.target.value })}
                 placeholder={
-                  form.payment_category === "purchase_bill"
-                    ? "Vendor name from purchase bill"
-                    : form.payment_category === "normal_received"
-                    ? "Customer or payer name"
-                    : "Name of vendor or investor"
+                  form.payment_category === "advance_payable"
+                    ? "Name of vendor, supplier, or payee"
+                    : "Name of vendor or payee"
                 }
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
@@ -1239,9 +1388,129 @@ const Payments = () => {
             disabled={saving}
             className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Record Payment"}
+            {saving ? "Saving..." : (editingPayment ? "Update Payment" : "Record Payment")}
           </button>
         </form>
+      </Modal>
+
+      {/* LARGE READABLE VIEW PAYMENT DETAIL MODAL */}
+      <Modal
+        open={Boolean(viewingPayment)}
+        onClose={() => setViewingPayment(null)}
+        title="Payment Details"
+      >
+        {viewingPayment && (
+          <div className="space-y-5">
+            {/* Amount Banner */}
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                Payment Amount
+              </p>
+              <p className="mt-1 text-3xl font-extrabold text-slate-900">
+                ₹{Number(viewingPayment.amount || 0).toLocaleString("en-IN")}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    CATEGORY_STYLE[getEffectiveCategory(viewingPayment)] || "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {CATEGORY_LABEL[getEffectiveCategory(viewingPayment)] || viewingPayment.payment_category}
+                </span>
+                <span className="rounded-full bg-slate-200/80 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+                  Mode: {viewingPayment.payment_mode || "Cash"}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid gap-3 sm:grid-cols-2 text-sm">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <p className="text-xs font-medium text-slate-400">Party / Customer</p>
+                <p className="mt-1 font-semibold text-slate-800">
+                  {viewingPayment.customer_name || viewingPayment.party_name || "—"}
+                </p>
+                {viewingPayment.customer_phone && (
+                  <p className="text-xs text-slate-500 mt-0.5">Phone: {viewingPayment.customer_phone}</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <p className="text-xs font-medium text-slate-400">Date & Time</p>
+                <p className="mt-1 font-semibold text-slate-800">
+                  {viewingPayment.payment_date
+                    ? new Date(viewingPayment.payment_date).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {formatTransactionTime(
+                    viewingPayment.time || viewingPayment.payment_time,
+                    viewingPayment.created_at
+                  )}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                <p className="text-xs font-medium text-slate-400">Purpose / Description</p>
+                <p className="mt-1 font-medium text-slate-800 break-words">
+                  {viewingPayment.purpose || "—"}
+                </p>
+              </div>
+
+              {viewingPayment.reference_number && (
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                  <p className="text-xs font-medium text-slate-400">Reference / Txn ID</p>
+                  <p className="mt-1 font-medium text-slate-800">
+                    {viewingPayment.reference_number}
+                  </p>
+                </div>
+              )}
+
+              {viewingPayment.notes && (
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                  <p className="text-xs font-medium text-slate-400">Notes</p>
+                  <p className="mt-1 text-slate-700">{viewingPayment.notes}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Actions Footer */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+              <button
+                type="button"
+                onClick={() => handleDeletePayment(viewingPayment.id)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+              >
+                <Trash2 size={15} /> Delete
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = viewingPayment;
+                    setViewingPayment(null);
+                    openEditModal(p);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <Pencil size={15} /> Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingPayment(null)}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

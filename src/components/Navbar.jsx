@@ -4,7 +4,7 @@
 
 
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import {
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
+import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -26,9 +27,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-
-  const dropdownRef = useRef(null);
 
   const isLoggedIn = !!user;
 
@@ -37,11 +35,8 @@ const Navbar = () => {
   // =========================================
   const handleLogout = () => {
     logout();
-
     navigate("/login");
-
     setIsMenuOpen(false);
-    setShowProfileDropdown(false);
   };
 
   // =========================================
@@ -61,7 +56,6 @@ const Navbar = () => {
 
     if (searchInput) {
       searchInput.focus();
-
       searchInput.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -74,53 +68,11 @@ const Navbar = () => {
   };
 
   // =========================================
-  // PROFILE
-  // =========================================
-  const handleProfileClick = () => {
-    navigate("/profile");
-
-    setShowProfileDropdown(false);
-  };
-
-  // =========================================
-  // SETTINGS
-  // =========================================
-  const handleSettingsClick = () => {
-    navigate("/settings");
-
-    setShowProfileDropdown(false);
-  };
-
-  // =========================================
-  // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
-  // =========================================
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setShowProfileDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
-  }, []);
-
-  // =========================================
   // CLOSE MENU ON ESCAPE
   // =========================================
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === "Escape") {
-        setShowProfileDropdown(false);
         setIsMenuOpen(false);
       }
     };
@@ -464,87 +416,7 @@ const Navbar = () => {
               </button>
 
               {/* PROFILE DROPDOWN */}
-              <div
-                className="relative"
-                ref={dropdownRef}
-              >
-                <button
-                  onClick={() =>
-                    setShowProfileDropdown(
-                      !showProfileDropdown
-                    )
-                  }
-                  className="flex items-center gap-1 sm:gap-2 rounded-xl px-1 sm:px-2 py-1 transition hover:bg-white/10"
-                  aria-label="Profile"
-                  title="Profile"
-                >
-                  {/* PROFILE ICON */}
-                  <div className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-white text-sky-700 shadow-sm">
-                    <span className="text-xs sm:text-sm font-bold">
-                      {user?.name
-                        ? user.name
-                            .charAt(0)
-                            .toUpperCase()
-                        : "U"}
-                    </span>
-                  </div>
-
-                  {/* USER NAME */}
-                  <div className="hidden sm:block text-left">
-                    <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[60px] sm:max-w-[120px]">
-                      {user?.name || "User"}
-                    </p>
-
-                    <p className="hidden md:block text-[10px] sm:text-xs text-emerald-100 truncate max-w-[80px] sm:max-w-[120px]">
-                      {user?.role === "superadmin"
-                        ? "Super Admin"
-                        : user?.role === "employee"
-                        ? "Employee"
-                        : "Business Owner"}
-                    </p>
-                  </div>
-
-                  <ChevronDown
-                    size={14}
-                    className="sm:w-4 sm:h-4 text-emerald-100 hidden xs:block"
-                  />
-                </button>
-
-                {/* PROFILE DROPDOWN MENU */}
-                {showProfileDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg border border-slate-200 py-1 z-50">
-
-                    {/* PROFILE */}
-                    <button
-                      onClick={handleProfileClick}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
-                    >
-                      <User size={16} />
-                      Profile
-                    </button>
-
-                    {/* SETTINGS */}
-                    <button
-                      onClick={handleSettingsClick}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </button>
-
-                    <div className="border-t border-slate-100 my-1" />
-
-                    {/* LOGOUT */}
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <ProfileDropdown variant="nav" />
             </>
           ) : (
             /* =====================================

@@ -24,13 +24,11 @@ const BottomNav = () => {
 
   const navItems = [
     { name: "Home", path: "/", icon: Home },
-    ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
-    { name: "Customers", path: "/customers", icon: Users },
-    { name: "Khata", path: "/khata", icon: BookOpen },
-    { name: "Invoices", path: "/invoices", icon: FileText },
-    { name: "Payments", path: "/payments", icon: CreditCard },
-    { name: "Inventory", path: "/inventory", icon: Package },
-    { name: "Vehicles", path: "/vehicles", icon: Truck },
+    {
+      name: "Dash",
+      path: isSuperadmin ? "/dashboard" : "/khata",
+      icon: LayoutDashboard,
+    },
     { name: "Reports", path: "/reports", icon: BarChart3 },
     { name: "Profile", path: "/profile", icon: User },
     { name: "Settings", path: "/settings", icon: Settings },
