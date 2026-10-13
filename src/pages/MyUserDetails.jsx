@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
+import DeleteUserModal from "../components/DeleteUserModal";
 
 const formatDateTime = (value) => {
   if (!value) return "—";
@@ -1260,6 +1261,7 @@ const MyUserDetails = () => {
   const [showLogo, setShowLogo] = useState(false);
   const [recordSearch, setRecordSearch] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [showReports, setShowReports] = useState(false);
   const [selectedBusinessSection, setSelectedBusinessSection] = useState("");
 
@@ -2599,6 +2601,26 @@ const MyUserDetails = () => {
                 </button>
               )}
 
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(true)}
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-left transition hover:bg-red-50 hover:border-red-300"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                    <Trash2 size={18} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-red-700">
+                      Delete User Account
+                    </span>
+                    <span className="block text-xs text-slate-500">
+                      Permanently delete empty user or safely deactivate if records exist.
+                    </span>
+                  </span>
+                </span>
+              </button>
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
@@ -3548,6 +3570,17 @@ const MyUserDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Delete User Modal */}
+      <DeleteUserModal
+        isOpen={deleteModalOpen}
+        user={user}
+        onClose={() => setDeleteModalOpen(false)}
+        onSuccess={(res) => {
+          alert(res.message || "User account updated successfully.");
+          navigate("/my-users");
+        }}
+      />
     </div>
   );
 };

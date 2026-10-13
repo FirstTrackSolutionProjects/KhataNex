@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown, CreditCard } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const ProfileDropdown = ({ variant = "default" }) => {
@@ -114,6 +114,18 @@ const ProfileDropdown = ({ variant = "default" }) => {
           >
             <Settings size={16} />
             <span>Settings</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(false);
+              navigate(user?.role === "superadmin" ? "/billing" : "/subscription");
+            }}
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-left font-medium"
+          >
+            <CreditCard size={16} />
+            <span>{user?.role === "superadmin" ? "Billing Admin" : "Subscription"}</span>
           </button>
 
           <div className="border-t border-slate-100 my-1" />

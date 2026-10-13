@@ -1,0 +1,1272 @@
+import React, { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Users,
+  Calendar,
+  Clock,
+  TrendingUp,
+  Tag,
+  Plus,
+  RefreshCw,
+  Search,
+  Filter,
+  Download,
+  CheckCircle2,
+  AlertCircle,
+  Gift,
+  Edit,
+  ArrowUpRight,
+  ShieldCheck,
+  ChevronRight,
+  DollarSign,
+  BarChart3,
+  X,
+  Trash2,
+} from "lucide-react";
+import api, { getToken } from "../lib/api";
+import DeleteUserModal from "../components/DeleteUserModal";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+
+const formatRupees = (paise) => {
+  const rupees = Number(paise || 0) / 100;
+  return rupees.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return Number.isNaN(d.getTime())
+    ? "—"
+    : d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+export default function BillingDashboard() {
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'cohorts', 'plans', 'coupons', 'orders', 'lookup'
+
+  // Overview metrics
+  const [metrics, setMetrics] = useState(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(true);
+
+  // Cohorts
+  const [cohorts, setCohorts] = useState([]);
+  const [selectedCohortMonth, setSelectedCohortMonth] = useState(null);
+  const [cohortUsers, setCohortUsers] = useState([]);
+  const [loadingCohortUsers, setLoadingCohortUsers] = useState(false);
+
+  // Plans
+  const [plans, setPlans] = useState([]);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [planForm, setPlanForm] = useState({ name: "", price_rupees: "", introductory_price_rupees: "", is_active: 1 });
+
+  // Coupons
+  const [coupons, setCoupons] = useState([]);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponForm, setCouponForm] = useState({
+    code: "",
+    discount_type: "percent",
+    discount_value: "",
+    max_discount_rupees: "",
+    min_order_rupees: "0",
+    max_redemptions: "",
+    per_user_limit: "1",
+    plan_code: "",
+    valid_until: "",
+    target_cohort: "",
+  });
+
+  // Orders
+  const [orders, setOrders] = useState([]);
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderPagination, setOrderPagination] = useState({ total: 0, pages: 1 });
+
+  // User Lookup & Grant
+  const [lookupUserId, setLookupUserId] = useState("");
+  const [lookedUpUser, setLookedUpUser] = useState(null);
+  const [showGrantModal, setShowGrantModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [grantForm, setGrantForm] = useState({ plan_code: "monthly", notes: "" });
+
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  // 1. Load Overview KPIs
+  const loadOverview = async () => {
+    try {
+      setLoadingMetrics(true);
+      const res = await api.get("/api/superadmin/billing/overview");
+      if (res?.success) setMetrics(res.metrics);
+    } catch (err) {
+      console.error("Overview load failed:", err);
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
+
+  // 2. Load Cohorts
+  const loadCohorts = async (month = null) => {
+    try {
+      const path = month ? `/api/superadmin/billing/expiry-cohorts?month=${month}` : "/api/superadmin/billing/expiry-cohorts";
+      const res = await api.get(path);
+      if (res?.success) {
+        setCohorts(res.cohorts || []);
+        if (month) {
+          setCohortUsers(res.users || []);
+        }
+      }
+    } catch (err) {
+      console.error("Cohort load failed:", err);
+    }
+  };
+
+  // 3. Load Plans
+  const loadPlans = async () => {
+    try {
+      const res = await api.get("/api/superadmin/billing/plans");
+      if (res?.success) setPlans(res.plans || []);
+    } catch (err) {
+      console.error("Plans load failed:", err);
+    }
+  };
+
+  // 4. Load Coupons
+  const loadCoupons = async () => {
+    try {
+      const res = await api.get("/api/superadmin/billing/coupons");
+      if (res?.success) setCoupons(res.coupons || []);
+    } catch (err) {
+      console.error("Coupons load failed:", err);
+    }
+  };
+
+  // 5. Load Orders
+  const loadOrders = async (page = 1) => {
+    try {
+      const params = new URLSearchParams({ page, limit: 15 });
+      if (orderStatusFilter) params.set("status", orderStatusFilter);
+      if (orderSearch) params.set("search", orderSearch);
+
+      const res = await api.get(`/api/superadmin/billing/orders?${params.toString()}`);
+      if (res?.success) {
+        setOrders(res.orders || []);
+        setOrderPagination(res.pagination || { total: 0, pages: 1 });
+        setOrderPage(page);
+      }
+    } catch (err) {
+      console.error("Orders load failed:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadOverview();
+    loadCohorts();
+    loadPlans();
+    loadCoupons();
+    loadOrders(1);
+  }, []);
+
+  const handleSelectCohortMonth = async (month) => {
+    setSelectedCohortMonth(month);
+    setLoadingCohortUsers(true);
+    await loadCohorts(month);
+    setLoadingCohortUsers(false);
+  };
+
+  // Quick campaign generator for cohort
+  const handleOpenCohortCampaign = (month) => {
+    setCouponForm({
+      code: `RENEW-${month.replace("-", "")}`,
+      discount_type: "percent",
+      discount_value: "20",
+      max_discount_rupees: "500",
+      min_order_rupees: "0",
+      max_redemptions: "100",
+      per_user_limit: "1",
+      plan_code: "",
+      valid_until: "",
+      target_cohort: month,
+    });
+    setActiveTab("coupons");
+    setShowCouponModal(true);
+  };
+
+  // Plan Edit
+  const handleStartEditPlan = (plan) => {
+    setEditingPlan(plan);
+    setPlanForm({
+      name: plan.name,
+      price_rupees: (plan.price_paise / 100).toString(),
+      introductory_price_rupees: (plan.introductory_price_paise / 100).toString(),
+      is_active: plan.is_active,
+    });
+  };
+
+  const handleSavePlan = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.put(`/api/superadmin/billing/plans/${editingPlan.id}`, {
+        name: planForm.name,
+        price_paise: Math.round(Number(planForm.price_rupees) * 100),
+        introductory_price_paise: Math.round(Number(planForm.introductory_price_rupees) * 100),
+        is_active: planForm.is_active,
+      });
+      if (res?.success) {
+        setMessage({ type: "success", text: "Plan updated successfully!" });
+        setEditingPlan(null);
+        await loadPlans();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to update plan." });
+    }
+  };
+
+  // Coupon Create
+  const handleCreateCoupon = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.post("/api/superadmin/billing/coupons", {
+        code: couponForm.code,
+        discount_type: couponForm.discount_type,
+        discount_value: Number(couponForm.discount_value),
+        max_discount_paise: couponForm.max_discount_rupees ? Math.round(Number(couponForm.max_discount_rupees) * 100) : null,
+        min_order_paise: couponForm.min_order_rupees ? Math.round(Number(couponForm.min_order_rupees) * 100) : 0,
+        max_redemptions: couponForm.max_redemptions ? Number(couponForm.max_redemptions) : null,
+        per_user_limit: couponForm.per_user_limit ? Number(couponForm.per_user_limit) : 1,
+        plan_code: couponForm.plan_code || null,
+        valid_until: couponForm.valid_until || null,
+        target_cohort: couponForm.target_cohort || null,
+      });
+
+      if (res?.success) {
+        setMessage({ type: "success", text: `Coupon ${res.coupon.code} created!` });
+        setShowCouponModal(false);
+        await loadCoupons();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to create coupon." });
+    }
+  };
+
+  // Toggle Coupon Active
+  const handleToggleCouponActive = async (coupon) => {
+    try {
+      await api.put(`/api/superadmin/billing/coupons/${coupon.id}`, {
+        is_active: coupon.is_active ? 0 : 1,
+      });
+      await loadCoupons();
+    } catch (err) {
+      alert("Failed to update coupon status.");
+    }
+  };
+
+  // Lookup User
+  const handleLookupUser = async (e) => {
+    e.preventDefault();
+    if (!lookupUserId.trim()) return;
+    try {
+      const res = await api.get(`/api/superadmin/billing/users/${lookupUserId.trim()}`);
+      if (res?.success) {
+        setLookedUpUser(res);
+      }
+    } catch (err) {
+      alert(err.message || "User not found.");
+      setLookedUpUser(null);
+    }
+  };
+
+  // Grant Subscription
+  const handleGrantSubscription = async (e) => {
+    e.preventDefault();
+    if (!lookedUpUser?.user?.id) return;
+    try {
+      const res = await api.post("/api/superadmin/billing/grant", {
+        user_id: lookedUpUser.user.id,
+        plan_code: grantForm.plan_code,
+        notes: grantForm.notes,
+      });
+      if (res?.success) {
+        alert(res.message || "Subscription granted!");
+        setShowGrantModal(false);
+        // Refresh lookup
+        const refresh = await api.get(`/api/superadmin/billing/users/${lookedUpUser.user.id}`);
+        if (refresh?.success) setLookedUpUser(refresh);
+        loadOverview();
+      }
+    } catch (err) {
+      alert(err.message || "Failed to grant subscription.");
+    }
+  };
+
+  // Download Invoice
+  const handleDownloadInvoice = async (orderId, invoiceNumber) => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${BASE_URL}/api/subscriptions/orders/${orderId}/invoice`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to download invoice.");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invoiceNumber || "Invoice"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert(err.message || "Could not download invoice.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:pl-72 lg:pr-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <ShieldCheck size={14} />
+              <span>Super Admin Portal</span>
+            </div>
+            <h1 className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">
+              Subscription & Billing Administration
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Real-time revenue metrics, expiry cohort forecasting, plans configuration, and coupon campaigns.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                loadOverview();
+                loadCohorts();
+                loadPlans();
+                loadCoupons();
+                loadOrders(orderPage);
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition"
+            >
+              <RefreshCw size={14} />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Global Alert */}
+        {message.text && (
+          <div
+            className={`flex items-center justify-between rounded-xl p-4 text-sm font-medium ${
+              message.type === "success"
+                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                : "bg-red-50 text-red-800 border border-red-200"
+            }`}
+          >
+            <span>{message.text}</span>
+            <button onClick={() => setMessage({ type: "", text: "" })} className="text-slate-500 hover:text-slate-800">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Tabs Bar */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+          {[
+            { id: "overview", label: "Overview & KPIs", icon: TrendingUp },
+            { id: "cohorts", label: "Expiry Cohorts & Campaigns", icon: Calendar },
+            { id: "plans", label: "Plans Management", icon: CreditCard },
+            { id: "coupons", label: "Coupons & Discounts", icon: Tag },
+            { id: "orders", label: "Orders & Payments", icon: DollarSign },
+            { id: "lookup", label: "User Lookup & Manual Grants", icon: Users },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                  isActive
+                    ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20"
+                    : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
+                }`}
+              >
+                <Icon size={15} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ========================================================
+            TAB 1: OVERVIEW & KPIS
+        ======================================================== */}
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+            {metrics ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Active Subscriptions</span>
+                    <CheckCircle2 size={18} className="text-emerald-600" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-slate-900">{metrics.activeSubscriptions}</p>
+                  <p className="mt-1 text-xs text-slate-500">Users with valid current access</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Expiring in 7 Days</span>
+                    <Clock size={18} className="text-amber-500" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-amber-600">{metrics.expiringWithin7Days}</p>
+                  <p className="mt-1 text-xs text-slate-500">Need immediate renewal outreach</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Expiring This Month</span>
+                    <Calendar size={18} className="text-sky-500" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-slate-900">{metrics.expiringThisMonth}</p>
+                  <p className="mt-1 text-xs text-slate-500">Scheduled to expire in current month</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Expired Subscriptions</span>
+                    <AlertCircle size={18} className="text-red-500" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-slate-700">{metrics.expiredSubscriptions}</p>
+                  <p className="mt-1 text-xs text-slate-500">Lapsed past accounts</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Renewed Accounts</span>
+                    <TrendingUp size={18} className="text-emerald-600" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-emerald-600">{metrics.renewedSubscriptions}</p>
+                  <p className="mt-1 text-xs text-slate-500">Customers with &gt; 1 term</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Collected Revenue</span>
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">Verified Paid</span>
+                  </div>
+                  <p className="mt-3 text-3xl font-black text-emerald-600">
+                    ₹{formatRupees(metrics.collectedRevenuePaise)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">Actual collected cash revenue (excl. manual grants)</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Expected Renewal Revenue</span>
+                    <Clock size={18} className="text-indigo-500" />
+                  </div>
+                  <p className="mt-3 text-3xl font-extrabold text-indigo-600">
+                    ₹{formatRupees(metrics.expectedRenewalRevenuePaise)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">30-day forecasted renewal pipeline</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center">
+                <RefreshCw className="h-6 w-6 animate-spin text-emerald-600" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 2: EXPIRY COHORTS & RENEWAL CAMPAIGNS
+        ======================================================== */}
+        {activeTab === "cohorts" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-bold text-slate-900">Monthly Expiry Distribution</h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Click any month to inspect the customer cohort expiring in that window or generate a renewal coupon campaign.
+              </p>
+
+              {cohorts.length === 0 ? (
+                <p className="py-6 text-center text-xs text-slate-400">No expiring cohort records available.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  {cohorts.map((c) => {
+                    const isSelected = selectedCohortMonth === c.month;
+                    return (
+                      <div
+                        key={c.month}
+                        onClick={() => handleSelectCohortMonth(c.month)}
+                        className={`rounded-xl p-4 text-center cursor-pointer border-2 transition ${
+                          isSelected
+                            ? "border-emerald-600 bg-emerald-50/50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:border-emerald-300"
+                        }`}
+                      >
+                        <p className="text-xs font-bold text-slate-500 uppercase">{c.month}</p>
+                        <p className="mt-2 text-2xl font-black text-slate-900">{c.user_count}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Expiring users</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {selectedCohortMonth && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base">
+                      Cohort: {selectedCohortMonth} ({cohortUsers.length} Users)
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Users whose effective subscription ends in this month.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCohortCampaign(selectedCohortMonth)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
+                  >
+                    <Gift size={14} />
+                    <span>Create Campaign Coupon</span>
+                  </button>
+                </div>
+
+                {loadingCohortUsers ? (
+                  <div className="flex h-24 items-center justify-center">
+                    <RefreshCw className="h-5 w-5 animate-spin text-emerald-600" />
+                  </div>
+                ) : cohortUsers.length === 0 ? (
+                  <p className="py-4 text-center text-xs text-slate-400">No users found for this month.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-slate-600">
+                      <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <tr>
+                          <th className="py-2.5 px-3">User</th>
+                          <th className="py-2.5 px-3">Business</th>
+                          <th className="py-2.5 px-3">Plan</th>
+                          <th className="py-2.5 px-3">Expires On</th>
+                          <th className="py-2.5 px-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {cohortUsers.map((u) => (
+                          <tr key={u.user_id}>
+                            <td className="py-3 px-3">
+                              <p className="font-bold text-slate-900">{u.user_name}</p>
+                              <p className="text-[11px] text-slate-400">{u.user_email || u.user_phone}</p>
+                            </td>
+                            <td className="py-3 px-3">{u.business_name || "—"}</td>
+                            <td className="py-3 px-3 font-semibold text-slate-800">{u.plan_name}</td>
+                            <td className="py-3 px-3">{formatDate(u.ends_at)}</td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                  u.subscription_status === "active"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {u.subscription_status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 3: PLANS MANAGEMENT
+        ======================================================== */}
+        {activeTab === "plans" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-bold text-slate-900 mb-1">Configured Subscription Plans</h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Update regular and introductory prices. Existing order history retains its historical amounts.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-4">Code</th>
+                      <th className="py-3 px-4">Plan Name</th>
+                      <th className="py-3 px-4">Duration</th>
+                      <th className="py-3 px-4">Regular Price</th>
+                      <th className="py-3 px-4">Introductory Price</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {plans.map((p) => (
+                      <tr key={p.id}>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{p.code}</td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900">{p.name}</td>
+                        <td className="py-3.5 px-4">{p.duration_months} Month(s)</td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-900">₹{formatRupees(p.price_paise)}</td>
+                        <td className="py-3.5 px-4 font-semibold text-emerald-600">
+                          ₹{formatRupees(p.introductory_price_paise)}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                              p.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {p.is_active ? "Active" : "Disabled"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditPlan(p)}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                          >
+                            <Edit size={12} />
+                            <span>Edit</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Edit Plan Modal */}
+            {editingPlan && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-bold text-slate-900">Edit Plan: {editingPlan.code}</h4>
+                    <button onClick={() => setEditingPlan(null)} className="text-slate-400 hover:text-slate-700">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSavePlan} className="space-y-3 text-xs">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Plan Display Name</label>
+                      <input
+                        type="text"
+                        value={planForm.name}
+                        onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Regular Price (₹)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={planForm.price_rupees}
+                        onChange={(e) => setPlanForm({ ...planForm, price_rupees: e.target.value })}
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Introductory Offer Price (₹)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={planForm.introductory_price_rupees}
+                        onChange={(e) => setPlanForm({ ...planForm, introductory_price_rupees: e.target.value })}
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Status</label>
+                      <select
+                        value={planForm.is_active}
+                        onChange={(e) => setPlanForm({ ...planForm, is_active: Number(e.target.value) })}
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                      >
+                        <option value={1}>Active</option>
+                        <option value={0}>Disabled</option>
+                      </select>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingPlan(null)}
+                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 4: COUPONS & DISCOUNTS
+        ======================================================== */}
+        {activeTab === "coupons" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Promo & Campaign Coupons</h3>
+                  <p className="text-xs text-slate-500">
+                    Create percentage or flat discount codes with limits and cohort targeting.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCouponModal(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition"
+                >
+                  <Plus size={15} />
+                  <span>Create Coupon</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-3">Code</th>
+                      <th className="py-3 px-3">Discount</th>
+                      <th className="py-3 px-3">Max Cap</th>
+                      <th className="py-3 px-3">Redemptions</th>
+                      <th className="py-3 px-3">Expiry Date</th>
+                      <th className="py-3 px-3">Target Cohort</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {coupons.map((c) => (
+                      <tr key={c.id}>
+                        <td className="py-3 px-3 font-mono font-bold text-emerald-700">{c.code}</td>
+                        <td className="py-3 px-3 font-semibold text-slate-900">
+                          {c.discount_type === "percent" ? `${c.discount_value}% OFF` : `₹${formatRupees(c.discount_value)} OFF`}
+                        </td>
+                        <td className="py-3 px-3">{c.max_discount_paise ? `₹${formatRupees(c.max_discount_paise)}` : "No Cap"}</td>
+                        <td className="py-3 px-3">
+                          {c.redemptions_count} {c.max_redemptions ? `/ ${c.max_redemptions}` : "(unlimited)"}
+                        </td>
+                        <td className="py-3 px-3">{c.valid_until ? formatDate(c.valid_until) : "Never"}</td>
+                        <td className="py-3 px-3">{c.target_cohort || "All Users"}</td>
+                        <td className="py-3 px-3">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                              c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {c.is_active ? "Active" : "Disabled"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCouponActive(c)}
+                            className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                          >
+                            {c.is_active ? "Disable" : "Enable"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Create Coupon Modal */}
+            {showCouponModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-bold text-slate-900">Create New Coupon</h4>
+                    <button onClick={() => setShowCouponModal(false)} className="text-slate-400 hover:text-slate-700">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCreateCoupon} className="space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Coupon Code</label>
+                        <input
+                          type="text"
+                          value={couponForm.code}
+                          onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                          placeholder="e.g. FESTIVE50"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Discount Type</label>
+                        <select
+                          value={couponForm.discount_type}
+                          onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        >
+                          <option value="percent">Percentage (%)</option>
+                          <option value="flat">Flat Amount (₹)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          {couponForm.discount_type === "percent" ? "Percentage Value (1-100)" : "Flat Rupees (₹)"}
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={couponForm.discount_value}
+                          onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })}
+                          placeholder={couponForm.discount_type === "percent" ? "20" : "200"}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Max Cap (₹, optional)</label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={couponForm.max_discount_rupees}
+                          onChange={(e) => setCouponForm({ ...couponForm, max_discount_rupees: e.target.value })}
+                          placeholder="e.g. 500"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Total Max Redemptions</label>
+                        <input
+                          type="number"
+                          value={couponForm.max_redemptions}
+                          onChange={(e) => setCouponForm({ ...couponForm, max_redemptions: e.target.value })}
+                          placeholder="e.g. 100 (blank = unlimited)"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Per User Limit</label>
+                        <input
+                          type="number"
+                          value={couponForm.per_user_limit}
+                          onChange={(e) => setCouponForm({ ...couponForm, per_user_limit: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Expiry Date (optional)</label>
+                        <input
+                          type="date"
+                          value={couponForm.valid_until}
+                          onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Target Cohort (optional)</label>
+                        <input
+                          type="text"
+                          value={couponForm.target_cohort}
+                          onChange={(e) => setCouponForm({ ...couponForm, target_cohort: e.target.value })}
+                          placeholder="e.g. 2026-10"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowCouponModal(false)}
+                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+                      >
+                        Create Coupon
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 5: ORDERS & PAYMENTS
+        ======================================================== */}
+        {activeTab === "orders" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Payment & Order Records</h3>
+                  <p className="text-xs text-slate-500">
+                    Audit all subscription orders, provider transactions, and generated invoices.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={orderSearch}
+                    onChange={(e) => setOrderSearch(e.target.value)}
+                    placeholder="Search order or customer..."
+                    className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
+                  />
+                  <select
+                    value={orderStatusFilter}
+                    onChange={(e) => {
+                      setOrderStatusFilter(e.target.value);
+                      loadOrders(1);
+                    }}
+                    className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="paid">Paid</option>
+                    <option value="created">Created</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  <button
+                    onClick={() => loadOrders(1)}
+                    className="rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-900"
+                  >
+                    Filter
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-3">Order / Invoice</th>
+                      <th className="py-3 px-3">Customer</th>
+                      <th className="py-3 px-3">Plan</th>
+                      <th className="py-3 px-3">Amount</th>
+                      <th className="py-3 px-3">Provider</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3">Date</th>
+                      <th className="py-3 px-3 text-right">Invoice</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {orders.map((o) => (
+                      <tr key={o.id}>
+                        <td className="py-3 px-3">
+                          <p className="font-mono font-bold text-slate-900">{o.order_number}</p>
+                          {o.invoice_number && <p className="text-[10px] text-emerald-600 font-semibold">{o.invoice_number}</p>}
+                        </td>
+                        <td className="py-3 px-3">
+                          <p className="font-semibold text-slate-800">{o.user_name}</p>
+                          <p className="text-[10px] text-slate-400">{o.user_email}</p>
+                        </td>
+                        <td className="py-3 px-3">{o.plan_name}</td>
+                        <td className="py-3 px-3 font-semibold text-slate-900">₹{formatRupees(o.total_paise)}</td>
+                        <td className="py-3 px-3 font-mono text-[11px] uppercase">{o.provider}</td>
+                        <td className="py-3 px-3">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                              o.status === "paid"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : o.status === "created"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {o.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">{formatDate(o.created_at)}</td>
+                        <td className="py-3 px-3 text-right">
+                          {o.status === "paid" && (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadInvoice(o.id, o.invoice_number)}
+                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              <Download size={12} />
+                              <span>PDF</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {orderPagination.pages > 1 && (
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                  <span className="text-xs text-slate-500">
+                    Page {orderPage} of {orderPagination.pages} ({orderPagination.total} total)
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={orderPage <= 1}
+                      onClick={() => loadOrders(orderPage - 1)}
+                      className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      disabled={orderPage >= orderPagination.pages}
+                      onClick={() => loadOrders(orderPage + 1)}
+                      className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 6: USER LOOKUP & COMPLIMENTARY GRANTS
+        ======================================================== */}
+        {activeTab === "lookup" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <h3 className="text-base font-bold text-slate-900">User Subscription Lookup</h3>
+              <p className="text-xs text-slate-500">
+                Enter a user ID to inspect their active status or issue complimentary grandfathered access.
+              </p>
+
+              <form onSubmit={handleLookupUser} className="flex gap-2 max-w-md">
+                <input
+                  type="number"
+                  value={lookupUserId}
+                  onChange={(e) => setLookupUserId(e.target.value)}
+                  placeholder="Enter User ID (e.g. 11)"
+                  className="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-900"
+                >
+                  Lookup
+                </button>
+              </form>
+
+              {lookedUpUser && (
+                <div className="mt-6 border-t border-slate-100 pt-6 space-y-6">
+                  {/* User Profile Card */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl bg-slate-50 p-4 border border-slate-200">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-base">{lookedUpUser.user.name} (ID: #{lookedUpUser.user.id})</h4>
+                      <p className="text-xs text-slate-500">{lookedUpUser.user.email} · {lookedUpUser.user.phone || "No phone"}</p>
+                      <p className="text-xs text-slate-600 mt-1 font-medium">{lookedUpUser.user.business_name || "No Business Name"}</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowGrantModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
+                      >
+                        <Gift size={14} />
+                        <span>Grant Complimentary Plan</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-700 hover:bg-red-100 shadow-sm"
+                      >
+                        <Trash2 size={14} />
+                        <span>Delete User</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Subscriptions */}
+                  <div>
+                    <h5 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2">Subscription History</h5>
+                    {lookedUpUser.subscriptions?.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-2">No subscriptions recorded.</p>
+                    ) : (
+                      <div className="overflow-x-auto rounded-xl border border-slate-200">
+                        <table className="w-full text-left text-xs text-slate-600">
+                          <thead className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <tr>
+                              <th className="py-2.5 px-3">Plan</th>
+                              <th className="py-2.5 px-3">Starts At</th>
+                              <th className="py-2.5 px-3">Ends At</th>
+                              <th className="py-2.5 px-3">Type</th>
+                              <th className="py-2.5 px-3">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {lookedUpUser.subscriptions.map((s) => (
+                              <tr key={s.id}>
+                                <td className="py-2.5 px-3 font-semibold text-slate-800">{s.plan_name}</td>
+                                <td className="py-2.5 px-3">{formatDate(s.starts_at)}</td>
+                                <td className="py-2.5 px-3 font-bold text-slate-900">{formatDate(s.ends_at)}</td>
+                                <td className="py-2.5 px-3">
+                                  {s.is_complimentary ? (
+                                    <span className="rounded bg-amber-100 text-amber-800 px-1.5 py-0.5 text-[10px] font-bold">
+                                      Complimentary
+                                    </span>
+                                  ) : (
+                                    <span className="rounded bg-emerald-100 text-emerald-800 px-1.5 py-0.5 text-[10px] font-bold">
+                                      Paid
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3">
+                                  <span
+                                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                      new Date(s.ends_at) > new Date()
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}
+                                  >
+                                    {new Date(s.ends_at) > new Date() ? "Active" : "Expired"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Grant Modal */}
+            {showGrantModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-bold text-slate-900">Grant Complimentary Subscription</h4>
+                    <button onClick={() => setShowGrantModal(false)} className="text-slate-400 hover:text-slate-700">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleGrantSubscription} className="space-y-3 text-xs">
+                    <div>
+                      <p className="text-slate-500 mb-2">
+                        Granting for: <strong className="text-slate-800">{lookedUpUser.user.name}</strong> (#{lookedUpUser.user.id})
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Select Plan Duration</label>
+                      <select
+                        value={grantForm.plan_code}
+                        onChange={(e) => setGrantForm({ ...grantForm, plan_code: e.target.value })}
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                      >
+                        {plans.map((p) => (
+                          <option key={p.code} value={p.code}>
+                            {p.name} ({p.duration_months} Months)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Notes / Reason</label>
+                      <textarea
+                        rows={2}
+                        value={grantForm.notes}
+                        onChange={(e) => setGrantForm({ ...grantForm, notes: e.target.value })}
+                        placeholder="e.g. Grandfathered legacy user or customer care support"
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowGrantModal(false)}
+                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+                      >
+                        Confirm Grant
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Delete User Modal */}
+      <DeleteUserModal
+        isOpen={showDeleteModal}
+        user={lookedUpUser?.user}
+        onClose={() => setShowDeleteModal(false)}
+        onSuccess={(res) => {
+          alert(res.message || "User account updated successfully.");
+          setLookedUpUser(null);
+          setLookupUserId("");
+          loadOverview();
+        }}
+      />
+    </div>
+  );
+}
+

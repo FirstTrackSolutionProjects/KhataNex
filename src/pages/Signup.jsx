@@ -61,7 +61,7 @@ const Signup = () => {
         phone: formData.phone,
         password: formData.password,
       });
-      navigate("/customers");
+      navigate("/subscription?onboarding=true");
     } catch (err) {
       setError(err.message || "Could not create your account. Please try again.");
     } finally {

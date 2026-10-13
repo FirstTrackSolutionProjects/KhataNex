@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
 import Sidebar from "./components/Sidebar";
+import SubscriptionRestrictedBanner from "./components/SubscriptionRestrictedBanner";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 // =====================================
@@ -53,6 +54,8 @@ import MyUserDetails from "./pages/MyUserDetails";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Banking from "./pages/Banking";
+import Subscription from "./pages/Subscription";
+import BillingDashboard from "./pages/BillingDashboard";
 
 // =====================================
 // Dashboard Layout (NO Navbar - pages have their own header)
@@ -61,6 +64,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
       <Sidebar />
+      <SubscriptionRestrictedBanner />
       <main>{children}</main>
       <BottomNav />
     </div>
@@ -438,6 +442,28 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subscription"
+            element={
+              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]}>
+                <DashboardLayout>
+                  <Subscription />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/billing"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <BillingDashboard />
                 </DashboardLayout>
               </ProtectedRoute>
             }

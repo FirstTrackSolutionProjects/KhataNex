@@ -15,6 +15,7 @@ import {
   Landmark,
   UserRound,
   User,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -31,6 +32,7 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
   const menuItems = [
     ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
     ...(isSuperadmin ? [{ name: "My Users", path: "/my-users", icon: UserRound }] : []),
+    ...(isSuperadmin ? [{ name: "Billing", path: "/billing", icon: CreditCard }] : []),
     { name: "Customers", path: "/customers", icon: Users },
     { name: "Khata", path: "/khata", icon: BookOpen },
     { name: "Payments", path: "/payments", icon: CreditCard },
@@ -266,6 +268,32 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
             />
 
             <span>Settings</span>
+          </NavLink>
+
+          <NavLink
+            to="/subscription"
+            onClick={handleClose}
+            className={({ isActive }) =>
+              `
+              mt-1 flex items-center gap-3
+              rounded-xl px-3 py-3
+              text-sm font-semibold
+              transition-all duration-200
+
+              ${
+                isActive
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+              }
+              `
+            }
+          >
+            <Sparkles
+              size={20}
+              strokeWidth={1.9}
+            />
+
+            <span>Subscription</span>
           </NavLink>
 
           <button

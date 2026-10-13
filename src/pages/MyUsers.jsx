@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RefreshCw, Search, Users } from "lucide-react";
+import { RefreshCw, Search, Users, Trash2, CheckCircle2 } from "lucide-react";
 import api from "../lib/api";
+import DeleteUserModal from "../components/DeleteUserModal";
 
 const formatNumber = (value) => {
   const number = Number(value || 0);
@@ -16,6 +17,9 @@ const MyUsers = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successNotification, setSuccessNotification] = useState("");
+  const [selectedUserForDelete, setSelectedUserForDelete] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const loadUsers = async () => {
@@ -96,6 +100,22 @@ const MyUsers = () => {
         </div>
       </div>
 
+      {successNotification && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+            <span>{successNotification}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessNotification("")}
+            className="text-emerald-700 hover:text-emerald-900 font-bold text-xs"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -103,7 +123,7 @@ const MyUsers = () => {
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-          <table className="min-w-[1500px] w-full text-left text-sm">
+          <table className="min-w-[1550px] w-full text-left text-sm">
             <thead>
               <tr className="bg-emerald-600 text-white">
                 <th className="px-4 py-3 font-semibold">Account ID</th>
@@ -123,6 +143,7 @@ const MyUsers = () => {
                 <th className="px-4 py-3 font-semibold">Stock</th>
                 <th className="px-4 py-3 font-semibold">Vehicles</th>
                 <th className="px-4 py-3 font-semibold">Activity</th>
+                <th className="px-4 py-3 font-semibold text-center">Actions</th>
               </tr>
             </thead>
 
@@ -130,7 +151,7 @@ const MyUsers = () => {
               {loading ? (
                 <tr>
                   <td
-                    colSpan="17"
+                    colSpan="18"
                     className="px-4 py-12 text-center text-slate-500"
                   >
                     Loading users...
@@ -139,7 +160,7 @@ const MyUsers = () => {
               ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="17"
+                    colSpan="18"
                     className="px-4 py-12 text-center text-slate-500"
                   >
                     No users found.
@@ -241,6 +262,23 @@ const MyUsers = () => {
                           : "Logged out"}
                       </span>
                     </td>
+
+                    <td
+                      className="px-4 py-3 text-center whitespace-nowrap"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedUserForDelete(user);
+                          setDeleteModalOpen(true);
+                        }}
+                        title="Delete User Account"
+                        className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600 focus:outline-none"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -251,6 +289,19 @@ const MyUsers = () => {
           Showing {filteredUsers.length} of {users.length} users
         </div>
       </div>
+
+      <DeleteUserModal
+        isOpen={deleteModalOpen}
+        user={selectedUserForDelete}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedUserForDelete(null);
+        }}
+        onSuccess={(res) => {
+          setSuccessNotification(res.message || "User account updated successfully.");
+          loadUsers();
+        }}
+      />
     </div>
   );
 };
