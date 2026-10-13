@@ -22,6 +22,15 @@ import {
   BarChart3,
   X,
   Trash2,
+  Settings,
+  Sliders,
+  Lock,
+  Check,
+  RotateCcw,
+  ShieldAlert,
+  Key,
+  FileText,
+  Info,
 } from "lucide-react";
 import api, { getToken } from "../lib/api";
 import DeleteUserModal from "../components/DeleteUserModal";
@@ -45,7 +54,7 @@ const formatDate = (dateStr) => {
 };
 
 export default function BillingDashboard() {
-  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'cohorts', 'plans', 'coupons', 'orders', 'lookup'
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'cohorts', 'plans', 'coupons', 'orders', 'lookup', 'settings'
 
   // Overview metrics
   const [metrics, setMetrics] = useState(null);
@@ -59,8 +68,17 @@ export default function BillingDashboard() {
 
   // Plans
   const [plans, setPlans] = useState([]);
-  const [editingPlan, setEditingPlan] = useState(null);
-  const [planForm, setPlanForm] = useState({ name: "", price_rupees: "", introductory_price_rupees: "", is_active: 1 });
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planForm, setPlanForm] = useState({
+    id: null,
+    code: "",
+    name: "",
+    description: "",
+    duration_months: 1,
+    price_rupees: "",
+    introductory_price_rupees: "",
+    is_active: 1,
+  });
 
   // Coupons
   const [coupons, setCoupons] = useState([]);
@@ -91,6 +109,21 @@ export default function BillingDashboard() {
   const [showGrantModal, setShowGrantModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [grantForm, setGrantForm] = useState({ plan_code: "monthly", notes: "" });
+
+  // Global Subscription Settings & Payment Gateway
+  const [settings, setSettings] = useState(null);
+  const [gatewayStatus, setGatewayStatus] = useState(null);
+  const [auditHistory, setAuditHistory] = useState([]);
+  const [loadingSettings, setLoadingSettings] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({
+    intro_offers_enabled: 1,
+    tax_percent: 18,
+    tax_inclusive: 1,
+    subscription_enforcement: "off",
+    reminders_enabled: 1,
+    reminder_days: "7,3,1",
+  });
+  const [showEnforcementModal, setShowEnforcementModal] = useState(false);
 
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -161,12 +194,60 @@ export default function BillingDashboard() {
     }
   };
 
+  // 6. Load Settings & Gateway Status
+  const loadSettings = async () => {
+    try {
+      setLoadingSettings(true);
+      const res = await api.get("/api/superadmin/billing/settings");
+      if (res?.success) {
+        setSettings(res.settings);
+        setGatewayStatus(res.paymentGateway);
+        setAuditHistory(res.auditHistory || []);
+        if (res.settings) {
+          setSettingsForm({
+            intro_offers_enabled: res.settings.intro_offers_enabled ? 1 : 0,
+            tax_percent: res.settings.tax_percent !== undefined ? res.settings.tax_percent : 18,
+            tax_inclusive: res.settings.tax_inclusive !== undefined ? (res.settings.tax_inclusive ? 1 : 0) : 1,
+            subscription_enforcement: res.settings.subscription_enforcement || "off",
+            reminders_enabled: res.settings.reminders_enabled !== undefined ? (res.settings.reminders_enabled ? 1 : 0) : 1,
+            reminder_days: res.settings.reminder_days || "7,3,1",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Settings load failed:", err);
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
+
+  const handleSaveSettings = async (confirmEnforce = false) => {
+    if (settingsForm.subscription_enforcement === "on" && settings?.subscription_enforcement !== "on" && !confirmEnforce) {
+      setShowEnforcementModal(true);
+      return;
+    }
+    try {
+      const res = await api.patch("/api/superadmin/billing/settings", {
+        ...settingsForm,
+        confirm_enforcement: confirmEnforce ? true : undefined,
+      });
+      if (res?.success) {
+        setMessage({ type: "success", text: "Subscription settings saved successfully!" });
+        setShowEnforcementModal(false);
+        await loadSettings();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to update settings." });
+    }
+  };
+
   useEffect(() => {
     loadOverview();
     loadCohorts();
     loadPlans();
     loadCoupons();
     loadOrders(1);
+    loadSettings();
   }, []);
 
   const handleSelectCohortMonth = async (month) => {
@@ -194,33 +275,97 @@ export default function BillingDashboard() {
     setShowCouponModal(true);
   };
 
-  // Plan Edit
-  const handleStartEditPlan = (plan) => {
-    setEditingPlan(plan);
+  // Plan Create & Edit
+  const handleStartCreatePlan = () => {
     setPlanForm({
+      id: null,
+      code: "",
+      name: "",
+      description: "",
+      duration_months: 1,
+      price_rupees: "",
+      introductory_price_rupees: "",
+      is_active: 1,
+    });
+    setShowPlanModal(true);
+  };
+
+  const handleStartEditPlan = (plan) => {
+    setPlanForm({
+      id: plan.id,
+      code: plan.code,
       name: plan.name,
+      description: plan.description || "",
+      duration_months: plan.duration_months,
       price_rupees: (plan.price_paise / 100).toString(),
       introductory_price_rupees: (plan.introductory_price_paise / 100).toString(),
       is_active: plan.is_active,
     });
+    setShowPlanModal(true);
   };
 
   const handleSavePlan = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.put(`/api/superadmin/billing/plans/${editingPlan.id}`, {
+      const payload = {
         name: planForm.name,
+        description: planForm.description || null,
+        duration_months: Number(planForm.duration_months),
         price_paise: Math.round(Number(planForm.price_rupees) * 100),
         introductory_price_paise: Math.round(Number(planForm.introductory_price_rupees) * 100),
         is_active: planForm.is_active,
-      });
+      };
+
+      let res;
+      if (planForm.id) {
+        res = await api.put(`/api/superadmin/billing/plans/${planForm.id}`, payload);
+      } else {
+        payload.code = planForm.code.trim().toLowerCase();
+        res = await api.post("/api/superadmin/billing/plans", payload);
+      }
+
       if (res?.success) {
-        setMessage({ type: "success", text: "Plan updated successfully!" });
-        setEditingPlan(null);
+        setMessage({
+          type: "success",
+          text: planForm.id ? "Plan updated successfully!" : "Plan created successfully!",
+        });
+        setShowPlanModal(false);
         await loadPlans();
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.message || "Failed to update plan." });
+      setMessage({ type: "error", text: err.message || "Failed to save plan." });
+    }
+  };
+
+  // Revoke User Subscription
+  const handleRevokeSubscription = async (userId) => {
+    const reason = prompt("Enter the reason for revoking this user's subscription:", "Administrative cancellation");
+    if (reason === null) return;
+    try {
+      const res = await api.post(`/api/superadmin/billing/users/${userId}/revoke`, { reason });
+      if (res?.success) {
+        setMessage({ type: "success", text: res.message || "Subscription revoked successfully." });
+        const refresh = await api.get(`/api/superadmin/billing/users/${userId}`);
+        if (refresh?.success) setLookedUpUser(refresh);
+        loadOverview();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to revoke subscription." });
+    }
+  };
+
+  // Reset Introductory Offer Eligibility
+  const handleResetIntroOffer = async (userId) => {
+    if (!window.confirm("Are you sure you want to restore one-time introductory offer eligibility for this user?")) return;
+    try {
+      const res = await api.post(`/api/superadmin/billing/users/${userId}/reset-intro`);
+      if (res?.success) {
+        setMessage({ type: "success", text: res.message || "Introductory offer eligibility reset successfully." });
+        const refresh = await api.get(`/api/superadmin/billing/users/${userId}`);
+        if (refresh?.success) setLookedUpUser(refresh);
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to reset introductory offer." });
     }
   };
 
@@ -349,6 +494,7 @@ export default function BillingDashboard() {
                 loadPlans();
                 loadCoupons();
                 loadOrders(orderPage);
+                loadSettings();
               }}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition"
             >
@@ -382,7 +528,8 @@ export default function BillingDashboard() {
             { id: "plans", label: "Plans Management", icon: CreditCard },
             { id: "coupons", label: "Coupons & Discounts", icon: Tag },
             { id: "orders", label: "Orders & Payments", icon: DollarSign },
-            { id: "lookup", label: "User Lookup & Manual Grants", icon: Users },
+            { id: "lookup", label: "User Lookup & Controls", icon: Users },
+            { id: "settings", label: "Settings & Gateway", icon: Settings },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -599,17 +746,29 @@ export default function BillingDashboard() {
         {activeTab === "plans" && (
           <div className="space-y-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 mb-1">Configured Subscription Plans</h3>
-              <p className="text-xs text-slate-500 mb-4">
-                Update regular and introductory prices. Existing order history retains its historical amounts.
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Configured Subscription Plans</h3>
+                  <p className="text-xs text-slate-500">
+                    Manage regular prices, introductory rates, descriptions, and durations.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleStartCreatePlan}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition"
+                >
+                  <Plus size={14} />
+                  <span>Create Plan</span>
+                </button>
+              </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600">
                   <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
                     <tr>
                       <th className="py-3 px-4">Code</th>
-                      <th className="py-3 px-4">Plan Name</th>
+                      <th className="py-3 px-4">Plan Name & Description</th>
                       <th className="py-3 px-4">Duration</th>
                       <th className="py-3 px-4">Regular Price</th>
                       <th className="py-3 px-4">Introductory Price</th>
@@ -621,7 +780,10 @@ export default function BillingDashboard() {
                     {plans.map((p) => (
                       <tr key={p.id}>
                         <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{p.code}</td>
-                        <td className="py-3.5 px-4 font-bold text-slate-900">{p.name}</td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-bold text-slate-900 block">{p.name}</span>
+                          {p.description && <span className="text-[11px] text-slate-400 block line-clamp-1">{p.description}</span>}
+                        </td>
                         <td className="py-3.5 px-4">{p.duration_months} Month(s)</td>
                         <td className="py-3.5 px-4 font-semibold text-slate-900">₹{formatRupees(p.price_paise)}</td>
                         <td className="py-3.5 px-4 font-semibold text-emerald-600">
@@ -653,24 +815,65 @@ export default function BillingDashboard() {
               </div>
             </div>
 
-            {/* Edit Plan Modal */}
-            {editingPlan && (
+            {/* Create / Edit Plan Modal */}
+            {showPlanModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
                 <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h4 className="font-bold text-slate-900">Edit Plan: {editingPlan.code}</h4>
-                    <button onClick={() => setEditingPlan(null)} className="text-slate-400 hover:text-slate-700">
+                    <h4 className="font-bold text-slate-900">
+                      {planForm.id ? `Edit Plan: ${planForm.code}` : "Create New Subscription Plan"}
+                    </h4>
+                    <button onClick={() => setShowPlanModal(false)} className="text-slate-400 hover:text-slate-700">
                       <X size={18} />
                     </button>
                   </div>
 
                   <form onSubmit={handleSavePlan} className="space-y-3 text-xs">
+                    {!planForm.id && (
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Plan Code (Unique Identifier)</label>
+                        <input
+                          type="text"
+                          value={planForm.code}
+                          onChange={(e) => setPlanForm({ ...planForm, code: e.target.value.toLowerCase() })}
+                          placeholder="e.g. quarterly or lifetime"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    )}
+
                     <div>
                       <label className="block font-semibold text-slate-700 mb-1">Plan Display Name</label>
                       <input
                         type="text"
                         value={planForm.name}
                         onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                        placeholder="e.g. Premium Business 3 Months"
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Description / Summary</label>
+                      <input
+                        type="text"
+                        value={planForm.description}
+                        onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                        placeholder="e.g. Full ledger access with multi-device sync"
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Duration (Months)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={planForm.duration_months}
+                        onChange={(e) => setPlanForm({ ...planForm, duration_months: e.target.value })}
                         className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
                         required
                       />
@@ -715,7 +918,7 @@ export default function BillingDashboard() {
                     <div className="flex justify-end gap-2 pt-3">
                       <button
                         type="button"
-                        onClick={() => setEditingPlan(null)}
+                        onClick={() => setShowPlanModal(false)}
                         className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
                       >
                         Cancel
@@ -724,7 +927,7 @@ export default function BillingDashboard() {
                         type="submit"
                         className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
                       >
-                        Save Changes
+                        {planForm.id ? "Save Changes" : "Create Plan"}
                       </button>
                     </div>
                   </form>
@@ -1105,12 +1308,45 @@ export default function BillingDashboard() {
                   {/* User Profile Card */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl bg-slate-50 p-4 border border-slate-200">
                     <div>
-                      <h4 className="font-bold text-slate-900 text-base">{lookedUpUser.user.name} (ID: #{lookedUpUser.user.id})</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-900 text-base">{lookedUpUser.user.name} (ID: #{lookedUpUser.user.id})</h4>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            lookedUpUser.user.has_used_intro_offer
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-emerald-100 text-emerald-800"
+                          }`}
+                        >
+                          {lookedUpUser.user.has_used_intro_offer ? "Intro Offer: Used" : "Intro Offer: Eligible"}
+                        </span>
+                      </div>
                       <p className="text-xs text-slate-500">{lookedUpUser.user.email} · {lookedUpUser.user.phone || "No phone"}</p>
                       <p className="text-xs text-slate-600 mt-1 font-medium">{lookedUpUser.user.business_name || "No Business Name"}</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
+                      {lookedUpUser.user.has_used_intro_offer === 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleResetIntroOffer(lookedUpUser.user.id)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 shadow-sm"
+                        >
+                          <RotateCcw size={14} />
+                          <span>Reset Intro Offer</span>
+                        </button>
+                      )}
+
+                      {lookedUpUser.subscriptions?.some((s) => new Date(s.ends_at) > new Date()) && (
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeSubscription(lookedUpUser.user.id)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-700 hover:bg-red-100 shadow-sm"
+                        >
+                          <ShieldAlert size={14} />
+                          <span>Revoke Subscription</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => setShowGrantModal(true)}
@@ -1247,6 +1483,338 @@ export default function BillingDashboard() {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 7: SUBSCRIPTION SETTINGS & PAYMENT GATEWAY
+        ======================================================== */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            {/* Payment Provider & Gateway Status */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Key size={18} className="text-emerald-600" />
+                    <span>Payment Gateway Provider Status</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Live production status and credentials security diagnostics. Secrets are never exposed.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                      gatewayStatus?.isConfigured
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    <span className={`h-2 w-2 rounded-full ${gatewayStatus?.isConfigured ? "bg-emerald-500" : "bg-amber-500"}`} />
+                    <span>{gatewayStatus?.mode?.toUpperCase() || "UNCONFIGURED"}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gateway Provider</span>
+                  <p className="mt-1 text-base font-extrabold text-slate-900 capitalize">
+                    {gatewayStatus?.provider || "Not Configured"}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {gatewayStatus?.provider === "razorpay" ? "Official Razorpay Node.js SDK" : "Development Mock Adapter"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Public Key Preview</span>
+                  <p className="mt-1 text-base font-mono font-bold text-slate-900">
+                    {gatewayStatus?.keyIdPreview || "Not Configured"}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Safe frontend identifier
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Webhook Secret</span>
+                  <p className="mt-1 text-base font-bold text-slate-900 flex items-center gap-1.5">
+                    {gatewayStatus?.hasWebhookSecret ? (
+                      <>
+                        <ShieldCheck size={16} className="text-emerald-600" />
+                        <span className="text-emerald-700">Configured (Protected)</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={16} className="text-amber-600" />
+                        <span className="text-amber-700">Not Configured</span>
+                      </>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    HMAC signature verification
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-xl bg-slate-100 p-3.5 text-xs text-slate-600 flex items-center gap-2.5">
+                <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
+                <span>
+                  <strong>Security Guard:</strong> Live production environments strictly reject mock payment adapters. Razorpay secrets and webhook secrets are stored in protected environment variables and are never displayed or exposed over API.
+                </span>
+              </div>
+            </div>
+
+            {/* Global Subscription Settings Form */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="border-b border-slate-100 pb-4 mb-5">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Sliders size={18} className="text-emerald-600" />
+                  <span>Platform Subscription Rules & Enforcement</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure tax treatment, introductory offer access, reminder triggers, and write enforcement.
+                </p>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveSettings(false);
+                }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Introductory Offer Toggle */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-900 text-xs">Platform-wide Introductory Offers</label>
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.intro_offers_enabled === 1}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            intro_offers_enabled: e.target.checked ? 1 : 0,
+                          })
+                        }
+                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      When enabled, first-time registered users can purchase plans at discounted introductory prices. When disabled, standard regular prices apply to everyone.
+                    </p>
+                  </div>
+
+                  {/* Subscription Write Enforcement */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <label className="block font-bold text-slate-900 text-xs">
+                      Subscription Write Access Enforcement
+                    </label>
+                    <select
+                      value={settingsForm.subscription_enforcement}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          subscription_enforcement: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs font-semibold focus:border-emerald-600 focus:outline-none"
+                    >
+                      <option value="off">Off — Standard Free Access (Soft Banners Only)</option>
+                      <option value="on">On — Strict Enforcement (Read-Only Writes for Unsubscribed)</option>
+                    </select>
+                    <p className="text-[11px] text-slate-500">
+                      Default is <strong>Off</strong> to ensure existing users are never blocked. Turning this <strong>On</strong> blocks unsubscribed users from creating customers, invoices, debit/credit entries, and collections.
+                    </p>
+                  </div>
+
+                  {/* Tax Percentage */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <label className="block font-bold text-slate-900 text-xs">GST Tax Percentage (%)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="50"
+                      value={settingsForm.tax_percent}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          tax_percent: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
+                      required
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Default standard rate is 18.00%. Used for official tax breakdown and reverse calculation.
+                    </p>
+                  </div>
+
+                  {/* Tax Inclusive Pricing */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-900 text-xs">Tax-Inclusive Advertised Pricing</label>
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.tax_inclusive === 1}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            tax_inclusive: e.target.checked ? 1 : 0,
+                          })
+                        }
+                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      When checked, displayed checkout totals include GST (no surprise charges). The taxable amount is automatically back-calculated to the single paisa.
+                    </p>
+                  </div>
+
+                  {/* Expiry Reminders */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-900 text-xs">Automated Renewal Notifications</label>
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.reminders_enabled === 1}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            reminders_enabled: e.target.checked ? 1 : 0,
+                          })
+                        }
+                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Send scheduled renewal alerts and reminder emails before subscription expiration.
+                    </p>
+                  </div>
+
+                  {/* Reminder Schedule */}
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-2">
+                    <label className="block font-bold text-slate-900 text-xs">
+                      Reminder Days Schedule (Days Before Expiry)
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.reminder_days}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          reminder_days: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. 7,3,1"
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Comma-separated list of days before expiration to trigger automated notifications (e.g. "7,3,1").
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={loadingSettings}
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition disabled:opacity-50"
+                  >
+                    {loadingSettings ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check size={14} />}
+                    <span>Save Platform Settings</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Audit Log Trail */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-1">
+                <FileText size={18} className="text-emerald-600" />
+                <span>Subscription Settings Audit Trail</span>
+              </h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Immutable chronological log of all administrative updates, price revisions, and complimentary grants.
+              </p>
+
+              {auditHistory.length === 0 ? (
+                <p className="text-xs text-slate-400 py-6 text-center">No administrative changes recorded yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-600">
+                    <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
+                      <tr>
+                        <th className="py-2.5 px-3">Timestamp</th>
+                        <th className="py-2.5 px-3">Admin</th>
+                        <th className="py-2.5 px-3">Action</th>
+                        <th className="py-2.5 px-3">Details / Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                      {auditHistory.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/50">
+                          <td className="py-2.5 px-3 text-slate-500 font-sans">{formatDate(item.created_at)}</td>
+                          <td className="py-2.5 px-3 font-sans font-semibold text-slate-800">
+                            {item.superadmin_name || `Admin #${item.superadmin_id}`}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="rounded-md bg-slate-100 text-slate-800 px-2 py-0.5 text-[10px] font-bold">
+                              {item.action}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 max-w-xs truncate text-slate-600" title={item.new_value}>
+                            {item.new_value || item.previous_value || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Confirmation Modal for Activating Enforcement */}
+            {showEnforcementModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+                  <div className="flex items-center gap-3 text-amber-600">
+                    <AlertCircle size={24} className="shrink-0" />
+                    <h4 className="font-bold text-slate-900 text-base">Confirm Write Access Enforcement</h4>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Activating subscription write enforcement will immediately restrict all users without an active subscription to <strong>read-only mode</strong>. They will not be able to create new customers, invoices, debit/credit records, or collections.
+                  </p>
+
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+                    Are you sure you want to enforce subscription restrictions platform-wide?
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowEnforcementModal(false)}
+                      className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSaveSettings(true)}
+                      className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 shadow"
+                    >
+                      Yes, Enable Write Enforcement
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

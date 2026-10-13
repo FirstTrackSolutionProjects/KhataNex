@@ -253,6 +253,7 @@ export default function Subscription() {
               type: "error",
               text: "Checkout was closed before payment completion. You can retry anytime.",
             });
+            api.post(`/api/subscriptions/orders/${orderData.id}/cancel`).catch(() => {});
           },
         },
       };
@@ -264,6 +265,10 @@ export default function Subscription() {
           text: response.error?.description || "Payment failed. Please verify card details or try a different payment method.",
         });
         setCheckoutLoading(false);
+        api.post(`/api/subscriptions/orders/${orderData.id}/fail`, {
+          error_code: response.error?.code,
+          error_description: response.error?.description,
+        }).catch(() => {});
       });
       rzp.open();
     } catch (err) {
@@ -523,6 +528,9 @@ export default function Subscription() {
                         /{p.duration_months === 1 ? "month" : `${p.duration_months} mos`}
                       </span>
                     </div>
+                    <p className="text-[11px] font-semibold text-emerald-700 mt-1">
+                      Includes 18% GST · No hidden fees
+                    </p>
 
                     <ul className="mt-6 space-y-2.5 text-xs text-slate-600">
                       <li className="flex items-center gap-2">
@@ -648,7 +656,7 @@ export default function Subscription() {
 
                 {pricing.taxPercent > 0 && (
                   <div className="flex justify-between text-xs text-slate-600">
-                    <span>GST ({pricing.taxPercent}%):</span>
+                    <span>GST ({pricing.taxPercent}% included):</span>
                     <span>₹{formatRupees(pricing.taxPaise)}</span>
                   </div>
                 )}
@@ -656,7 +664,10 @@ export default function Subscription() {
                 <div className="my-2 border-t border-slate-200" />
 
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-slate-900">Total Payable:</span>
+                  <div>
+                    <span className="text-sm font-bold text-slate-900">Total Payable:</span>
+                    <p className="text-[10px] text-slate-500">Final checkout price · All taxes included</p>
+                  </div>
                   <span className="text-2xl font-black text-emerald-600">
                     ₹{formatRupees(pricing.totalPaise)}
                   </span>
