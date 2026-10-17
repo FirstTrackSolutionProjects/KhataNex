@@ -4,12 +4,9 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   Users,
-  Plus,
   Menu,
   Bell,
   Search,
-  Ban,
-  CheckCircle2,
   Home,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +14,6 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import TransactionCard from "../components/TransactionCard";
-import Button from "../components/Button";
 import ProfileDropdown from "../components/ProfileDropdown";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
@@ -37,7 +33,6 @@ const Dashboard = () => {
     customerCount: 0,
   });
   const [transactions, setTransactions] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -45,12 +40,11 @@ const Dashboard = () => {
     setLoading(true);
     setError("");
     try {
-      const [summaryRes, customersRes, expenseSummaryRes, khataRes, employeesRes] = await Promise.all([
+      const [summaryRes, customersRes, expenseSummaryRes, khataRes] = await Promise.all([
         api.get("/api/collections/summary"),
         api.get("/api/customers"),
         api.get("/api/expenses/summary"),
         api.get("/api/khata"),
-        api.get("/api/superadmin/employees"),
       ]);
 
       const totalDue = (customersRes.customers || []).reduce(
@@ -66,7 +60,6 @@ const Dashboard = () => {
       });
 
       setTransactions((khataRes.entries || []).slice(0, 6));
-      setEmployees(employeesRes.employees || []);
     } catch (err) {
       setError(err.message || "Could not load dashboard data.");
     } finally {
@@ -99,16 +92,6 @@ const Dashboard = () => {
 
   const handleProfileClick = () => {
     navigate("/profile");
-  };
-
-  const toggleEmployeeStatus = async (employee) => {
-    const nextStatus = employee.status === "active" ? "inactive" : "active";
-    try {
-      await api.patch(`/api/superadmin/users/${employee.id}/status`, { status: nextStatus });
-      loadDashboard();
-    } catch (err) {
-      setError(err.message || "Could not update employee status.");
-    }
   };
 
   const formatMoney = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
@@ -242,10 +225,10 @@ const Dashboard = () => {
           </div>
 
           {/* CONTENT */}
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 xl:grid-cols-3">
+          <div className="mt-5 sm:mt-6">
 
             {/* RECENT TRANSACTIONS */}
-            <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 xl:col-span-2">
+            <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
 
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
@@ -273,52 +256,6 @@ const Dashboard = () => {
                       date={new Date(t.date).toLocaleDateString("en-IN")}
                       description={t.description}
                     />
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* EMPLOYEES */}
-            <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-
-              <h3 className="font-bold text-slate-900">
-                Employees
-              </h3>
-              <p className="mt-1 text-xs text-slate-400">
-                Accounts you've created for your team
-              </p>
-
-              <div className="mt-4 space-y-2">
-                {loading ? (
-                  <p className="text-sm text-slate-400">Loading...</p>
-                ) : employees.length === 0 ? (
-                  <p className="text-sm text-slate-400">No employees added yet.</p>
-                ) : (
-                  employees.map((emp) => (
-                    <div
-                      key={emp.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 p-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-800">
-                          {emp.name || emp.email}
-                        </p>
-                        <p className="truncate text-xs text-slate-400">
-                          {emp.employee_role_type || "Employee"} · {emp.status}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => toggleEmployeeStatus(emp)}
-                        className={`shrink-0 rounded-lg p-2 transition ${
-                          emp.status === "active"
-                            ? "text-red-500 hover:bg-red-50"
-                            : "text-emerald-600 hover:bg-emerald-50"
-                        }`}
-                        title={emp.status === "active" ? "Deactivate" : "Activate"}
-                      >
-                        {emp.status === "active" ? <Ban size={17} /> : <CheckCircle2 size={17} />}
-                      </button>
-                    </div>
                   ))
                 )}
               </div>
