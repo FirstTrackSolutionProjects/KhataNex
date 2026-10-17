@@ -31,9 +31,14 @@ import {
   Key,
   FileText,
   Info,
+  Menu,
+  Sparkles,
+  Crown,
 } from "lucide-react";
 import api, { getToken } from "../lib/api";
 import DeleteUserModal from "../components/DeleteUserModal";
+import Sidebar from "../components/Sidebar";
+import PageHeader from "../components/PageHeader";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
@@ -54,7 +59,8 @@ const formatDate = (dateStr) => {
 };
 
 export default function BillingDashboard() {
-  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'cohorts', 'plans', 'coupons', 'orders', 'lookup', 'settings'
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'cohorts', 'plans', 'coupons', 'promotions', 'orders', 'lookup', 'settings'
 
   // Overview metrics
   const [metrics, setMetrics] = useState(null);
@@ -69,22 +75,35 @@ export default function BillingDashboard() {
   // Plans
   const [plans, setPlans] = useState([]);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [newFeatureInput, setNewFeatureInput] = useState("");
   const [planForm, setPlanForm] = useState({
     id: null,
     code: "",
     name: "",
     description: "",
+    summary: "",
     duration_months: 1,
+    billing_interval: "monthly",
     price_rupees: "",
     introductory_price_rupees: "",
+    promotional_badge: "",
+    display_order: 1,
+    is_highlighted: 0,
+    features: [],
     is_active: 1,
   });
 
   // Coupons
   const [coupons, setCoupons] = useState([]);
   const [showCouponModal, setShowCouponModal] = useState(false);
+  const [showEditCouponModal, setShowEditCouponModal] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [couponSearch, setCouponSearch] = useState("");
+  const [couponStatusFilter, setCouponStatusFilter] = useState("all");
   const [couponForm, setCouponForm] = useState({
     code: "",
+    name: "",
+    description: "",
     discount_type: "percent",
     discount_value: "",
     max_discount_rupees: "",
@@ -96,6 +115,27 @@ export default function BillingDashboard() {
     target_cohort: "",
   });
 
+  // Promotions & Seasonal Flash Sales
+  const [promotions, setPromotions] = useState([]);
+  const [showPromoModal, setShowPromoModal] = useState(false);
+  const [editingPromo, setEditingPromo] = useState(null);
+  const [promoForm, setPromoForm] = useState({
+    id: null,
+    name: "",
+    code: "",
+    discount_type: "percent",
+    discount_value: "",
+    max_discount_rupees: "",
+    plan_code: "",
+    starts_at: "",
+    ends_at: "",
+    target_cohort: "",
+    user_eligibility: "all",
+    max_redemptions: "",
+    can_stack_with_coupon: 0,
+    is_active: 1,
+  });
+
   // Orders
   const [orders, setOrders] = useState([]);
   const [orderSearch, setOrderSearch] = useState("");
@@ -103,9 +143,18 @@ export default function BillingDashboard() {
   const [orderPage, setOrderPage] = useState(1);
   const [orderPagination, setOrderPagination] = useState({ total: 0, pages: 1 });
 
-  // User Lookup & Grant
+  // User Lookup & Alerts
   const [lookupUserId, setLookupUserId] = useState("");
   const [lookedUpUser, setLookedUpUser] = useState(null);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [alerts, setAlerts] = useState({
+    expiringToday: [],
+    expiringSoon: [],
+    expiredRecently: [],
+    summary: { todayCount: 0, soonCount: 0, expiredCount: 0 },
+  });
   const [showGrantModal, setShowGrantModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [grantForm, setGrantForm] = useState({ plan_code: "monthly", notes: "" });
@@ -173,6 +222,26 @@ export default function BillingDashboard() {
       if (res?.success) setCoupons(res.coupons || []);
     } catch (err) {
       console.error("Coupons load failed:", err);
+    }
+  };
+
+  // 4b. Load Promotions
+  const loadPromotions = async () => {
+    try {
+      const res = await api.get("/api/superadmin/billing/promotions");
+      if (res?.success) setPromotions(res.promotions || []);
+    } catch (err) {
+      console.error("Promotions load failed:", err);
+    }
+  };
+
+  // 4c. Load Subscription Alerts
+  const loadAlerts = async () => {
+    try {
+      const res = await api.get("/api/superadmin/billing/alerts");
+      if (res?.success) setAlerts(res.alerts);
+    } catch (err) {
+      console.error("Alerts load failed:", err);
     }
   };
 
@@ -246,8 +315,9 @@ export default function BillingDashboard() {
     loadCohorts();
     loadPlans();
     loadCoupons();
+    loadPromotions();
+    loadAlerts();
     loadOrders(1);
-    loadSettings();
   }, []);
 
   const handleSelectCohortMonth = async (month) => {
@@ -282,25 +352,49 @@ export default function BillingDashboard() {
       code: "",
       name: "",
       description: "",
+      summary: "",
       duration_months: 1,
+      billing_interval: "monthly",
       price_rupees: "",
       introductory_price_rupees: "",
+      promotional_badge: "",
+      display_order: 1,
+      is_highlighted: 0,
+      features: [
+        "Unlimited Invoices & Quotations",
+        "Customer Khata & Digital Ledgers",
+        "Standard Email & In-App Support",
+      ],
       is_active: 1,
     });
+    setNewFeatureInput("");
     setShowPlanModal(true);
   };
 
   const handleStartEditPlan = (plan) => {
+    let feats = [];
+    if (Array.isArray(plan.features)) feats = plan.features;
+    else if (typeof plan.features === "string") {
+      try { feats = JSON.parse(plan.features); } catch (_) { feats = []; }
+    }
+
     setPlanForm({
       id: plan.id,
       code: plan.code,
       name: plan.name,
       description: plan.description || "",
+      summary: plan.summary || "",
       duration_months: plan.duration_months,
+      billing_interval: plan.billing_interval || "monthly",
       price_rupees: (plan.price_paise / 100).toString(),
       introductory_price_rupees: (plan.introductory_price_paise / 100).toString(),
+      promotional_badge: plan.promotional_badge || "",
+      display_order: plan.display_order !== undefined ? plan.display_order : 0,
+      is_highlighted: plan.is_highlighted ? 1 : 0,
+      features: feats,
       is_active: plan.is_active,
     });
+    setNewFeatureInput("");
     setShowPlanModal(true);
   };
 
@@ -310,9 +404,15 @@ export default function BillingDashboard() {
       const payload = {
         name: planForm.name,
         description: planForm.description || null,
+        summary: planForm.summary || null,
         duration_months: Number(planForm.duration_months),
+        billing_interval: planForm.billing_interval || "monthly",
         price_paise: Math.round(Number(planForm.price_rupees) * 100),
         introductory_price_paise: Math.round(Number(planForm.introductory_price_rupees) * 100),
+        promotional_badge: planForm.promotional_badge || null,
+        display_order: Number(planForm.display_order) || 0,
+        is_highlighted: planForm.is_highlighted ? 1 : 0,
+        features: planForm.features || [],
         is_active: planForm.is_active,
       };
 
@@ -373,10 +473,13 @@ export default function BillingDashboard() {
   const handleCreateCoupon = async (e) => {
     e.preventDefault();
     try {
+      const isFlat = couponForm.discount_type === "flat";
       const res = await api.post("/api/superadmin/billing/coupons", {
         code: couponForm.code,
+        name: couponForm.name || null,
+        description: couponForm.description || null,
         discount_type: couponForm.discount_type,
-        discount_value: Number(couponForm.discount_value),
+        discount_value: isFlat ? Math.round(Number(couponForm.discount_value) * 100) : Number(couponForm.discount_value),
         max_discount_paise: couponForm.max_discount_rupees ? Math.round(Number(couponForm.max_discount_rupees) * 100) : null,
         min_order_paise: couponForm.min_order_rupees ? Math.round(Number(couponForm.min_order_rupees) * 100) : 0,
         max_redemptions: couponForm.max_redemptions ? Number(couponForm.max_redemptions) : null,
@@ -396,6 +499,69 @@ export default function BillingDashboard() {
     }
   };
 
+  // Coupon Edit & Delete
+  const handleStartEditCoupon = (c) => {
+    setEditingCoupon(c);
+    setCouponForm({
+      code: c.code,
+      name: c.name || "",
+      description: c.description || "",
+      discount_type: c.discount_type,
+      discount_value: c.discount_type === "flat" ? (Number(c.discount_value) / 100).toString() : c.discount_value.toString(),
+      max_discount_rupees: c.max_discount_paise ? (Number(c.max_discount_paise) / 100).toString() : "",
+      min_order_rupees: c.min_order_paise ? (Number(c.min_order_paise) / 100).toString() : "0",
+      max_redemptions: c.max_redemptions ? c.max_redemptions.toString() : "",
+      per_user_limit: c.per_user_limit ? c.per_user_limit.toString() : "1",
+      plan_code: c.plan_code || "",
+      valid_until: c.valid_until ? c.valid_until.split("T")[0] : "",
+      target_cohort: c.target_cohort || "",
+    });
+    setShowEditCouponModal(true);
+  };
+
+  const handleSaveEditCoupon = async (e) => {
+    e.preventDefault();
+    if (!editingCoupon) return;
+    try {
+      const isFlat = couponForm.discount_type === "flat";
+      const res = await api.put(`/api/superadmin/billing/coupons/${editingCoupon.id}`, {
+        name: couponForm.name || null,
+        description: couponForm.description || null,
+        discount_type: couponForm.discount_type,
+        discount_value: isFlat ? Math.round(Number(couponForm.discount_value) * 100) : Number(couponForm.discount_value),
+        max_discount_paise: couponForm.max_discount_rupees ? Math.round(Number(couponForm.max_discount_rupees) * 100) : null,
+        min_order_paise: couponForm.min_order_rupees ? Math.round(Number(couponForm.min_order_rupees) * 100) : 0,
+        max_redemptions: couponForm.max_redemptions ? Number(couponForm.max_redemptions) : null,
+        per_user_limit: couponForm.per_user_limit ? Number(couponForm.per_user_limit) : 1,
+        plan_code: couponForm.plan_code || null,
+        valid_until: couponForm.valid_until || null,
+        target_cohort: couponForm.target_cohort || null,
+      });
+
+      if (res?.success) {
+        setMessage({ type: "success", text: `Coupon ${editingCoupon.code} updated successfully!` });
+        setShowEditCouponModal(false);
+        setEditingCoupon(null);
+        await loadCoupons();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to update coupon." });
+    }
+  };
+
+  const handleDeleteCoupon = async (c) => {
+    if (!window.confirm(`Are you sure you want to delete coupon "${c.code}"? This will disable it from future redemptions while preserving past records.`)) return;
+    try {
+      const res = await api.delete(`/api/superadmin/billing/coupons/${c.id}`);
+      if (res?.success) {
+        setMessage({ type: "success", text: res.message || `Coupon ${c.code} deleted.` });
+        await loadCoupons();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to delete coupon." });
+    }
+  };
+
   // Toggle Coupon Active
   const handleToggleCouponActive = async (coupon) => {
     try {
@@ -405,6 +571,143 @@ export default function BillingDashboard() {
       await loadCoupons();
     } catch (err) {
       alert("Failed to update coupon status.");
+    }
+  };
+
+  // Promotions Handlers
+  const handleStartCreatePromo = () => {
+    setEditingPromo(null);
+    setPromoForm({
+      id: null,
+      name: "",
+      code: "",
+      discount_type: "percent",
+      discount_value: "",
+      max_discount_rupees: "",
+      plan_code: "",
+      starts_at: "",
+      ends_at: "",
+      target_cohort: "",
+      user_eligibility: "all",
+      max_redemptions: "",
+      can_stack_with_coupon: 0,
+      is_active: 1,
+    });
+    setShowPromoModal(true);
+  };
+
+  const handleStartEditPromo = (promo) => {
+    setEditingPromo(promo);
+    setPromoForm({
+      id: promo.id,
+      name: promo.name || "",
+      code: promo.code || "",
+      discount_type: promo.discount_type,
+      discount_value: promo.discount_type === "flat" ? (Number(promo.discount_value) / 100).toString() : promo.discount_value.toString(),
+      max_discount_rupees: promo.max_discount_paise ? (Number(promo.max_discount_paise) / 100).toString() : "",
+      plan_code: promo.plan_code || "",
+      starts_at: promo.starts_at ? new Date(promo.starts_at).toISOString().slice(0, 16) : "",
+      ends_at: promo.ends_at ? new Date(promo.ends_at).toISOString().slice(0, 16) : "",
+      target_cohort: promo.target_cohort || "",
+      user_eligibility: promo.user_eligibility || "all",
+      max_redemptions: promo.max_redemptions ? promo.max_redemptions.toString() : "",
+      can_stack_with_coupon: promo.can_stack_with_coupon ? 1 : 0,
+      is_active: promo.is_active ? 1 : 0,
+    });
+    setShowPromoModal(true);
+  };
+
+  const handleSavePromo = async (e) => {
+    e.preventDefault();
+    try {
+      const isFlat = promoForm.discount_type === "flat";
+      const payload = {
+        name: promoForm.name,
+        code: promoForm.code || null,
+        discount_type: promoForm.discount_type,
+        discount_value: isFlat ? Math.round(Number(promoForm.discount_value) * 100) : Number(promoForm.discount_value),
+        max_discount_paise: promoForm.max_discount_rupees ? Math.round(Number(promoForm.max_discount_rupees) * 100) : null,
+        plan_code: promoForm.plan_code || null,
+        starts_at: promoForm.starts_at || null,
+        ends_at: promoForm.ends_at || null,
+        target_cohort: promoForm.target_cohort || null,
+        user_eligibility: promoForm.user_eligibility,
+        max_redemptions: promoForm.max_redemptions ? Number(promoForm.max_redemptions) : null,
+        can_stack_with_coupon: promoForm.can_stack_with_coupon ? 1 : 0,
+        is_active: promoForm.is_active ? 1 : 0,
+      };
+
+      let res;
+      if (promoForm.id) {
+        res = await api.put(`/api/superadmin/billing/promotions/${promoForm.id}`, payload);
+      } else {
+        res = await api.post("/api/superadmin/billing/promotions", payload);
+      }
+
+      if (res?.success) {
+        setMessage({ type: "success", text: promoForm.id ? "Promotion updated!" : "Promotion campaign created!" });
+        setShowPromoModal(false);
+        setEditingPromo(null);
+        await loadPromotions();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to save promotion." });
+    }
+  };
+
+  const handleTogglePromoActive = async (promo) => {
+    try {
+      await api.put(`/api/superadmin/billing/promotions/${promo.id}`, {
+        is_active: promo.is_active ? 0 : 1,
+      });
+      await loadPromotions();
+    } catch (err) {
+      alert("Failed to toggle promotion status.");
+    }
+  };
+
+  const handleDeletePromo = async (promo) => {
+    if (!window.confirm(`Are you sure you want to delete campaign "${promo.name}"?`)) return;
+    try {
+      const res = await api.delete(`/api/superadmin/billing/promotions/${promo.id}`);
+      if (res?.success) {
+        setMessage({ type: "success", text: res.message || "Promotion campaign deleted." });
+        await loadPromotions();
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to delete promotion." });
+    }
+  };
+
+  // User Search & Selection
+  const handleSearchUsers = async (e) => {
+    if (e) e.preventDefault();
+    if (!userSearchQuery.trim()) {
+      setUserSearchResults([]);
+      return;
+    }
+    try {
+      setIsSearchingUsers(true);
+      const res = await api.get(`/api/superadmin/billing/users-search?q=${encodeURIComponent(userSearchQuery.trim())}`);
+      if (res?.success) {
+        setUserSearchResults(res.users || []);
+      }
+    } catch (err) {
+      console.error("User search failed:", err);
+    } finally {
+      setIsSearchingUsers(false);
+    }
+  };
+
+  const handleSelectUser = async (userId) => {
+    try {
+      const res = await api.get(`/api/superadmin/billing/users/${userId}`);
+      if (res?.success) {
+        setLookedUpUser(res);
+        setLookupUserId(String(userId));
+      }
+    } catch (err) {
+      alert(err.message || "Failed to load user details.");
     }
   };
 
@@ -469,40 +772,38 @@ export default function BillingDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:pl-72 lg:pr-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-              <ShieldCheck size={14} />
-              <span>Super Admin Portal</span>
-            </div>
-            <h1 className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">
-              Subscription & Billing Administration
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Real-time revenue metrics, expiry cohort forecasting, plans configuration, and coupon campaigns.
-            </p>
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:pl-64">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                loadOverview();
-                loadCohorts();
-                loadPlans();
-                loadCoupons();
-                loadOrders(orderPage);
-                loadSettings();
-              }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition"
-            >
-              <RefreshCw size={14} />
-              <span>Refresh</span>
-            </button>
-          </div>
-        </div>
+      {/* Header Blueprint */}
+      <PageHeader
+        title="Billing Administration"
+        subtitle="Revenue metrics, expiry cohorts, plan configuration & coupons"
+        onMenuClick={() => setSidebarOpen(true)}
+        showHome={true}
+        showSearch={false}
+        showProfile={true}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            loadOverview();
+            loadCohorts();
+            loadPlans();
+            loadCoupons();
+            loadPromotions();
+            loadAlerts();
+            loadOrders(orderPage);
+            loadSettings();
+          }}
+          className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition"
+        >
+          <RefreshCw size={14} />
+          <span className="hidden sm:inline">Refresh</span>
+        </button>
+      </PageHeader>
+
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
 
         {/* Global Alert */}
         {message.text && (
@@ -527,6 +828,7 @@ export default function BillingDashboard() {
             { id: "cohorts", label: "Expiry Cohorts & Campaigns", icon: Calendar },
             { id: "plans", label: "Plans Management", icon: CreditCard },
             { id: "coupons", label: "Coupons & Discounts", icon: Tag },
+            { id: "promotions", label: "Promotions & Flash Sales", icon: Sparkles },
             { id: "orders", label: "Orders & Payments", icon: DollarSign },
             { id: "lookup", label: "User Lookup & Controls", icon: Users },
             { id: "settings", label: "Settings & Gateway", icon: Settings },
@@ -769,9 +1071,11 @@ export default function BillingDashboard() {
                     <tr>
                       <th className="py-3 px-4">Code</th>
                       <th className="py-3 px-4">Plan Name & Description</th>
-                      <th className="py-3 px-4">Duration</th>
+                      <th className="py-3 px-4">Interval & Duration</th>
                       <th className="py-3 px-4">Regular Price</th>
-                      <th className="py-3 px-4">Introductory Price</th>
+                      <th className="py-3 px-4">Intro Price</th>
+                      <th className="py-3 px-4">Badge / Highlight</th>
+                      <th className="py-3 px-4">Sort</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Action</th>
                     </tr>
@@ -781,14 +1085,31 @@ export default function BillingDashboard() {
                       <tr key={p.id}>
                         <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{p.code}</td>
                         <td className="py-3.5 px-4">
-                          <span className="font-bold text-slate-900 block">{p.name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-900 block">{p.name}</span>
+                            {p.is_highlighted === 1 && <Crown size={14} className="text-amber-500 fill-amber-400" />}
+                          </div>
+                          {p.summary && <span className="text-[11px] font-semibold text-emerald-700 block line-clamp-1">{p.summary}</span>}
                           {p.description && <span className="text-[11px] text-slate-400 block line-clamp-1">{p.description}</span>}
                         </td>
-                        <td className="py-3.5 px-4">{p.duration_months} Month(s)</td>
+                        <td className="py-3.5 px-4">
+                          <span className="capitalize font-semibold text-slate-800">{p.billing_interval || "monthly"}</span>
+                          <span className="block text-[11px] text-slate-400">{p.duration_months} Month(s)</span>
+                        </td>
                         <td className="py-3.5 px-4 font-semibold text-slate-900">₹{formatRupees(p.price_paise)}</td>
                         <td className="py-3.5 px-4 font-semibold text-emerald-600">
                           ₹{formatRupees(p.introductory_price_paise)}
                         </td>
+                        <td className="py-3.5 px-4">
+                          {p.promotional_badge ? (
+                            <span className="inline-block rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                              {p.promotional_badge}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-xs">{p.display_order || 0}</td>
                         <td className="py-3.5 px-4">
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
@@ -815,122 +1136,344 @@ export default function BillingDashboard() {
               </div>
             </div>
 
-            {/* Create / Edit Plan Modal */}
+            {/* Create / Edit Plan Modal with Live Card Preview */}
             {showPlanModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h4 className="font-bold text-slate-900">
-                      {planForm.id ? `Edit Plan: ${planForm.code}` : "Create New Subscription Plan"}
-                    </h4>
-                    <button onClick={() => setShowPlanModal(false)} className="text-slate-400 hover:text-slate-700">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
+                <div className="w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-slate-100 overflow-hidden my-auto">
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-base">
+                        {planForm.id ? `Edit Plan: ${planForm.name || planForm.code}` : "Create New Subscription Plan"}
+                      </h4>
+                      <p className="text-xs text-slate-500">Configure duration, pricing, promotional tags, and dynamic features with instant live preview</p>
+                    </div>
+                    <button onClick={() => setShowPlanModal(false)} className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition">
                       <X size={18} />
                     </button>
                   </div>
 
-                  <form onSubmit={handleSavePlan} className="space-y-3 text-xs">
-                    {!planForm.id && (
+                  {/* Modal Body: Two-column Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-y-auto">
+                    {/* Left Column: Configuration Form */}
+                    <form id="plan-config-form" onSubmit={handleSavePlan} className="lg:col-span-7 space-y-4 text-xs">
+                      {!planForm.id && (
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Plan Code (Unique Identifier)</label>
+                          <input
+                            type="text"
+                            value={planForm.code}
+                            onChange={(e) => setPlanForm({ ...planForm, code: e.target.value.toLowerCase() })}
+                            placeholder="e.g. quarterly or lifetime"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-emerald-600 focus:outline-none"
+                            required
+                          />
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Plan Display Name</label>
+                          <input
+                            type="text"
+                            value={planForm.name}
+                            onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                            placeholder="e.g. Monthly Plan"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Billing Interval</label>
+                          <select
+                            value={planForm.billing_interval}
+                            onChange={(e) => setPlanForm({ ...planForm, billing_interval: e.target.value })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                          >
+                            <option value="monthly">Monthly</option>
+                            <option value="half_yearly">Half-Yearly (6 Months)</option>
+                            <option value="yearly">Yearly (Annual)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Duration (Months)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="120"
+                            value={planForm.duration_months}
+                            onChange={(e) => setPlanForm({ ...planForm, duration_months: e.target.value })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Regular Price (₹)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={planForm.price_rupees}
+                            onChange={(e) => setPlanForm({ ...planForm, price_rupees: e.target.value })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-semibold text-slate-900"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Intro Offer Price (₹)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={planForm.introductory_price_rupees}
+                            onChange={(e) => setPlanForm({ ...planForm, introductory_price_rupees: e.target.value })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-semibold text-emerald-600"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Promotional Badge</label>
+                          <input
+                            type="text"
+                            value={planForm.promotional_badge}
+                            onChange={(e) => setPlanForm({ ...planForm, promotional_badge: e.target.value })}
+                            placeholder="e.g. Save 46% or Best Value"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Summary Tagline</label>
+                          <input
+                            type="text"
+                            value={planForm.summary}
+                            onChange={(e) => setPlanForm({ ...planForm, summary: e.target.value })}
+                            placeholder="e.g. Includes 1 Extra Month Free"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
                       <div>
-                        <label className="block font-semibold text-slate-700 mb-1">Plan Code (Unique Identifier)</label>
+                        <label className="block font-semibold text-slate-700 mb-1">Detailed Description</label>
                         <input
                           type="text"
-                          value={planForm.code}
-                          onChange={(e) => setPlanForm({ ...planForm, code: e.target.value.toLowerCase() })}
-                          placeholder="e.g. quarterly or lifetime"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-emerald-600 focus:outline-none"
-                          required
+                          value={planForm.description}
+                          onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                          placeholder="e.g. Full ledger access with multi-device sync"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
                         />
                       </div>
-                    )}
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Plan Display Name</label>
-                      <input
-                        type="text"
-                        value={planForm.name}
-                        onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-                        placeholder="e.g. Premium Business 3 Months"
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                        required
-                      />
-                    </div>
+                      {/* Display Order and Highlight */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Display Sort Order</label>
+                          <input
+                            type="number"
+                            value={planForm.display_order}
+                            onChange={(e) => setPlanForm({ ...planForm, display_order: Number(e.target.value) })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          />
+                        </div>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Description / Summary</label>
-                      <input
-                        type="text"
-                        value={planForm.description}
-                        onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
-                        placeholder="e.g. Full ledger access with multi-device sync"
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                      />
-                    </div>
+                        <div className="pt-4">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={planForm.is_highlighted === 1}
+                              onChange={(e) => setPlanForm({ ...planForm, is_highlighted: e.target.checked ? 1 : 0 })}
+                              className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+                            />
+                            <span className="font-semibold text-slate-700 flex items-center gap-1">
+                              <Crown size={14} className="text-amber-500 fill-amber-400" />
+                              Highlight Card
+                            </span>
+                          </label>
+                        </div>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Duration (Months)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="120"
-                        value={planForm.duration_months}
-                        onChange={(e) => setPlanForm({ ...planForm, duration_months: e.target.value })}
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                        required
-                      />
-                    </div>
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Plan Status</label>
+                          <select
+                            value={planForm.is_active}
+                            onChange={(e) => setPlanForm({ ...planForm, is_active: Number(e.target.value) })}
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                          >
+                            <option value={1}>Active</option>
+                            <option value={0}>Disabled</option>
+                          </select>
+                        </div>
+                      </div>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Regular Price (₹)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={planForm.price_rupees}
-                        onChange={(e) => setPlanForm({ ...planForm, price_rupees: e.target.value })}
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                        required
-                      />
-                    </div>
+                      {/* Dynamic Features List Manager */}
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2.5">
+                        <label className="block font-bold text-slate-800">Plan Features List</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newFeatureInput}
+                            onChange={(e) => setNewFeatureInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                if (newFeatureInput.trim()) {
+                                  setPlanForm({
+                                    ...planForm,
+                                    features: [...(planForm.features || []), newFeatureInput.trim()],
+                                  });
+                                  setNewFeatureInput("");
+                                }
+                              }
+                            }}
+                            placeholder="Type feature (e.g. Unlimited GST Invoices) and press Add"
+                            className="flex-1 rounded-xl border border-slate-300 p-2 bg-white focus:border-emerald-600 focus:outline-none text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newFeatureInput.trim()) {
+                                setPlanForm({
+                                  ...planForm,
+                                  features: [...(planForm.features || []), newFeatureInput.trim()],
+                                });
+                                setNewFeatureInput("");
+                              }
+                            }}
+                            className="rounded-xl bg-slate-900 text-white px-3 py-2 font-bold hover:bg-slate-800 transition"
+                          >
+                            Add
+                          </button>
+                        </div>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Introductory Offer Price (₹)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={planForm.introductory_price_rupees}
-                        onChange={(e) => setPlanForm({ ...planForm, introductory_price_rupees: e.target.value })}
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                        required
-                      />
-                    </div>
+                        {/* Features chips */}
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                          {(planForm.features || []).map((feat, index) => (
+                            <div key={index} className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs">
+                              <span className="text-slate-800 flex-1 truncate">{feat}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = planForm.features.filter((_, i) => i !== index);
+                                  setPlanForm({ ...planForm, features: updated });
+                                }}
+                                className="text-red-500 hover:text-red-700 p-0.5"
+                                title="Remove feature"
+                              >
+                                <X size={13} />
+                              </button>
+                            </div>
+                          ))}
+                          {(!planForm.features || planForm.features.length === 0) && (
+                            <p className="text-[11px] text-slate-400 italic">No features added yet. Add key bullet points above.</p>
+                          )}
+                        </div>
+                      </div>
+                    </form>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Status</label>
-                      <select
-                        value={planForm.is_active}
-                        onChange={(e) => setPlanForm({ ...planForm, is_active: Number(e.target.value) })}
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
-                      >
-                        <option value={1}>Active</option>
-                        <option value={0}>Disabled</option>
-                      </select>
-                    </div>
+                    {/* Right Column: Live Card Preview */}
+                    <div className="lg:col-span-5 flex flex-col">
+                      <h5 className="font-bold text-slate-700 text-xs mb-2 flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-amber-500" />
+                        Live Card Preview
+                      </h5>
 
-                    <div className="flex justify-end gap-2 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowPlanModal(false)}
-                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
-                      >
-                        {planForm.id ? "Save Changes" : "Create Plan"}
-                      </button>
+                      <div className="flex-1 rounded-2xl bg-slate-950 p-5 text-white flex flex-col justify-between border-2 border-slate-800 relative shadow-xl overflow-hidden">
+                        {/* Preview Top Badge */}
+                        {planForm.is_highlighted === 1 ? (
+                          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-950 shadow">
+                            <Crown size={12} className="fill-amber-300 text-slate-950" />
+                            <span>{planForm.promotional_badge || "BEST VALUE"}</span>
+                          </div>
+                        ) : planForm.promotional_badge ? (
+                          <div className="absolute top-3 right-3 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-white">
+                            {planForm.promotional_badge}
+                          </div>
+                        ) : null}
+
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-lg text-white">{planForm.name || "Plan Name"}</h4>
+                            {planForm.is_highlighted === 1 && <Crown size={16} className="text-amber-400 fill-amber-400" />}
+                          </div>
+
+                          <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+                            Billed {planForm.billing_interval || "monthly"} · {planForm.duration_months} mo
+                          </p>
+
+                          {planForm.summary && (
+                            <div className="mt-2 rounded-lg bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                              {planForm.summary}
+                            </div>
+                          )}
+
+                          <div className="mt-4 flex items-baseline gap-2">
+                            <span className="text-3xl font-black text-white">
+                              ₹{planForm.introductory_price_rupees || planForm.price_rupees || "0"}
+                            </span>
+                            {Number(planForm.introductory_price_rupees) < Number(planForm.price_rupees) && (
+                              <span className="text-sm font-semibold text-slate-500 line-through">
+                                ₹{planForm.price_rupees}
+                              </span>
+                            )}
+                            <span className="text-xs text-slate-400">
+                              /{planForm.duration_months === 1 ? "mo" : `${planForm.duration_months} mos`}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] font-semibold text-emerald-400 mt-1">
+                            No hidden fees
+                          </p>
+
+                          {/* Dynamic Features List */}
+                          <ul className="mt-4 space-y-2 text-xs text-slate-300">
+                            {(planForm.features || []).map((feat, i) => (
+                              <li key={i} className="flex items-center gap-2">
+                                <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                                <span className="line-clamp-1">{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="mt-6 pt-3 border-t border-slate-800">
+                          <div
+                            className={`w-full py-2.5 text-center text-xs font-bold rounded-xl transition ${
+                              planForm.is_highlighted === 1
+                                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow"
+                                : "bg-emerald-600 text-white"
+                            }`}
+                          >
+                            Choose {planForm.name || "Plan"}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </form>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="flex justify-end gap-2 px-6 py-3 border-t border-slate-100 bg-slate-50">
+                    <button
+                      type="button"
+                      onClick={() => setShowPlanModal(false)}
+                      className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 text-xs transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      form="plan-config-form"
+                      className="rounded-xl bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700 text-xs shadow-sm transition"
+                    >
+                      {planForm.id ? "Save & Publish Changes" : "Create Plan"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -947,66 +1490,141 @@ export default function BillingDashboard() {
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Promo & Campaign Coupons</h3>
                   <p className="text-xs text-slate-500">
-                    Create percentage or flat discount codes with limits and cohort targeting.
+                    Create percentage or flat discount codes with limits, cohort targeting, and soft deletion.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCouponModal(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
                 >
                   <Plus size={15} />
                   <span>Create Coupon</span>
                 </button>
               </div>
 
+              {/* Filters & Search */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                <div className="relative flex-1 w-full">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={couponSearch}
+                    onChange={(e) => setCouponSearch(e.target.value)}
+                    placeholder="Search by code, campaign name, or description..."
+                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Filter size={14} className="text-slate-400" />
+                  <select
+                    value={couponStatusFilter}
+                    onChange={(e) => setCouponStatusFilter(e.target.value)}
+                    className="rounded-xl border border-slate-300 px-3 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="active">Active Only</option>
+                    <option value="disabled">Disabled Only</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600">
                   <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
                     <tr>
-                      <th className="py-3 px-3">Code</th>
+                      <th className="py-3 px-3">Code & Name</th>
                       <th className="py-3 px-3">Discount</th>
                       <th className="py-3 px-3">Max Cap</th>
                       <th className="py-3 px-3">Redemptions</th>
                       <th className="py-3 px-3">Expiry Date</th>
                       <th className="py-3 px-3">Target Cohort</th>
                       <th className="py-3 px-3">Status</th>
-                      <th className="py-3 px-3 text-right">Action</th>
+                      <th className="py-3 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {coupons.map((c) => (
-                      <tr key={c.id}>
-                        <td className="py-3 px-3 font-mono font-bold text-emerald-700">{c.code}</td>
-                        <td className="py-3 px-3 font-semibold text-slate-900">
-                          {c.discount_type === "percent" ? `${c.discount_value}% OFF` : `₹${formatRupees(c.discount_value)} OFF`}
-                        </td>
-                        <td className="py-3 px-3">{c.max_discount_paise ? `₹${formatRupees(c.max_discount_paise)}` : "No Cap"}</td>
-                        <td className="py-3 px-3">
-                          {c.redemptions_count} {c.max_redemptions ? `/ ${c.max_redemptions}` : "(unlimited)"}
-                        </td>
-                        <td className="py-3 px-3">{c.valid_until ? formatDate(c.valid_until) : "Never"}</td>
-                        <td className="py-3 px-3">{c.target_cohort || "All Users"}</td>
-                        <td className="py-3 px-3">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
-                            }`}
-                          >
-                            {c.is_active ? "Active" : "Disabled"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleCouponActive(c)}
-                            className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
-                          >
-                            {c.is_active ? "Disable" : "Enable"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {coupons
+                      .filter((c) => {
+                        if (couponStatusFilter === "active" && !c.is_active) return false;
+                        if (couponStatusFilter === "disabled" && c.is_active) return false;
+                        if (couponSearch) {
+                          const term = couponSearch.toLowerCase();
+                          const matchCode = c.code?.toLowerCase().includes(term);
+                          const matchName = c.name?.toLowerCase().includes(term);
+                          const matchDesc = c.description?.toLowerCase().includes(term);
+                          if (!matchCode && !matchName && !matchDesc) return false;
+                        }
+                        return true;
+                      })
+                      .map((c) => (
+                        <tr key={c.id}>
+                          <td className="py-3 px-3">
+                            <span className="font-mono font-bold text-emerald-700 block">{c.code}</span>
+                            {c.name && <span className="font-semibold text-slate-800 text-[11px] block">{c.name}</span>}
+                            {c.description && (
+                              <span className="text-[10px] text-slate-400 block line-clamp-1">{c.description}</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 font-semibold text-slate-900">
+                            {c.discount_type === "percent"
+                              ? `${c.discount_value}% OFF`
+                              : `₹${formatRupees(c.discount_value)} OFF`}
+                          </td>
+                          <td className="py-3 px-3">
+                            {c.max_discount_paise ? `₹${formatRupees(c.max_discount_paise)}` : "No Cap"}
+                          </td>
+                          <td className="py-3 px-3">
+                            {c.redemptions_count} {c.max_redemptions ? `/ ${c.max_redemptions}` : "(unlimited)"}
+                          </td>
+                          <td className="py-3 px-3">{c.valid_until ? formatDate(c.valid_until) : "Never"}</td>
+                          <td className="py-3 px-3">
+                            {c.target_cohort ? (
+                              <span className="rounded bg-sky-50 text-sky-700 px-1.5 py-0.5 text-[10px] font-bold">
+                                {c.target_cohort}
+                              </span>
+                            ) : (
+                              "All Users"
+                            )}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                              }`}
+                            >
+                              {c.is_active ? "Active" : "Disabled"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleCouponActive(c)}
+                                className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+                              >
+                                {c.is_active ? "Disable" : "Enable"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditCoupon(c)}
+                                className="rounded-lg bg-slate-100 p-1 text-slate-700 hover:bg-slate-200 transition"
+                                title="Edit Coupon"
+                              >
+                                <Edit size={13} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCoupon(c)}
+                                className="rounded-lg bg-red-50 p-1 text-red-600 hover:bg-red-100 transition"
+                                title="Delete Coupon"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1051,6 +1669,29 @@ export default function BillingDashboard() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Name (Optional)</label>
+                        <input
+                          type="text"
+                          value={couponForm.name}
+                          onChange={(e) => setCouponForm({ ...couponForm, name: e.target.value })}
+                          placeholder="e.g. Diwali Super Saver"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Description</label>
+                        <input
+                          type="text"
+                          value={couponForm.description}
+                          onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                          placeholder="e.g. Applicable on all 1-year plans"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
                         <label className="block font-semibold text-slate-700 mb-1">
                           {couponForm.discount_type === "percent" ? "Percentage Value (1-100)" : "Flat Rupees (₹)"}
                         </label>
@@ -1059,7 +1700,7 @@ export default function BillingDashboard() {
                           step="1"
                           value={couponForm.discount_value}
                           onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })}
-                          placeholder={couponForm.discount_type === "percent" ? "20" : "200"}
+                          placeholder={couponForm.discount_type === "percent" ? "20" : "120"}
                           className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
                           required
                         />
@@ -1131,9 +1772,500 @@ export default function BillingDashboard() {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
                       >
                         Create Coupon
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Coupon Modal */}
+            {showEditCouponModal && editingCoupon && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-bold text-slate-900">Edit Coupon: {editingCoupon.code}</h4>
+                    <button onClick={() => setShowEditCouponModal(false)} className="text-slate-400 hover:text-slate-700">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveEditCoupon} className="space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Coupon Code (Read-Only)</label>
+                        <input
+                          type="text"
+                          value={couponForm.code}
+                          disabled
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-mono font-bold text-slate-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Discount Type</label>
+                        <select
+                          value={couponForm.discount_type}
+                          onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        >
+                          <option value="percent">Percentage (%)</option>
+                          <option value="flat">Flat Amount (₹)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Name</label>
+                        <input
+                          type="text"
+                          value={couponForm.name}
+                          onChange={(e) => setCouponForm({ ...couponForm, name: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Description</label>
+                        <input
+                          type="text"
+                          value={couponForm.description}
+                          onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          {couponForm.discount_type === "percent" ? "Percentage Value (1-100)" : "Flat Rupees (₹)"}
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={couponForm.discount_value}
+                          onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Max Cap (₹, optional)</label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={couponForm.max_discount_rupees}
+                          onChange={(e) => setCouponForm({ ...couponForm, max_discount_rupees: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Total Max Redemptions</label>
+                        <input
+                          type="number"
+                          value={couponForm.max_redemptions}
+                          onChange={(e) => setCouponForm({ ...couponForm, max_redemptions: e.target.value })}
+                          placeholder="Blank = unlimited"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Per User Limit</label>
+                        <input
+                          type="number"
+                          value={couponForm.per_user_limit}
+                          onChange={(e) => setCouponForm({ ...couponForm, per_user_limit: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Expiry Date</label>
+                        <input
+                          type="date"
+                          value={couponForm.valid_until}
+                          onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Target Cohort</label>
+                        <input
+                          type="text"
+                          value={couponForm.target_cohort}
+                          onChange={(e) => setCouponForm({ ...couponForm, target_cohort: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowEditCouponModal(false)}
+                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 4B: PROMOTIONS & SEASONAL FLASH SALES
+        ======================================================== */}
+        {activeTab === "promotions" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Sparkles size={18} className="text-amber-500" />
+                    <span>Seasonal Promotions & Flash Sales</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Time-bounded promotional campaigns (hourly/daily/festival) with non-stacking rules and cohort targeting.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleStartCreatePromo}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
+                >
+                  <Plus size={15} />
+                  <span>Create Campaign</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-3">Campaign Name & Code</th>
+                      <th className="py-3 px-3">Discount</th>
+                      <th className="py-3 px-3">Active Window</th>
+                      <th className="py-3 px-3">Audience</th>
+                      <th className="py-3 px-3">Redemptions</th>
+                      <th className="py-3 px-3">Stacking</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {promotions.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="py-8 text-center text-slate-400">
+                          No promotional campaigns configured yet. Click "Create Campaign" to launch a flash sale or seasonal discount.
+                        </td>
+                      </tr>
+                    ) : (
+                      promotions.map((p) => {
+                        const now = new Date();
+                        const starts = new Date(p.starts_at);
+                        const ends = new Date(p.ends_at);
+                        const isExpired = ends < now;
+                        const isPending = starts > now;
+                        const isLive = p.is_active && !isExpired && !isPending;
+
+                        return (
+                          <tr key={p.id}>
+                            <td className="py-3 px-3">
+                              <span className="font-bold text-slate-900 block">{p.name}</span>
+                              {p.code && (
+                                <span className="font-mono text-emerald-700 text-[11px] font-semibold">{p.code}</span>
+                              )}
+                              {p.plan_code && (
+                                <span className="text-[10px] text-slate-400 block">Plan: {p.plan_code}</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 font-semibold text-slate-900">
+                              {p.discount_type === "percent"
+                                ? `${p.discount_value}% OFF`
+                                : `₹${formatRupees(p.discount_value)} OFF`}
+                              {p.max_discount_paise && (
+                                <span className="text-[10px] text-slate-400 block">
+                                  Cap: ₹{formatRupees(p.max_discount_paise)}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="block">{formatDate(p.starts_at)}</span>
+                              <span className="text-[10px] text-slate-400 block">to {formatDate(p.ends_at)}</span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 capitalize">
+                                {p.user_eligibility.replace("_", " ")}
+                              </span>
+                              {p.target_cohort && (
+                                <span className="block text-[10px] text-sky-600 mt-0.5">Cohort: {p.target_cohort}</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3">
+                              {p.redemptions_count} {p.max_redemptions ? `/ ${p.max_redemptions}` : ""}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                                  p.can_stack_with_coupon
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                {p.can_stack_with_coupon ? "Stackable" : "Non-stacking"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                  isLive
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : isPending
+                                    ? "bg-amber-100 text-amber-800"
+                                    : isExpired
+                                    ? "bg-slate-100 text-slate-500"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {isLive ? "Live" : isPending ? "Scheduled" : isExpired ? "Expired" : "Disabled"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTogglePromoActive(p)}
+                                  className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+                                >
+                                  {p.is_active ? "Disable" : "Enable"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditPromo(p)}
+                                  className="rounded-lg bg-slate-100 p-1 text-slate-700 hover:bg-slate-200 transition"
+                                  title="Edit Campaign"
+                                >
+                                  <Edit size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePromo(p)}
+                                  className="rounded-lg bg-red-50 p-1 text-red-600 hover:bg-red-100 transition"
+                                  title="Delete Campaign"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Create / Edit Promotion Modal */}
+            {showPromoModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-bold text-slate-900">
+                      {promoForm.id ? "Edit Promotion Campaign" : "Create Promotional Campaign"}
+                    </h4>
+                    <button onClick={() => setShowPromoModal(false)} className="text-slate-400 hover:text-slate-700">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSavePromo} className="space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Name</label>
+                        <input
+                          type="text"
+                          value={promoForm.name}
+                          onChange={(e) => setPromoForm({ ...promoForm, name: e.target.value })}
+                          placeholder="e.g. Diwali Flash Sale"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Campaign Code (Optional)</label>
+                        <input
+                          type="text"
+                          value={promoForm.code}
+                          onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })}
+                          placeholder="e.g. DIWALI2026"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Discount Type</label>
+                        <select
+                          value={promoForm.discount_type}
+                          onChange={(e) => setPromoForm({ ...promoForm, discount_type: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        >
+                          <option value="percent">Percentage (%)</option>
+                          <option value="flat">Flat Amount (₹)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          {promoForm.discount_type === "percent" ? "Percentage (1-100)" : "Flat Rupees (₹)"}
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={promoForm.discount_value}
+                          onChange={(e) => setPromoForm({ ...promoForm, discount_value: e.target.value })}
+                          placeholder={promoForm.discount_type === "percent" ? "30" : "500"}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Max Cap (₹, optional)</label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={promoForm.max_discount_rupees}
+                          onChange={(e) => setPromoForm({ ...promoForm, max_discount_rupees: e.target.value })}
+                          placeholder="e.g. 1000"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Applicable Plan</label>
+                        <select
+                          value={promoForm.plan_code}
+                          onChange={(e) => setPromoForm({ ...promoForm, plan_code: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        >
+                          <option value="">All Subscription Plans</option>
+                          {plans.map((p) => (
+                            <option key={p.code} value={p.code}>
+                              {p.name} ({p.code})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Starts At (Date & Time)</label>
+                        <input
+                          type="datetime-local"
+                          value={promoForm.starts_at}
+                          onChange={(e) => setPromoForm({ ...promoForm, starts_at: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Ends At (Date & Time)</label>
+                        <input
+                          type="datetime-local"
+                          value={promoForm.ends_at}
+                          onChange={(e) => setPromoForm({ ...promoForm, ends_at: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">User Eligibility</label>
+                        <select
+                          value={promoForm.user_eligibility}
+                          onChange={(e) => setPromoForm({ ...promoForm, user_eligibility: e.target.value })}
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        >
+                          <option value="all">All Users</option>
+                          <option value="new_user">New Users Only</option>
+                          <option value="renewal">Renewing Users Only</option>
+                          <option value="cohort">Target Cohort Only</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Target Cohort (if cohort)</label>
+                        <input
+                          type="text"
+                          value={promoForm.target_cohort}
+                          onChange={(e) => setPromoForm({ ...promoForm, target_cohort: e.target.value })}
+                          placeholder="e.g. 2026-10"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Total Max Redemptions</label>
+                        <input
+                          type="number"
+                          value={promoForm.max_redemptions}
+                          onChange={(e) => setPromoForm({ ...promoForm, max_redemptions: e.target.value })}
+                          placeholder="Blank = unlimited"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex items-center pt-5">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={promoForm.can_stack_with_coupon === 1}
+                            onChange={(e) =>
+                              setPromoForm({ ...promoForm, can_stack_with_coupon: e.target.checked ? 1 : 0 })
+                            }
+                            className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span className="font-semibold text-slate-700">Allow Stacking with Coupons</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPromoModal(false)}
+                        className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
+                      >
+                        {promoForm.id ? "Save Changes" : "Launch Promotion"}
                       </button>
                     </div>
                   </form>
@@ -1276,32 +2408,215 @@ export default function BillingDashboard() {
         )}
 
         {/* ========================================================
-            TAB 6: USER LOOKUP & COMPLIMENTARY GRANTS
+            TAB 6: USER LOOKUP, ALERTS & COMPLIMENTARY GRANTS
         ======================================================== */}
         {activeTab === "lookup" && (
           <div className="space-y-6">
+            {/* Subscription Alerts Panel */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-slate-900">User Subscription Lookup</h3>
-              <p className="text-xs text-slate-500">
-                Enter a user ID to inspect their active status or issue complimentary grandfathered access.
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <AlertCircle size={18} className="text-amber-500" />
+                    <span>Real-Time Subscription Alerts</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Accounts requiring renewal outreach or immediate attention.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadAlerts}
+                  className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition"
+                >
+                  Refresh Alerts
+                </button>
+              </div>
 
-              <form onSubmit={handleLookupUser} className="flex gap-2 max-w-md">
-                <input
-                  type="number"
-                  value={lookupUserId}
-                  onChange={(e) => setLookupUserId(e.target.value)}
-                  placeholder="Enter User ID (e.g. 11)"
-                  className="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Expiring Today */}
+                <div className="rounded-xl border border-red-200 bg-red-50/50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-red-700">Expiring Today</span>
+                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-black text-white">
+                      {alerts.summary?.todayCount || 0}
+                    </span>
+                  </div>
+                  {alerts.expiringToday?.length === 0 ? (
+                    <p className="text-[11px] text-slate-400">No subscriptions expiring today.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {alerts.expiringToday.map((u) => (
+                        <div
+                          key={u.id}
+                          className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-xs border border-red-100 text-xs"
+                        >
+                          <div>
+                            <p className="font-bold text-slate-900">{u.name}</p>
+                            <p className="text-[10px] text-slate-500">{u.phone || u.email} · {u.plan_name}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectUser(u.id)}
+                            className="rounded bg-red-100 px-2 py-1 text-[10px] font-bold text-red-800 hover:bg-red-200"
+                          >
+                            Inspect
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Expiring Soon (Next 7 Days) */}
+                <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-700">Next 7 Days</span>
+                    <span className="rounded-full bg-amber-600 px-2 py-0.5 text-xs font-black text-white">
+                      {alerts.summary?.soonCount || 0}
+                    </span>
+                  </div>
+                  {alerts.expiringSoon?.length === 0 ? (
+                    <p className="text-[11px] text-slate-400">No subscriptions expiring in next 7 days.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {alerts.expiringSoon.map((u) => (
+                        <div
+                          key={u.id}
+                          className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-xs border border-amber-100 text-xs"
+                        >
+                          <div>
+                            <p className="font-bold text-slate-900">{u.name}</p>
+                            <p className="text-[10px] text-amber-700 font-semibold">{u.days_left}d left · {u.plan_name}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectUser(u.id)}
+                            className="rounded bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800 hover:bg-amber-200"
+                          >
+                            Inspect
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Expired in Last 14 Days */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Expired (14 Days)</span>
+                    <span className="rounded-full bg-slate-600 px-2 py-0.5 text-xs font-black text-white">
+                      {alerts.summary?.expiredCount || 0}
+                    </span>
+                  </div>
+                  {alerts.expiredRecently?.length === 0 ? (
+                    <p className="text-[11px] text-slate-400">No recent expirations recorded.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {alerts.expiredRecently.map((u) => (
+                        <div
+                          key={u.id}
+                          className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-xs border border-slate-200 text-xs"
+                        >
+                          <div>
+                            <p className="font-bold text-slate-900">{u.name}</p>
+                            <p className="text-[10px] text-slate-500">{u.days_ago}d ago · {u.plan_name}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectUser(u.id)}
+                            className="rounded bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200"
+                          >
+                            Inspect
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Multi-field User Search Card */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Multi-Field User Lookup</h3>
+                <p className="text-xs text-slate-500">
+                  Search across User ID, Full Name, Business Name, Phone Number, or Email address.
+                </p>
+              </div>
+
+              <form onSubmit={handleSearchUsers} className="flex flex-col sm:flex-row gap-2 max-w-2xl">
+                <div className="relative flex-1">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    placeholder="Enter ID, Name, Business, Phone, or Email..."
+                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-900"
+                  disabled={isSearchingUsers}
+                  className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-900 transition disabled:opacity-50"
                 >
-                  Lookup
+                  {isSearchingUsers ? "Searching..." : "Search Users"}
                 </button>
               </form>
+
+              {/* Search Results Dropdown/List */}
+              {userSearchResults.length > 0 && (
+                <div className="rounded-xl border border-slate-200 overflow-hidden mt-3">
+                  <div className="bg-slate-50 px-3 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                    Matching Users ({userSearchResults.length})
+                  </div>
+                  <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+                    {userSearchResults.map((u) => (
+                      <div
+                        key={u.id}
+                        className="p-3 flex items-center justify-between hover:bg-slate-50 transition text-xs"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900">{u.name}</span>
+                            <span className="font-mono text-slate-400 text-[11px]">#{u.id}</span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                u.subscription_display_status === "active"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : u.subscription_display_status === "expired"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
+                            >
+                              {u.subscription_display_status}
+                            </span>
+                          </div>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            {u.email} · {u.phone || "No phone"} · {u.business_name || "No Business"}
+                          </p>
+                          {u.subscription_plan_name && (
+                            <p className="text-[10px] text-emerald-700 font-semibold mt-0.5">
+                              Plan: {u.subscription_plan_name} (Expires: {formatDate(u.subscription_ends_at)})
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectUser(u.id)}
+                          className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition shadow-xs"
+                        >
+                          Inspect & Manage
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {lookedUpUser && (
                 <div className="mt-6 border-t border-slate-100 pt-6 space-y-6">

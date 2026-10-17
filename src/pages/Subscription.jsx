@@ -15,9 +15,12 @@ import {
   ShieldCheck,
   Check,
   HelpCircle,
+  Menu,
+  Crown,
 } from "lucide-react";
 import api, { getToken } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import Sidebar from "../components/Sidebar";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
@@ -42,6 +45,7 @@ export default function Subscription() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isOnboarding = searchParams.get("onboarding") === "true";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [plans, setPlans] = useState([]);
   const [selectedPlanCode, setSelectedPlanCode] = useState("monthly");
   const [couponCode, setCouponCode] = useState("");
@@ -107,15 +111,24 @@ export default function Subscription() {
       if (res?.success) {
         setPricing(res.pricing);
         if (coupon) {
-          setAppliedCoupon(coupon);
+          if (res.couponApplied) {
+            setAppliedCoupon(coupon);
+            setCouponError("");
+          } else {
+            setAppliedCoupon(null);
+            setCouponError(res.couponError || "Coupon could not be applied.");
+          }
         }
       }
     } catch (err) {
       if (coupon) {
         setCouponError(err.message || "Invalid coupon code.");
         setAppliedCoupon(null);
-        // Fallback calculation without coupon
-        updatePriceBreakdown(planCode, null);
+        // Fallback calculation without coupon safely without recursive race
+        try {
+          const fallback = await api.post("/api/subscriptions/price", { plan_code: planCode });
+          if (fallback?.success) setPricing(fallback.pricing);
+        } catch (_) {}
       } else {
         setStatusMessage({ type: "error", text: err.message || "Failed to calculate pricing." });
       }
@@ -337,24 +350,40 @@ export default function Subscription() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:pl-72 lg:pr-8">
-      <div className="mx-auto max-w-5xl space-y-8">
-        {/* Header */}
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-            <Sparkles size={14} />
-            <span>KhataNex Premium Membership</span>
+    <>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:pl-72 lg:pr-8 transition-colors">
+        <div className="mx-auto max-w-5xl space-y-8">
+          {/* Mobile Top Header */}
+          <div className="lg:hidden flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+              aria-label="Open sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm">Subscription & Billing</span>
+            <div className="w-8" />
           </div>
-          <h1 className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">
-            Subscription & Billing
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Manage your digital ledger plan, unlock unlimited invoices, and review tax invoices.
-          </p>
-        </div>
 
-        {/* Status Alerts */}
-        {statusMessage.text && (
+          {/* Header */}
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+              <Sparkles size={14} />
+              <span>KhataNex Premium Membership</span>
+            </div>
+            <h1 className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Subscription & Billing
+            </h1>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              Manage your digital ledger plan, unlock unlimited invoices, and review tax invoices.
+            </p>
+          </div>
+
+          {/* Status Alerts */}
+          {statusMessage.text && (
           <div
             className={`flex items-center gap-3 rounded-xl p-4 text-sm font-medium ${
               statusMessage.type === "success"
@@ -476,6 +505,8 @@ export default function Subscription() {
             {plans.map((p) => {
               const isSelected = selectedPlanCode === p.code;
               const hasIntro = p.is_eligible_for_introductory && p.savings_paise > 0;
+              const isYearly = p.duration_months >= 12 || p.code === "yearly" || p.is_highlighted === 1;
+              const monthlyPaise = p.duration_months > 1 ? Math.round(p.effective_price_paise / p.duration_months) : null;
 
               return (
                 <div
@@ -483,40 +514,72 @@ export default function Subscription() {
                   onClick={() => setSelectedPlanCode(p.code)}
                   className={`relative flex flex-col justify-between rounded-2xl p-6 cursor-pointer transition-all duration-200 border-2 ${
                     isSelected
-                      ? "border-emerald-600 bg-white shadow-xl shadow-emerald-600/10 scale-[1.02]"
-                      : "border-slate-200 bg-white hover:border-emerald-300 hover:shadow-md"
+                      ? isYearly
+                        ? "border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-xl shadow-amber-500/10 scale-[1.02] ring-2 ring-amber-400/50"
+                        : "border-emerald-600 bg-white dark:bg-slate-900 shadow-xl shadow-emerald-600/10 scale-[1.02]"
+                      : isYearly
+                      ? "border-amber-300 dark:border-amber-500/40 bg-gradient-to-b from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 hover:border-amber-400 hover:shadow-md"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-md"
                   }`}
                 >
-                  {hasIntro && (
+                  {/* Badges */}
+                  {isYearly ? (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 px-3.5 py-1 text-[11px] font-black uppercase tracking-wider text-slate-950 shadow-md">
+                      <Crown size={13} className="text-slate-950 fill-amber-300 shrink-0" />
+                      <span>{p.promotional_badge || "BEST VALUE · 13 MONTHS"}</span>
+                    </div>
+                  ) : p.promotional_badge ? (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+                      {p.promotional_badge}
+                    </div>
+                  ) : hasIntro ? (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
                       Introductory Offer · Save ₹{formatRupees(p.savings_paise)}
                     </div>
-                  )}
+                  ) : null}
 
                   <div>
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-slate-900 text-lg">{p.name}</h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-bold text-slate-900 dark:text-white text-lg">{p.name}</h3>
+                        {isYearly && <Crown size={16} className="text-amber-500 fill-amber-400" />}
+                      </div>
                       <div
                         className={`h-5 w-5 rounded-full border flex items-center justify-center ${
                           isSelected
-                            ? "border-emerald-600 bg-emerald-600 text-white"
-                            : "border-slate-300"
+                            ? isYearly
+                              ? "border-amber-500 bg-amber-500 text-slate-950"
+                              : "border-emerald-600 bg-emerald-600 text-white"
+                            : "border-slate-300 dark:border-slate-600"
                         }`}
                       >
                         {isSelected && <Check size={12} strokeWidth={3} />}
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-500 mt-1">
-                      {p.duration_months === 1
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 capitalize">
+                      {p.billing_interval
+                        ? `Billed ${p.billing_interval.replace(/_/g, " ")} (${p.duration_months} mo)`
+                        : p.duration_months === 1
                         ? "Billed monthly"
                         : p.duration_months === 6
                         ? "Billed every 6 months"
                         : "Billed annually"}
                     </p>
 
+                    {/* Plan Summary or Description */}
+                    {p.summary ? (
+                      <div className="mt-2.5 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
+                        {p.summary}
+                      </div>
+                    ) : p.description ? (
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2">
+                        {p.description}
+                      </p>
+                    ) : null}
+
                     <div className="mt-4 flex items-baseline gap-2">
-                      <span className="text-3xl font-extrabold text-slate-900">
+                      <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
                         ₹{formatRupees(p.effective_price_paise)}
                       </span>
                       {hasIntro && (
@@ -524,40 +587,65 @@ export default function Subscription() {
                           ₹{formatRupees(p.price_paise)}
                         </span>
                       )}
-                      <span className="text-xs text-slate-500 font-medium">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                         /{p.duration_months === 1 ? "month" : `${p.duration_months} mos`}
                       </span>
                     </div>
-                    <p className="text-[11px] font-semibold text-emerald-700 mt-1">
-                      Includes 18% GST · No hidden fees
+
+                    {/* Monthly Equivalent */}
+                    {monthlyPaise && (
+                      <div className="mt-1 flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-400">
+                        <Sparkles size={12} className="text-amber-500" />
+                        <span>Just ₹{formatRupees(monthlyPaise)}/month equivalent</span>
+                      </div>
+                    )}
+
+                    <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                      No hidden fees
                     </p>
 
-                    <ul className="mt-6 space-y-2.5 text-xs text-slate-600">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>Complete digital Khata ledger</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>Unlimited GST invoices & receipts</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>Customer dues & payment tracking</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>Official GST tax invoice receipt</span>
-                      </li>
-                    </ul>
+                    {/* Dynamic Features List */}
+                    {Array.isArray(p.features) && p.features.length > 0 ? (
+                      <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        {p.features.map((feat, i) => (
+                          <li key={i} className="flex items-center gap-2">
+                            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>Complete digital Khata ledger</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>Unlimited GST invoices & receipts</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>Customer dues & payment tracking</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>Official GST tax invoice receipt</span>
+                        </li>
+                      </ul>
+                    )}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100">
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                     <span
                       className={`block w-full py-2.5 text-center text-xs font-bold rounded-xl transition ${
                         isSelected
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          ? isYearly
+                            ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow"
+                            : "bg-emerald-600 text-white"
+                          : isYearly
+                          ? "bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 hover:bg-amber-200"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                       }`}
                     >
                       {isSelected ? "Selected Plan" : "Choose Plan"}
@@ -567,29 +655,49 @@ export default function Subscription() {
               );
             })}
           </div>
+
+          {/* Contextual Recommendation Prompt for Monthly plan */}
+          {selectedPlanCode === "monthly" && (
+            <div className="mt-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-4 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <Crown size={20} className="text-amber-600 shrink-0" />
+                <span>
+                  <strong>Save 55% on Yearly:</strong> The <strong>Yearly Plan</strong> breaks down to just <strong>₹108/month</strong> and saves you over <strong>₹1,400 per year</strong> compared to paying monthly!
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPlanCode("yearly")}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-1.5 font-bold text-slate-950 shadow hover:from-amber-600 hover:to-amber-700 transition shrink-0"
+              >
+                <Sparkles size={13} />
+                <span>Switch to Yearly & Save</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Pricing Summary & Checkout */}
         {pricing && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 text-base">Payment Summary</h3>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Payment Summary</h3>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Coupon Form */}
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-700">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Have a Promo / Referral Coupon?
                 </label>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5">
-                    <div className="flex items-center gap-2 text-emerald-800 text-xs font-bold">
+                  <div className="flex items-center justify-between rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
                       <Tag size={16} />
                       <span>Coupon applied: {appliedCoupon}</span>
                     </div>
                     <button
                       type="button"
                       onClick={handleRemoveCoupon}
-                      className="text-xs font-semibold text-red-600 hover:underline"
+                      className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
                     >
                       Remove
                     </button>
@@ -601,12 +709,12 @@ export default function Subscription() {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       placeholder="ENTER COUPON CODE"
-                      className="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-xs uppercase font-medium focus:border-emerald-600 focus:outline-none"
+                      className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs uppercase font-medium text-slate-900 dark:text-white focus:border-emerald-600 focus:outline-none"
                     />
                     <button
                       type="submit"
                       disabled={pricingLoading || !couponCode.trim()}
-                      className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-900 disabled:opacity-50"
+                      className="rounded-xl bg-slate-800 dark:bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-900 dark:hover:bg-emerald-700 disabled:opacity-50"
                     >
                       Apply
                     </button>
@@ -614,12 +722,12 @@ export default function Subscription() {
                 )}
 
                 {couponError && (
-                  <p className="text-xs text-red-600 font-medium">{couponError}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 font-medium">{couponError}</p>
                 )}
 
-                <div className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-500 space-y-1">
-                  <p className="flex items-center gap-1 font-semibold text-slate-700">
-                    <ShieldCheck size={14} className="text-emerald-600" />
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
+                  <p className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                    <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
                     <span>Safe & Instant Activation</span>
                   </p>
                   <p>
@@ -629,46 +737,46 @@ export default function Subscription() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="space-y-2.5 border-t md:border-t-0 md:border-l md:pl-8 border-slate-200 pt-4 md:pt-0">
-                <div className="flex justify-between text-xs text-slate-600">
+              <div className="space-y-2.5 border-t md:border-t-0 md:border-l md:pl-8 border-slate-200 dark:border-slate-800 pt-4 md:pt-0">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                   <span>List Price:</span>
                   <span>₹{formatRupees(pricing.listPricePaise)}</span>
                 </div>
 
                 {pricing.introductoryDiscountPaise > 0 && (
-                  <div className="flex justify-between text-xs font-semibold text-emerald-600">
+                  <div className="flex justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     <span>Introductory Discount:</span>
                     <span>- ₹{formatRupees(pricing.introductoryDiscountPaise)}</span>
                   </div>
                 )}
 
                 {pricing.couponDiscountPaise > 0 && (
-                  <div className="flex justify-between text-xs font-semibold text-emerald-600">
+                  <div className="flex justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     <span>Coupon Discount ({pricing.couponCode}):</span>
                     <span>- ₹{formatRupees(pricing.couponDiscountPaise)}</span>
                   </div>
                 )}
 
-                <div className="flex justify-between text-xs text-slate-600">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                   <span>Taxable Value:</span>
                   <span>₹{formatRupees(pricing.taxablePaise)}</span>
                 </div>
 
                 {pricing.taxPercent > 0 && (
-                  <div className="flex justify-between text-xs text-slate-600">
+                  <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                     <span>GST ({pricing.taxPercent}% included):</span>
                     <span>₹{formatRupees(pricing.taxPaise)}</span>
                   </div>
                 )}
 
-                <div className="my-2 border-t border-slate-200" />
+                <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
 
                 <div className="flex justify-between items-baseline">
                   <div>
-                    <span className="text-sm font-bold text-slate-900">Total Payable:</span>
-                    <p className="text-[10px] text-slate-500">Final checkout price · All taxes included</p>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">Total Payable:</span>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Final checkout price · All taxes included</p>
                   </div>
-                  <span className="text-2xl font-black text-emerald-600">
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                     ₹{formatRupees(pricing.totalPaise)}
                   </span>
                 </div>
@@ -694,9 +802,9 @@ export default function Subscription() {
         )}
 
         {/* Billing History Section */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-base mb-1">Billing & Invoice History</h3>
-          <p className="text-xs text-slate-500 mb-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h3 className="font-bold text-slate-900 dark:text-white text-base mb-1">Billing & Invoice History</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
             Download your official computer-generated GST subscription invoices for accounting.
           </p>
 
@@ -704,8 +812,8 @@ export default function Subscription() {
             <p className="py-8 text-center text-xs text-slate-400">No payment records found.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-600">
-                <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <tr>
                     <th className="py-3 px-4">Invoice / Order</th>
                     <th className="py-3 px-4">Date</th>
@@ -715,25 +823,25 @@ export default function Subscription() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {billingHistory.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50">
-                      <td className="py-3.5 px-4 font-semibold text-slate-900">
+                    <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         {item.invoice_number || item.order_number}
                       </td>
                       <td className="py-3.5 px-4">{formatDate(item.paid_at || item.created_at)}</td>
                       <td className="py-3.5 px-4">{item.plan_name}</td>
-                      <td className="py-3.5 px-4 font-semibold text-slate-900">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         ₹{formatRupees(item.total_paise)}
                       </td>
                       <td className="py-3.5 px-4">
                         <span
                           className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                             item.status === "paid"
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                               : item.status === "created"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-red-100 text-red-800"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
                           }`}
                         >
                           {item.status}
@@ -745,7 +853,7 @@ export default function Subscription() {
                             <button
                               type="button"
                               onClick={() => handleDownloadInvoice(item.id, item.invoice_number)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition"
                             >
                               <Download size={13} />
                               <span>Invoice</span>
@@ -753,7 +861,7 @@ export default function Subscription() {
                             <button
                               type="button"
                               onClick={() => handleResendInvoice(item.id)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 transition"
+                              className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                               title="Resend to registered email"
                             >
                               <Mail size={13} />
@@ -770,6 +878,8 @@ export default function Subscription() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }
+
 
