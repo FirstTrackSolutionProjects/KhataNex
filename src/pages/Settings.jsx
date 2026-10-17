@@ -18,8 +18,10 @@ import Button from "../components/Button";
 import PageHeader from "../components/PageHeader";
 import { useTheme } from "../context/ThemeContext";
 import api from "../lib/api";
+import { useSubscriptionAccess, subscriptionRequiredMessage } from "../hooks/useSubscriptionAccess";
 
 const Settings = () => {
+  const { canWrite, isRestricted } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
 
@@ -69,6 +71,10 @@ const Settings = () => {
   };
 
   const handleToggleWatermark = async () => {
+    if (!canWrite) {
+      setWatermarkStatusMsg(subscriptionRequiredMessage);
+      return;
+    }
     const nextVal = !watermarkEnabled;
     setWatermarkEnabled(nextVal);
     setWatermarkLoading(true);
@@ -98,6 +104,10 @@ const Settings = () => {
   };
 
   const handleRegenerateDocuments = async () => {
+    if (!canWrite) {
+      setWatermarkStatusMsg(subscriptionRequiredMessage);
+      return;
+    }
     setRegeneratingDocs(true);
     setWatermarkStatusMsg("");
     try {
@@ -107,14 +117,15 @@ const Settings = () => {
           ? "Documents successfully regenerated without KhataNex watermark. Your business logo remains intact."
           : "Documents regenerated with standard watermark."
       );
-    } catch (_) {
-      setWatermarkStatusMsg("Documents regenerated without KhataNex watermark. Your business logo is preserved.");
+    } catch (err) {
+      setWatermarkStatusMsg(err.message || "Could not regenerate documents.");
     } finally {
       setRegeneratingDocs(false);
     }
   };
 
   const handleSaveAll = async () => {
+    if (!canWrite) return;
     setSaveSuccess(true);
     try {
       await api.patch("/api/settings", {
@@ -241,9 +252,12 @@ const Settings = () => {
 
                   <button
                     type="button"
-                    disabled={watermarkLoading}
+                    disabled={watermarkLoading || !canWrite}
+                    title={!canWrite ? subscriptionRequiredMessage : undefined}
                     onClick={handleToggleWatermark}
                     className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                      !canWrite ? "opacity-50 cursor-not-allowed" : ""
+                    } ${
                       watermarkEnabled ? "bg-emerald-600" : "bg-slate-300"
                     }`}
                     aria-label="Toggle remove watermark"
@@ -282,9 +296,10 @@ const Settings = () => {
                     </div>
                     <button
                       type="button"
-                      disabled={regeneratingDocs}
+                      disabled={regeneratingDocs || !canWrite}
+                      title={!canWrite ? subscriptionRequiredMessage : undefined}
                       onClick={handleRegenerateDocuments}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 disabled:opacity-50"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RefreshCw size={13} className={regeneratingDocs ? "animate-spin" : ""} />
                       {regeneratingDocs ? "Regenerating..." : "Regenerate Documents"}
@@ -363,7 +378,12 @@ const Settings = () => {
                 ) : (
                   <span />
                 )}
-                <Button icon={Save} onClick={handleSaveAll}>
+                <Button
+                  icon={Save}
+                  onClick={handleSaveAll}
+                  disabled={!canWrite}
+                  title={!canWrite ? subscriptionRequiredMessage : undefined}
+                >
                   Save Settings
                 </Button>
               </div>

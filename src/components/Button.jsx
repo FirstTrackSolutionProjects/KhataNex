@@ -8,10 +8,13 @@ const Button = ({
   size = "md",
   loading = false,
   disabled = false,
+  onDisabledClick,
   icon: Icon,
   fullWidth = false,
   onClick,
   className = "",
+  title,
+  ...rest
 }) => {
 
   const variants = {
@@ -40,11 +43,27 @@ const Button = ({
     lg: "px-5 py-3 text-base",
   };
 
+  const handleClick = (e) => {
+    if (loading) return;
+    if (disabled) {
+      if (onDisabledClick) {
+        e.preventDefault();
+        e.stopPropagation();
+        onDisabledClick(e);
+      }
+      return;
+    }
+    if (onClick) onClick(e);
+  };
+
   return (
     <button
       type={type}
-      disabled={disabled || loading}
-      onClick={onClick}
+      disabled={onDisabledClick ? loading : (disabled || loading)}
+      aria-disabled={disabled || loading}
+      onClick={handleClick}
+      title={title}
+      {...rest}
       className={`
         inline-flex
         items-center
@@ -57,6 +76,7 @@ const Button = ({
         focus:outline-none
         focus:ring-2
         focus:ring-offset-2
+        ${disabled ? "opacity-60 cursor-pointer" : ""}
         disabled:cursor-not-allowed
         disabled:opacity-50
         ${variants[variant]}

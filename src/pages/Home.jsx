@@ -12,6 +12,9 @@ import {
   ShieldCheck,
   Smartphone,
   TrendingUp,
+  Sparkles,
+  Crown,
+  Tag,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -79,9 +82,9 @@ const Home = () => {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-2 lg:px-8">
 
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm">
-              <CheckCircle2 size={16} />
-              Simple Digital Business Management
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-100/60 px-4 py-2 text-xs font-bold text-emerald-800 shadow-sm animate-pulse">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-600" />
+              <span>Special Launch Offer: Save up to 55% with Introductory Pricing</span>
             </div>
 
             <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -92,8 +95,7 @@ const Home = () => {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-              Keep your khata, customers, payments, invoices and inventory
-              organized in one simple digital platform.
+              Keep your digital khata, customer ledgers, payment tracking, invoices, and stock inventory organized in one seamless platform.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -101,49 +103,58 @@ const Home = () => {
                 <>
                   <Link
                     to="/dashboard"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
                   >
-                    Go to Dashboard
+                    <span>Go to Dashboard</span>
                     <ArrowRight size={18} />
                   </Link>
                   <Link
-                    to="/customers"
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600"
+                    to="/subscription"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600 shadow-xs"
                   >
-                    View Customers
+                    <span>My Subscription</span>
                   </Link>
                 </>
               ) : (
                 <>
                   <Link
                     to="/signup"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700"
                   >
-                    Get Started
+                    <span>Claim Offer & Get Started</span>
                     <ArrowRight size={18} />
                   </Link>
                   <Link
-                    to="/login"
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600"
+                    to="/subscription"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600 shadow-xs"
                   >
-                    Login
+                    <span>View Pricing & Plans</span>
                   </Link>
                 </>
               )}
             </div>
 
+            {!isLoggedIn && (
+              <p className="mt-3 text-xs text-slate-500">
+                Already have an account?{" "}
+                <Link to="/login" className="font-semibold text-emerald-600 hover:underline">
+                  Log in here
+                </Link>
+              </p>
+            )}
+
             <div className="mt-8 flex flex-wrap gap-5 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={17} className="text-emerald-600" />
-                Secure
+                <span>GST Tax Invoices</span>
               </div>
               <div className="flex items-center gap-2">
                 <Smartphone size={17} className="text-emerald-600" />
-                Mobile Friendly
+                <span>Mobile & Desktop Sync</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp size={17} className="text-emerald-600" />
-                Business Ready
+                <span>Instant Activation</span>
               </div>
             </div>
           </div>
@@ -233,6 +244,112 @@ const Home = () => {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Promotional Pricing Showcase */}
+      <section className="border-y border-slate-200 bg-slate-50/60 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+              <Sparkles size={14} />
+              <span>Transparent, Value-Packed Pricing</span>
+            </div>
+            <h2 className="mt-3 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
+              Simple, Affordable Plans for Every Business
+            </h2>
+            <p className="mt-3 text-sm text-slate-600">
+              No hidden fees. Full GST invoices provided. Introductory eligible users save up to 55% instantly.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+            {/* Monthly */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Flexible Starter</span>
+                <h3 className="mt-1 text-xl font-bold text-slate-900">Monthly Plan</h3>
+                <p className="mt-1 text-xs text-slate-500">Full platform access, billed month-to-month</p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-900">₹129</span>
+                  <span className="text-sm font-semibold text-slate-400 line-through">₹249</span>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Save 48%</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">First-time introductory rate</p>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <Link
+                  to={isLoggedIn ? "/subscription" : "/signup"}
+                  className="block w-full rounded-xl bg-slate-900 py-2.5 text-center text-xs font-bold text-white hover:bg-slate-800 transition"
+                >
+                  {isLoggedIn ? "Select Monthly" : "Start with Monthly"}
+                </Link>
+              </div>
+            </div>
+
+            {/* 6 Months */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Mid-Term Value</span>
+                <h3 className="mt-1 text-xl font-bold text-slate-900">6 Months Plan</h3>
+                <p className="mt-1 text-xs text-slate-500">Ideal for growing shops and retail outlets</p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-900">₹750</span>
+                  <span className="text-sm font-semibold text-slate-400 line-through">₹1,399</span>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Save 46%</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">₹125/month equivalent</p>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <Link
+                  to={isLoggedIn ? "/subscription" : "/signup"}
+                  className="block w-full rounded-xl bg-slate-900 py-2.5 text-center text-xs font-bold text-white hover:bg-slate-800 transition"
+                >
+                  {isLoggedIn ? "Select 6 Months" : "Get 6 Months Plan"}
+                </Link>
+              </div>
+            </div>
+
+            {/* Yearly - Best Value */}
+            <div className="relative rounded-2xl border-2 border-emerald-500 bg-white p-6 shadow-lg shadow-emerald-500/10 flex flex-col justify-between">
+              <div className="absolute -top-3.5 right-6 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-sm">
+                <Crown size={12} />
+                <span>Best Value · Save 55%</span>
+              </div>
+
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Annual Protection</span>
+                <h3 className="mt-1 text-xl font-bold text-slate-900">Yearly Plan (12 Months)</h3>
+                <p className="mt-1 text-xs text-slate-500">Uninterrupted accounting and peace of mind</p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-emerald-600">₹1,299</span>
+                  <span className="text-sm font-semibold text-slate-400 line-through">₹2,899</span>
+                </div>
+                <p className="text-[11px] font-bold text-emerald-700 mt-1">Just ₹108/month · Maximum Savings</p>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <Link
+                  to={isLoggedIn ? "/subscription" : "/signup"}
+                  className="block w-full rounded-xl bg-emerald-600 py-2.5 text-center text-xs font-bold text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition"
+                >
+                  {isLoggedIn ? "Upgrade to Yearly" : "Claim Yearly Offer"}
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              to="/subscription"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
+            >
+              <span>Explore all plan features, coupons, and tax details</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
       </section>
 

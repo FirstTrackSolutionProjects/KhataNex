@@ -23,6 +23,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const CATEGORY_LABEL = {
   money_received: "Money Received",
@@ -61,6 +62,7 @@ export const getEffectiveCategory = (p) => {
 };
 
 const Payments = () => {
+  const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [payments, setPayments] = useState([]);
@@ -342,6 +344,10 @@ const Payments = () => {
   };
 
   const openEditModal = (payment) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     setEditingPayment(payment);
     const cat = getEffectiveCategory(payment);
     setForm({
@@ -364,6 +370,10 @@ const Payments = () => {
   };
 
   const handleDeletePayment = async (paymentId) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this payment record?")) return;
     try {
       await api.del(`/api/payments/${paymentId}`);
@@ -376,6 +386,10 @@ const Payments = () => {
 
   const handleAddPayment = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      setSaveError(subscriptionRequiredMessage);
+      return;
+    }
     setSaveError("");
     setSaving(true);
     try {
@@ -434,6 +448,10 @@ const Payments = () => {
   });
 
   const handleAddMoneyReceiptToPayment = async (receipt) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     try {
       await api.post(`/api/payments/link-money-receipt/${receipt.id}`, {
         payment_mode: receipt.payment_mode || "cash",
@@ -549,10 +567,16 @@ const Payments = () => {
           showSearch={true}
           showProfile={true}
           onNew={() => {
+            if (!canWrite) {
+              alert(subscriptionRequiredMessage);
+              return;
+            }
             resetModalState();
             setShowModal(true);
           }}
           newLabel="Add Payment"
+          newDisabled={!canWrite}
+          newTooltip={!canWrite ? subscriptionRequiredMessage : undefined}
         />
 
         <main className="p-4 sm:p-6 lg:p-8">
@@ -817,9 +841,14 @@ const Payments = () => {
 
                           <button
                             type="button"
+                            disabled={!canWrite}
                             onClick={() => openEditModal(payment)}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600"
-                            title="Edit Payment"
+                            className={`rounded-lg p-2 transition ${
+                              !canWrite
+                                ? "opacity-40 cursor-not-allowed text-slate-400"
+                                : "text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                            }`}
+                            title={!canWrite ? subscriptionRequiredMessage : "Edit Payment"}
                             aria-label="Edit Payment"
                           >
                             <Pencil size={18} />
@@ -827,9 +856,14 @@ const Payments = () => {
 
                           <button
                             type="button"
+                            disabled={!canWrite}
                             onClick={() => handleDeletePayment(payment.id)}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
-                            title="Delete Payment"
+                            className={`rounded-lg p-2 transition ${
+                              !canWrite
+                                ? "opacity-40 cursor-not-allowed text-rose-300"
+                                : "text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                            }`}
+                            title={!canWrite ? subscriptionRequiredMessage : "Delete Payment"}
                             aria-label="Delete Payment"
                           >
                             <Trash2 size={18} />
@@ -1385,8 +1419,9 @@ const Payments = () => {
 
           <button
             type="submit"
-            disabled={saving}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+            disabled={!canWrite || saving}
+            title={!canWrite ? subscriptionRequiredMessage : undefined}
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : (editingPayment ? "Update Payment" : "Record Payment")}
           </button>
@@ -1482,8 +1517,12 @@ const Payments = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
               <button
                 type="button"
+                disabled={!canWrite}
                 onClick={() => handleDeletePayment(viewingPayment.id)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                title={!canWrite ? subscriptionRequiredMessage : "Delete"}
+                className={`inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold transition ${
+                  !canWrite ? "opacity-40 cursor-not-allowed text-rose-400" : "text-rose-700 hover:bg-rose-100"
+                }`}
               >
                 <Trash2 size={15} /> Delete
               </button>
@@ -1491,12 +1530,16 @@ const Payments = () => {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  disabled={!canWrite}
                   onClick={() => {
                     const p = viewingPayment;
                     setViewingPayment(null);
                     openEditModal(p);
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                  title={!canWrite ? subscriptionRequiredMessage : "Edit"}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold transition ${
+                    !canWrite ? "opacity-40 cursor-not-allowed text-slate-400" : "text-slate-700 hover:bg-slate-50"
+                  }`}
                 >
                   <Pencil size={15} /> Edit
                 </button>

@@ -21,6 +21,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import ProfileDropdown from "../components/ProfileDropdown";
 import PageHeader from "../components/PageHeader";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 import api from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -341,6 +342,7 @@ const KhataProductPicker = ({
 
 const Khata = () => {
   const { user } = useAuth();
+  const { canWrite, isRestricted, openSubscriptionPrompt } = useSubscriptionAccess();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -603,6 +605,10 @@ const Khata = () => {
 
   const handleAddEntry = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      openSubscriptionPrompt("Khata Ledger");
+      return;
+    }
     setSaveError("");
 
     const hasExisting = Boolean(form.customerId);
@@ -953,6 +959,10 @@ const Khata = () => {
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      openSubscriptionPrompt("Khata Ledger");
+      return;
+    }
     setEditError("");
     setEditSaving(true);
     try {
@@ -987,6 +997,10 @@ const Khata = () => {
   };
 
   const handleDeleteEntry = async (item) => {
+    if (!canWrite) {
+      openSubscriptionPrompt("Khata Ledger");
+      return;
+    }
     if (
       !window.confirm(
         `Are you sure you want to delete this ${item.type} entry of ₹${Number(item.amount).toLocaleString("en-IN")}?`
@@ -1035,6 +1049,10 @@ const Khata = () => {
           onSearchClick={handleSearchClick}
           showProfile={true}
           onNew={() => {
+            if (!canWrite) {
+              openSubscriptionPrompt("Khata Ledger");
+              return;
+            }
             setShowModal(true);
             setForm({
               customerId: "",
@@ -1050,7 +1068,6 @@ const Khata = () => {
         />
 
         <main className="p-4 sm:p-6 lg:p-8">
-
           {error && (
             <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}

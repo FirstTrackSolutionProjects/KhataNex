@@ -20,6 +20,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { fetchSecureFile } from "../lib/api";
+import { useSubscriptionAccess, subscriptionRequiredMessage } from "../hooks/useSubscriptionAccess";
 
 const STATUS_STYLE = {
   created: "bg-slate-100 text-slate-600",
@@ -28,6 +29,7 @@ const STATUS_STYLE = {
 };
 
 const Vehicles = () => {
+  const { canWrite, isRestricted, openSubscriptionPrompt } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [trips, setTrips] = useState([]);
@@ -134,6 +136,10 @@ const Vehicles = () => {
 
   const handleCreateTrip = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      setSaveError(subscriptionRequiredMessage);
+      return;
+    }
     setSaveError("");
     setSaving(true);
     try {
@@ -192,6 +198,10 @@ const Vehicles = () => {
   };
 
   const startTrip = async (id) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     try {
       await api.patch(`/api/vehicles/${id}/start-trip`, {});
       loadTrips();
@@ -201,6 +211,10 @@ const Vehicles = () => {
   };
 
   const markReached = async (id, unloadingFile = null) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     try {
       const formData = new FormData();
       if (unloadingFile && unloadingFile instanceof File && unloadingFile.size > 0) {
@@ -229,6 +243,10 @@ const Vehicles = () => {
   };
 
   const handleDeleteTrip = async (id) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this vehicle trip?")) return;
     try {
       await api.del(`/api/vehicles/${id}`);
@@ -283,6 +301,10 @@ const Vehicles = () => {
   };
 
   const handleUploadPhoto = async (tripId, file, fieldName = "loading_photo") => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     if (!file || !(file instanceof File) || file.size === 0) return;
     try {
       const formData = new FormData();
@@ -299,6 +321,10 @@ const Vehicles = () => {
   };
 
   const handleReplaceEWayBill = async (file) => {
+    if (!canWrite) {
+      window.alert(subscriptionRequiredMessage);
+      return;
+    }
     if (!file || !(file instanceof File) || file.size === 0 || !ewayModal.tripId) return;
     try {
       await handleUploadEWayBill(ewayModal.tripId, file);
@@ -390,6 +416,10 @@ const Vehicles = () => {
   };
 
   const handleReplaceActivePhoto = async (file) => {
+    if (!canWrite) {
+      window.alert(subscriptionRequiredMessage);
+      return;
+    }
     if (!file || !(file instanceof File) || file.size === 0 || !previewPhoto?.tripId) return;
     try {
       const field = previewPhoto.activeField || "loading_photo";
@@ -401,6 +431,10 @@ const Vehicles = () => {
   };
 
   const handleUploadEWayBill = async (tripId, file) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     if (!file || !(file instanceof File) || file.size === 0) return;
     try {
       const formData = new FormData();
@@ -436,6 +470,10 @@ const Vehicles = () => {
           showSearch={true}
           showProfile={true}
           onNew={() => {
+            if (!canWrite) {
+              openSubscriptionPrompt("Vehicles");
+              return;
+            }
             setEditingTrip(null);
             setTripType("outgoing");
             setForm({
@@ -455,6 +493,7 @@ const Vehicles = () => {
             setSaveError("");
             setShowModal(true);
           }}
+          onDisabledNew={() => openSubscriptionPrompt("Vehicles")}
           newLabel="Add Vehicle"
         />
 
@@ -566,8 +605,17 @@ const Vehicles = () => {
                     {/* EDIT */}
                     <button
                       type="button"
-                      onClick={() => openEditTrip(trip)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+                      disabled={!canWrite}
+                      title={!canWrite ? subscriptionRequiredMessage : "Edit"}
+                      onClick={() => {
+                        if (!canWrite) return;
+                        openEditTrip(trip);
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                        !canWrite
+                          ? "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
                     >
                       <Pencil size={13} /> Edit
                     </button>
@@ -575,8 +623,17 @@ const Vehicles = () => {
                     {/* DELETE */}
                     <button
                       type="button"
-                      onClick={() => handleDeleteTrip(trip.id)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                      disabled={!canWrite}
+                      title={!canWrite ? subscriptionRequiredMessage : "Delete"}
+                      onClick={() => {
+                        if (!canWrite) return;
+                        handleDeleteTrip(trip.id);
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                        !canWrite
+                          ? "cursor-not-allowed bg-rose-50 text-rose-300 opacity-60"
+                          : "bg-rose-50 text-rose-600 hover:bg-rose-100"
+                      }`}
                     >
                       <Trash2 size={13} /> Delete
                     </button>
@@ -605,13 +662,22 @@ const Vehicles = () => {
                         <Eye size={13} /> View E-Way Bill
                       </button>
                     ) : (
-                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200">
+                      <label
+                        title={!canWrite ? subscriptionRequiredMessage : undefined}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          !canWrite
+                            ? "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"
+                            : "cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
                         <Upload size={13} /> Upload E-Way Bill
                         <input
                           type="file"
+                          disabled={!canWrite}
                           accept="image/*,.pdf"
                           className="hidden"
                           onChange={(e) => {
+                            if (!canWrite) return;
                             const file = e.target.files?.[0];
                             if (file) handleUploadEWayBill(trip.id, file);
                             e.target.value = "";
@@ -630,13 +696,22 @@ const Vehicles = () => {
                         <Camera size={13} /> View Photos ({getTripPhotos(trip).length})
                       </button>
                     ) : (
-                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200">
+                      <label
+                        title={!canWrite ? subscriptionRequiredMessage : undefined}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          !canWrite
+                            ? "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"
+                            : "cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
                         <Camera size={13} /> Upload Photo
                         <input
                           type="file"
+                          disabled={!canWrite}
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
+                            if (!canWrite) return;
                             const file = e.target.files?.[0];
                             if (file) handleUploadPhoto(trip.id, file, "loading_photo");
                             e.target.value = "";
@@ -649,8 +724,17 @@ const Vehicles = () => {
                     {trip.trip_type === "outgoing" && trip.status === "created" && (
                       <button
                         type="button"
-                        onClick={() => startTrip(trip.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-200"
+                        disabled={!canWrite}
+                        title={!canWrite ? subscriptionRequiredMessage : "Start Trip"}
+                        onClick={() => {
+                          if (!canWrite) return;
+                          startTrip(trip.id);
+                        }}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          !canWrite
+                            ? "cursor-not-allowed bg-blue-50 text-blue-300 opacity-60"
+                            : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        }`}
                       >
                         <PlayCircle size={13} /> Start Trip
                       </button>
@@ -660,8 +744,17 @@ const Vehicles = () => {
                     {trip.trip_type === "outgoing" && trip.status === "in_transit" && (
                       <button
                         type="button"
-                        onClick={() => markReached(trip.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-200"
+                        disabled={!canWrite}
+                        title={!canWrite ? subscriptionRequiredMessage : "Mark Reached"}
+                        onClick={() => {
+                          if (!canWrite) return;
+                          markReached(trip.id);
+                        }}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          !canWrite
+                            ? "cursor-not-allowed bg-emerald-50 text-emerald-300 opacity-60"
+                            : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                        }`}
                       >
                         <CheckCircle2 size={13} /> Mark Reached
                       </button>
@@ -871,7 +964,8 @@ const Vehicles = () => {
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || !canWrite}
+            title={!canWrite ? subscriptionRequiredMessage : undefined}
             className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
           >
             {saving ? "Saving..." : (editingTrip ? "Update Vehicle" : "Add Vehicle")}
@@ -997,24 +1091,28 @@ const Vehicles = () => {
             </a>
 
             {/* Edit / Replace */}
-            <button
-              type="button"
-              onClick={() => replaceFileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-            >
-              <Pencil size={14} /> Edit / Replace
-            </button>
-            <input
-              ref={replaceFileInputRef}
-              type="file"
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleReplaceEWayBill(file);
-                e.target.value = "";
-              }}
-            />
+            {canWrite && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => replaceFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  <Pencil size={14} /> Edit / Replace
+                </button>
+                <input
+                  ref={replaceFileInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleReplaceEWayBill(file);
+                    e.target.value = "";
+                  }}
+                />
+              </>
+            )}
 
             <button
               type="button"

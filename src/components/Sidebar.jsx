@@ -15,8 +15,12 @@ import {
   Landmark,
   UserRound,
   User,
+  Sparkles,
+  Briefcase,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { hasModuleAccess } from "../utils/navigation";
 
 const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
   const isSidebarOpen = open !== undefined ? Boolean(open) : Boolean(isOpen);
@@ -24,23 +28,28 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isSuperadmin = user?.role === "superadmin";
+  const isEmployee = user?.role === "employee";
 
-  // "Dashboard" is the super admin's overview page only. Everyone else
-  // (user / employee) works from Customers onward — the normal
-  // operational dashboard.
+  const canAccessModule = (modId) => hasModuleAccess(user, modId);
+
   const menuItems = [
     ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
-    ...(isSuperadmin ? [{ name: "My Users", path: "/my-users", icon: UserRound }] : []),
-    { name: "Customers", path: "/customers", icon: Users },
-    { name: "Khata", path: "/khata", icon: BookOpen },
-    { name: "Payments", path: "/payments", icon: CreditCard },
-    { name: "Invoices", path: "/invoices", icon: FileText },
-    { name: "Quotations", path: "/quotations", icon: FileText },
-    { name: "Receipts", path: "/money-receipts", icon: FileText },
-    { name: "Inventory", path: "/inventory", icon: Package },
-    { name: "Banking", path: "/banking", icon: Landmark },
-    { name: "Vehicles", path: "/vehicles", icon: Truck },
-    { name: "Reports", path: "/reports", icon: BarChart3 },
+    ...(isSuperadmin || (isEmployee && canAccessModule("users")) ? [{ name: "My Users", path: "/my-users", icon: UserRound }] : []),
+    ...(isSuperadmin ? [{ name: "My Employees", path: "/my-employees", icon: Briefcase }] : []),
+    ...(isSuperadmin ? [{ name: "Billing", path: "/billing", icon: CreditCard }] : []),
+    ...(canAccessModule("customers") ? [{ name: "Customers", path: "/customers", icon: Users }] : []),
+    ...(canAccessModule("khata") ? [{ name: "Khata", path: "/khata", icon: BookOpen }] : []),
+    ...(canAccessModule("payments") ? [{ name: "Payments", path: "/payments", icon: CreditCard }] : []),
+    ...(canAccessModule("invoices") ? [{ name: "Invoices", path: "/invoices", icon: FileText }] : []),
+    ...(canAccessModule("quotations") ? [{ name: "Quotations", path: "/quotations", icon: FileText }] : []),
+    ...(canAccessModule("receipts") || canAccessModule("money_receipts") || canAccessModule("invoices")
+      ? [{ name: "Receipts", path: "/money-receipts", icon: FileText }]
+      : []),
+    ...(canAccessModule("inventory") ? [{ name: "Inventory", path: "/inventory", icon: Package }] : []),
+    ...(canAccessModule("banking") ? [{ name: "Banking", path: "/banking", icon: Landmark }] : []),
+    ...(canAccessModule("vehicles") ? [{ name: "Vehicles", path: "/vehicles", icon: Truck }] : []),
+    ...(canAccessModule("reports") ? [{ name: "Reports", path: "/reports", icon: BarChart3 }] : []),
+    { name: "Help Centre", path: "/help-centre", icon: HelpCircle },
   ];
 
   const handleLogout = () => {
@@ -121,7 +130,7 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
             type="button"
             onClick={handleClose}
             className="
-              rounded-lg p-2
+              flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2
               text-slate-500
               transition
               hover:bg-slate-100
@@ -266,6 +275,32 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
             />
 
             <span>Settings</span>
+          </NavLink>
+
+          <NavLink
+            to="/subscription"
+            onClick={handleClose}
+            className={({ isActive }) =>
+              `
+              mt-1 flex items-center gap-3
+              rounded-xl px-3 py-3
+              text-sm font-semibold
+              transition-all duration-200
+
+              ${
+                isActive
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+              }
+              `
+            }
+          >
+            <Sparkles
+              size={20}
+              strokeWidth={1.9}
+            />
+
+            <span>Subscription</span>
           </NavLink>
 
           <button

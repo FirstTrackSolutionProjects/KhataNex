@@ -18,6 +18,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -115,6 +116,7 @@ const emptyPurchase = {
 };
 
 const Inventory = () => {
+  const { canWrite, isRestricted, subscriptionRequiredMessage, openSubscriptionPrompt } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -260,6 +262,11 @@ const Inventory = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+
+    if (!canWrite) {
+      setProductError(subscriptionRequiredMessage);
+      return;
+    }
 
     setProductError("");
 
@@ -408,6 +415,10 @@ const Inventory = () => {
   };
 
   const openEditProduct = (product) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const type =
       product.item_type ||
       product.type ||
@@ -458,6 +469,10 @@ const Inventory = () => {
   };
 
   const handleDeleteProduct = async (product) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const name =
       product.product_name ||
       "this product";
@@ -690,6 +705,10 @@ const Inventory = () => {
   };
 
   const openEditPurchaseBill = async (bill) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     setPurchaseError("");
 
     try {
@@ -753,6 +772,10 @@ const Inventory = () => {
   };
 
   const handleDeletePurchaseBill = async (bill) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const confirmed = window.confirm(
       `Delete purchase bill ${bill.bill_number || bill.id}? This cannot be undone.`
     );
@@ -784,6 +807,11 @@ const Inventory = () => {
 
   const handleAddPurchase = async (e) => {
     e.preventDefault();
+
+    if (!canWrite) {
+      setPurchaseError(subscriptionRequiredMessage);
+      return;
+    }
 
     setPurchaseError("");
 
@@ -945,6 +973,10 @@ const Inventory = () => {
   };
 
   const openProductModal = () => {
+    if (!canWrite) {
+      openSubscriptionPrompt("Inventory");
+      return;
+    }
     setEditingProductId(null);
     setProductError("");
     setProductPurchaseSearch("");
@@ -961,6 +993,10 @@ const Inventory = () => {
   };
 
   const openPurchaseModal = () => {
+    if (!canWrite) {
+      openSubscriptionPrompt("Inventory");
+      return;
+    }
     setPurchaseError("");
 
     setPurchaseForm({
@@ -1003,6 +1039,9 @@ const Inventory = () => {
               icon={ClipboardList}
               size="sm"
               variant="outline"
+              disabled={!canWrite}
+              onDisabledClick={() => openSubscriptionPrompt("Inventory")}
+              title={!canWrite ? subscriptionRequiredMessage : undefined}
               onClick={openPurchaseModal}
               className="px-2.5 py-1.5 text-xs font-medium"
             >
@@ -1012,6 +1051,9 @@ const Inventory = () => {
             <Button
               icon={Plus}
               size="sm"
+              disabled={!canWrite}
+              onDisabledClick={() => openSubscriptionPrompt("Inventory")}
+              title={!canWrite ? subscriptionRequiredMessage : undefined}
               onClick={openProductModal}
               className="px-2.5 py-1.5 text-xs font-semibold"
             >
@@ -1027,6 +1069,9 @@ const Inventory = () => {
               icon={ClipboardList}
               size="sm"
               variant="outline"
+              disabled={!canWrite}
+              onDisabledClick={() => openSubscriptionPrompt("Inventory")}
+              title={!canWrite ? subscriptionRequiredMessage : undefined}
               onClick={openPurchaseModal}
               className="flex-1 justify-center px-2 py-2 text-xs font-medium"
             >
@@ -1036,6 +1081,9 @@ const Inventory = () => {
             <Button
               icon={Plus}
               size="sm"
+              disabled={!canWrite}
+              onDisabledClick={() => openSubscriptionPrompt("Inventory")}
+              title={!canWrite ? subscriptionRequiredMessage : undefined}
               onClick={openProductModal}
               className="flex-1 justify-center px-2 py-2 text-xs font-semibold"
             >
@@ -1276,20 +1324,28 @@ const Inventory = () => {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() =>
                                 openEditProduct(product)
                               }
-                              className="min-h-10 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100"
+                              title={!canWrite ? subscriptionRequiredMessage : "Update"}
+                              className={`min-h-10 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed text-emerald-400" : "text-emerald-700 hover:bg-emerald-100"
+                              }`}
                             >
                               Update
                             </button>
 
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() =>
                                 handleDeleteProduct(product)
                               }
-                              className="min-h-10 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                              title={!canWrite ? subscriptionRequiredMessage : "Delete"}
+                              className={`min-h-10 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed text-red-300" : "text-red-600 hover:bg-red-100"
+                              }`}
                             >
                               Delete
                             </button>
@@ -1444,18 +1500,24 @@ const Inventory = () => {
 
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() => openEditPurchaseBill(bill)}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                              title="Edit Bill"
+                              title={!canWrite ? subscriptionRequiredMessage : "Edit Bill"}
+                              className={`inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed text-emerald-400" : "text-emerald-700 hover:bg-emerald-100"
+                              }`}
                             >
                               <Pencil size={15} /> Edit
                             </button>
 
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() => handleDeletePurchaseBill(bill)}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100"
-                              title="Delete Bill"
+                              title={!canWrite ? subscriptionRequiredMessage : "Delete Bill"}
+                              className={`inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed text-rose-300" : "text-rose-600 hover:bg-rose-100"
+                              }`}
                             >
                               <Trash2 size={15} /> Delete
                             </button>

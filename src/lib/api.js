@@ -48,6 +48,8 @@ async function apiRequest(path, { method = "GET", body, isFormData = false } = {
     const message = data?.message || `Request failed (${res.status})`;
     const error = new Error(message);
     error.status = res.status;
+    error.code = data?.code;
+    error.data = data;
     throw error;
   }
 
@@ -59,8 +61,8 @@ export const api = {
   post: (path, body) => apiRequest(path, { method: "POST", body }),
   put: (path, body) => apiRequest(path, { method: "PUT", body }),
   patch: (path, body) => apiRequest(path, { method: "PATCH", body }),
-  del: (path) => apiRequest(path, { method: "DELETE" }),
-  delete: (path) => apiRequest(path, { method: "DELETE" }),
+  del: (path, body) => apiRequest(path, { method: "DELETE", body }),
+  delete: (path, body) => apiRequest(path, { method: "DELETE", body }),
   postForm: (path, formData) => apiRequest(path, { method: "POST", body: formData, isFormData: true }),
   putForm: (path, formData) => apiRequest(path, { method: "PUT", body: formData, isFormData: true }),
   patchForm: (path, formData) => apiRequest(path, { method: "PATCH", body: formData, isFormData: true }),
