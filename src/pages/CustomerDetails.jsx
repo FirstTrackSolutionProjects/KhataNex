@@ -15,6 +15,7 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import api from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const emptyAddress = {
   state: "",
@@ -38,6 +39,8 @@ const CustomerDetails = () => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
 
   const [form, setForm] = useState({
     title: "",
@@ -108,6 +111,10 @@ const CustomerDetails = () => {
 
   const handleDeleteCustomer = async () => {
     if (!customer) return;
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const name = customer.name || customer.business_name || "this customer";
     if (
       !window.confirm(
@@ -132,6 +139,10 @@ const CustomerDetails = () => {
 
   const startEditing = () => {
     if (!customer) {
+      return;
+    }
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
       return;
     }
 
@@ -198,6 +209,11 @@ const CustomerDetails = () => {
 
   const handleSave = async (event) => {
     event.preventDefault();
+
+    if (!canWrite) {
+      setSaveError(subscriptionRequiredMessage);
+      return;
+    }
 
     setSaving(true);
     setSaveError("");
@@ -390,16 +406,24 @@ const CustomerDetails = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
+                      disabled={!canWrite}
                       onClick={handleDeleteCustomer}
-                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                      title={!canWrite ? subscriptionRequiredMessage : undefined}
+                      className={`flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition ${
+                        !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-red-100"
+                      }`}
                     >
                       <Trash2 size={16} />
                       Delete Customer
                     </button>
 
                     <button
+                      disabled={!canWrite}
                       onClick={startEditing}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                      title={!canWrite ? subscriptionRequiredMessage : undefined}
+                      className={`flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white ${
+                        !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-700"
+                      }`}
                     >
                       <Pencil size={16} />
                       Edit Customer
@@ -724,8 +748,9 @@ const CustomerDetails = () => {
 
                 <button
                   type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                  disabled={!canWrite || saving}
+                  title={!canWrite ? subscriptionRequiredMessage : undefined}
+                  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Save size={16} />
                   {saving ? "Saving..." : "Save Changes"}

@@ -48,6 +48,8 @@ async function apiRequest(path, { method = "GET", body, isFormData = false } = {
     const message = data?.message || `Request failed (${res.status})`;
     const error = new Error(message);
     error.status = res.status;
+    error.code = data?.code;
+    error.data = data;
     throw error;
   }
 

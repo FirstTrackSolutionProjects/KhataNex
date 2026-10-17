@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import DeleteUserModal from "../components/DeleteUserModal";
 
 const formatDateTime = (value) => {
@@ -1244,9 +1245,11 @@ const RecordModal = ({
 const MyUserDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
 
   const [user, setUser] = useState(null);
   const [overview, setOverview] = useState(null);
+  const [billingData, setBillingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -1264,6 +1267,16 @@ const MyUserDetails = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [showReports, setShowReports] = useState(false);
   const [selectedBusinessSection, setSelectedBusinessSection] = useState("");
+
+  const isSuperadmin = currentUser?.role === "superadmin";
+  const isEmployee = currentUser?.role === "employee";
+  const assigned = Array.isArray(currentUser?.assigned_modules) ? currentUser.assigned_modules : [];
+
+  const canAccessSection = (modId) => {
+    if (isSuperadmin) return true;
+    if (!isEmployee) return true;
+    return assigned.includes("all") || assigned.includes("manage_all") || assigned.includes(modId);
+  };
 
   // Scoped Superadmin Reports State
   const [userReportPeriod, setUserReportPeriod] = useState("this_month");
@@ -1686,18 +1699,22 @@ const MyUserDetails = () => {
       setLoading(true);
       setError("");
 
-      const [overRes, khataRes, payRes, billsRes, invRes] = await Promise.all([
+      const [overRes, khataRes, payRes, billsRes, invRes, billRes] = await Promise.all([
         api.get(`/api/superadmin/users/${id}/overview`),
         api.get(`/api/superadmin/users/${id}/data?type=khata`).catch(() => null),
         api.get(`/api/superadmin/users/${id}/data?type=payments`).catch(() => null),
         api.get(`/api/superadmin/users/${id}/data?type=purchase-bills`).catch(() => null),
         api.get(`/api/superadmin/users/${id}/data?type=invoices`).catch(() => null),
+        api.get(`/api/superadmin/billing/users/${id}`).catch(() => null),
       ]);
 
       const data = getResponseData(overRes);
 
       setUser(data.user || null);
       setOverview(data.overview || null);
+      if (billRes?.success) {
+        setBillingData(billRes);
+      }
 
       const khataList = extractRecordsFromResponse(getResponseData(khataRes), "khata");
       const payList = extractRecordsFromResponse(getResponseData(payRes), "payments");
@@ -2063,6 +2080,10 @@ const MyUserDetails = () => {
       return record.bill_number ? `Bill #${record.bill_number}` : record.vendor_name || "Purchase Bill";
     }
 
+    if (type === "billing" || type === "subscriptions") {
+      return record.plan_name || (record.order_number ? `Order #${record.order_number}` : "Subscription Plan");
+    }
+
     return record.name || record.title || "Record";
   };
 
@@ -2150,6 +2171,14 @@ const MyUserDetails = () => {
       const dateStr = formatDate(record.bill_date || record.created_at);
       const status = Number(record.is_paid) ? "Paid" : "Unpaid";
       return [vendor, total, dateStr, status].filter(Boolean).join(" · ");
+    }
+
+    if (type === "billing" || type === "subscriptions") {
+      const orderNum = record.order_number ? `Order #${record.order_number}` : "";
+      const invNum = record.invoice_number ? `Invoice #${record.invoice_number}` : "";
+      const dateStr = formatDate(record.paid_at || record.created_at);
+      const status = (record.status || "paid").toUpperCase();
+      return [orderNum, invNum, dateStr, status].filter(Boolean).join(" · ");
     }
 
     return "";
@@ -2361,6 +2390,13 @@ const MyUserDetails = () => {
                     ["invoices", "quotations", "purchase-bills", "purchase_bills"].includes(activeType) && (
                       <span className="text-sm font-semibold text-slate-800 mr-1">
                         {formatMoney(record.total_amount)}
+                      </span>
+                    )}
+
+                  {record.total_paise !== undefined &&
+                    ["billing", "subscriptions"].includes(activeType) && (
+                      <span className="text-sm font-semibold text-emerald-600 mr-1">
+                        {formatMoney(record.total_paise / 100)}
                       </span>
                     )}
 
@@ -2652,25 +2688,61 @@ const MyUserDetails = () => {
                 </button>
               </div>
 
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2.5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-bold text-slate-800">
                       Subscription
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Current subscription period
+                    <p className="text-[11px] text-slate-500">
+                      Plan and validity details
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-slate-500">
-                      Ends
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-amber-700">
-                      31 Dec
-                    </p>
+                  <div>
+                    {(user?.subscription || billingData?.user?.subscription)?.status === "active" ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Active
+                      </span>
+                    ) : (user?.subscription || billingData?.user?.subscription)?.status === "expired" ? (
+                      <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">
+                        Expired
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        No Subscription
+                      </span>
+                    )}
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 text-xs">
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Plan</span>
+                    <span className="font-semibold text-slate-900">
+                      {(user?.subscription || billingData?.user?.subscription)?.plan_name || "—"}
+                      {(user?.subscription || billingData?.user?.subscription)?.is_complimentary ? " (Free)" : ""}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-500 block text-[11px]">
+                      {(user?.subscription || billingData?.user?.subscription)?.status === "active" ? "Remaining" : "Ends"}
+                    </span>
+                    <span className="font-semibold text-slate-900">
+                      {(user?.subscription || billingData?.user?.subscription)?.status === "active"
+                        ? `${(user?.subscription || billingData?.user?.subscription)?.remaining_days ?? 0}d left`
+                        : (user?.subscription || billingData?.user?.subscription)?.ends_at
+                        ? formatDate((user?.subscription || billingData?.user?.subscription)?.ends_at)
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+
+                {(user?.subscription || billingData?.user?.subscription)?.ends_at && (
+                  <div className="text-[11px] text-slate-500 pt-0.5">
+                    Valid until: {formatDate((user?.subscription || billingData?.user?.subscription)?.ends_at)}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -2719,6 +2791,45 @@ const MyUserDetails = () => {
               <InfoRow label="Payment Terms" value={user.payment_terms} />
             </div>
           </Section>
+
+          {billingData?.orders?.length > 0 && (
+            <Section title="Subscription Orders History">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="py-2 px-2.5">Order</th>
+                      <th className="py-2 px-2.5">Plan</th>
+                      <th className="py-2 px-2.5">Amount</th>
+                      <th className="py-2 px-2.5">Status</th>
+                      <th className="py-2 px-2.5">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {billingData.orders.map((ord) => (
+                      <tr key={ord.id}>
+                        <td className="py-2 px-2.5 font-mono text-slate-700">{ord.order_number || `#${ord.id}`}</td>
+                        <td className="py-2 px-2.5 font-medium text-slate-800">{ord.plan_name || ord.plan_code || "Plan"}</td>
+                        <td className="py-2 px-2.5 font-semibold text-slate-900">₹{((ord.amount_paise || 0) / 100).toFixed(2)}</td>
+                        <td className="py-2 px-2.5">
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                            ord.status === "completed" || ord.status === "paid"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : ord.status === "failed"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}>
+                            {ord.status}
+                          </span>
+                        </td>
+                        <td className="py-2 px-2.5 text-slate-500">{formatDate(ord.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
+          )}
         </div>
 
         <div className="space-y-5">
@@ -2769,62 +2880,68 @@ const MyUserDetails = () => {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <ActivityCard
-                  title="Invoices"
-                  count={overview?.invoice_count}
-                  icon={FileText}
-                  description="View invoices"
-                  onClick={() => {
-                    setRecordSearch("");
-                    loadRecords("invoices");
-                  }}
-                />
+              {canAccessSection("invoices") && (
+                <div>
+                  <ActivityCard
+                    title="Invoices"
+                    count={overview?.invoice_count}
+                    icon={FileText}
+                    description="View invoices"
+                    onClick={() => {
+                      setRecordSearch("");
+                      loadRecords("invoices");
+                    }}
+                  />
 
-                {activeType === "invoices" && (
-                  <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
-                    {renderRecordRows()}
-                  </div>
-                )}
-              </div>
+                  {activeType === "invoices" && (
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                      {renderRecordRows()}
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div>
-                <ActivityCard
-                  title="Quotations"
-                  count={overview?.quotation_count}
-                  icon={FileText}
-                  description="View quotations"
-                  onClick={() => {
-                    setRecordSearch("");
-                    loadRecords("quotations");
-                  }}
-                />
+              {canAccessSection("quotations") && (
+                <div>
+                  <ActivityCard
+                    title="Quotations"
+                    count={overview?.quotation_count}
+                    icon={FileText}
+                    description="View quotations"
+                    onClick={() => {
+                      setRecordSearch("");
+                      loadRecords("quotations");
+                    }}
+                  />
 
-                {activeType === "quotations" && (
-                  <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
-                    {renderRecordRows()}
-                  </div>
-                )}
-              </div>
+                  {activeType === "quotations" && (
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                      {renderRecordRows()}
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div>
-                <ActivityCard
-                  title="Money Receipts"
-                  count={overview?.money_receipt_count}
-                  icon={Receipt}
-                  description="View receipts"
-                  onClick={() => {
-                    setRecordSearch("");
-                    loadRecords("money-receipts");
-                  }}
-                />
+              {(canAccessSection("receipts") || canAccessSection("invoices")) && (
+                <div>
+                  <ActivityCard
+                    title="Money Receipts"
+                    count={overview?.money_receipt_count}
+                    icon={Receipt}
+                    description="View receipts"
+                    onClick={() => {
+                      setRecordSearch("");
+                      loadRecords("money-receipts");
+                    }}
+                  />
 
-                {activeType === "money-receipts" && (
-                  <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
-                    {renderRecordRows()}
-                  </div>
-                )}
-              </div>
+                  {activeType === "money-receipts" && (
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                      {renderRecordRows()}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
 
@@ -2849,77 +2966,119 @@ const MyUserDetails = () => {
                   className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">-- Choose Business Section --</option>
-                  <option value="customers">Customers ({overview?.customer_count || 0})</option>
-                  <option value="khata">Khata (Credit / Debit / Due) ({userRawData.khata?.length || Number(overview?.khata_count || 0)})</option>
-                  <option value="payments">Payments ({userRawData.payments?.length || overview?.payment_count || 0})</option>
-                  <option value="purchase-bills">Purchase Bills ({userRawData.purchaseBills?.length || overview?.purchase_bill_count || 0})</option>
-                  <option value="reports">Reports (Sales, Expenses & Profit)</option>
-                  <option value="inventory">Inventory / Stock ({overview?.stock_count || 0})</option>
-                  <option value="vehicles">Vehicles ({overview?.vehicle_trip_count || 0})</option>
+                  {canAccessSection("customers") && (
+                    <option value="customers">Customers ({overview?.customer_count || 0})</option>
+                  )}
+                  {canAccessSection("khata") && (
+                    <option value="khata">Khata (Credit / Debit / Due) ({userRawData.khata?.length || Number(overview?.khata_count || 0)})</option>
+                  )}
+                  {canAccessSection("payments") && (
+                    <option value="payments">Payments ({userRawData.payments?.length || overview?.payment_count || 0})</option>
+                  )}
+                  {canAccessSection("inventory") && (
+                    <option value="purchase-bills">Purchase Bills ({userRawData.purchaseBills?.length || overview?.purchase_bill_count || 0})</option>
+                  )}
+                  {canAccessSection("reports") && (
+                    <option value="reports">Reports (Sales, Expenses & Profit)</option>
+                  )}
+                  {canAccessSection("inventory") && (
+                    <option value="inventory">Inventory / Stock ({overview?.stock_count || 0})</option>
+                  )}
+                  {canAccessSection("vehicles") && (
+                    <option value="vehicles">Vehicles ({overview?.vehicle_trip_count || 0})</option>
+                  )}
+                  {canAccessSection("billing") && (
+                    <option value="billing">Billing & Subscriptions</option>
+                  )}
                 </select>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <ActivityCard
-                title="Customers"
-                count={overview?.customer_count}
-                icon={Users}
-                description="Customer accounts"
-                onClick={() => handleBusinessSectionChange("customers")}
-              />
+              {canAccessSection("customers") && (
+                <ActivityCard
+                  title="Customers"
+                  count={overview?.customer_count}
+                  icon={Users}
+                  description="Customer accounts"
+                  onClick={() => handleBusinessSectionChange("customers")}
+                />
+              )}
 
-              <ActivityCard
-                title="Khata (Credit / Debit / Due)"
-                count={userRawData.khata?.length || Number(overview?.khata_count || 0)}
-                icon={BookOpen}
-                description="Credit, debit & due entries"
-                onClick={() => handleBusinessSectionChange("khata")}
-              />
+              {canAccessSection("khata") && (
+                <ActivityCard
+                  title="Khata (Credit / Debit / Due)"
+                  count={userRawData.khata?.length || Number(overview?.khata_count || 0)}
+                  icon={BookOpen}
+                  description="Credit, debit & due entries"
+                  onClick={() => handleBusinessSectionChange("khata")}
+                />
+              )}
 
-              <ActivityCard
-                title="Payments"
-                count={userRawData.payments?.length || overview?.payment_count}
-                icon={Receipt}
-                description="Customer & vendor payments"
-                onClick={() => handleBusinessSectionChange("payments")}
-              />
+              {canAccessSection("payments") && (
+                <ActivityCard
+                  title="Payments"
+                  count={userRawData.payments?.length || overview?.payment_count}
+                  icon={Receipt}
+                  description="Customer & vendor payments"
+                  onClick={() => handleBusinessSectionChange("payments")}
+                />
+              )}
 
-              <ActivityCard
-                title="Purchase Bills"
-                count={userRawData.purchaseBills?.length || overview?.purchase_bill_count}
-                icon={Package}
-                description="Purchase bills & stock vouchers"
-                onClick={() => handleBusinessSectionChange("purchase-bills")}
-              />
+              {canAccessSection("inventory") && (
+                <ActivityCard
+                  title="Purchase Bills"
+                  count={userRawData.purchaseBills?.length || overview?.purchase_bill_count}
+                  icon={Package}
+                  description="Purchase bills & stock vouchers"
+                  onClick={() => handleBusinessSectionChange("purchase-bills")}
+                />
+              )}
 
-              <ActivityCard
-                title="Reports"
-                count={null}
-                icon={BarChart3}
-                description="Business performance & drilldowns"
-                showCount={false}
-                onClick={() => handleBusinessSectionChange("reports")}
-              />
+              {canAccessSection("reports") && (
+                <ActivityCard
+                  title="Reports"
+                  count={null}
+                  icon={BarChart3}
+                  description="Business performance & drilldowns"
+                  showCount={false}
+                  onClick={() => handleBusinessSectionChange("reports")}
+                />
+              )}
 
-              <ActivityCard
-                title="Inventory / Stock"
-                count={overview?.stock_count}
-                icon={Package}
-                description="Stock items & catalog"
-                onClick={() => handleBusinessSectionChange("inventory")}
-              />
+              {canAccessSection("inventory") && (
+                <ActivityCard
+                  title="Inventory / Stock"
+                  count={overview?.stock_count}
+                  icon={Package}
+                  description="Stock items & catalog"
+                  onClick={() => handleBusinessSectionChange("inventory")}
+                />
+              )}
 
-              <ActivityCard
-                title="Vehicles"
-                count={overview?.vehicle_trip_count}
-                icon={Truck}
-                description="Vehicle trips & log"
-                onClick={() => handleBusinessSectionChange("vehicles")}
-              />
+              {canAccessSection("vehicles") && (
+                <ActivityCard
+                  title="Vehicles"
+                  count={overview?.vehicle_trip_count}
+                  icon={Truck}
+                  description="Vehicle trips & log"
+                  onClick={() => handleBusinessSectionChange("vehicles")}
+                />
+              )}
+
+              {canAccessSection("billing") && (
+                <ActivityCard
+                  title="Billing & Subscriptions"
+                  count={null}
+                  icon={CreditCard}
+                  description="Plans, orders & tax invoices"
+                  showCount={false}
+                  onClick={() => handleBusinessSectionChange("billing")}
+                />
+              )}
             </div>
 
-            {["customers", "khata", "payments", "purchase-bills", "purchase_bills", "inventory", "stock", "vehicles"].includes(activeType) && (
+            {["customers", "khata", "payments", "purchase-bills", "purchase_bills", "inventory", "stock", "vehicles", "billing", "subscriptions"].includes(activeType) && (
               <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-5 py-3.5">
                   <div className="flex items-center gap-2">

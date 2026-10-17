@@ -13,6 +13,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api from "../lib/api";
+import { useSubscriptionAccess, subscriptionRequiredMessage } from "../hooks/useSubscriptionAccess";
 
 const EMPTY_FORM = {
   bank_name: "",
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
 };
 
 const Banking = () => {
+  const { canWrite, isRestricted } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [banking, setBanking] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,10 @@ const Banking = () => {
   };
 
   const handleSetDefault = async () => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     if (!selectedDefaultId) return;
     setSettingDefault(true);
     try {
@@ -88,6 +94,10 @@ const Banking = () => {
   }, []);
 
   const openAddModal = () => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     setEditingId(null);
     setForm({
       ...EMPTY_FORM,
@@ -98,6 +108,10 @@ const Banking = () => {
   };
 
   const openEditModal = (bank) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     setEditingId(bank.id);
     setForm({
       bank_name: bank.bank_name || "",
@@ -121,6 +135,10 @@ const Banking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      setSaveError(subscriptionRequiredMessage);
+      return;
+    }
 
     setSaving(true);
     setSaveError("");
@@ -150,6 +168,10 @@ const Banking = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
     const confirmed = window.confirm(
       "Are you sure you want to delete this bank account?"
     );
@@ -178,7 +200,9 @@ const Banking = () => {
           onMenuClick={() => setSidebarOpen(true)}
           showHome={true}
           showProfile={true}
-          onNew={openAddModal}
+          onNew={!canWrite ? undefined : openAddModal}
+          newDisabled={!canWrite}
+          newTooltip={subscriptionRequiredMessage}
           newLabel="Add Bank"
         />
 
@@ -236,7 +260,8 @@ const Banking = () => {
                 </select>
                 <Button
                   size="sm"
-                  disabled={!selectedDefaultId || settingDefault}
+                  disabled={!selectedDefaultId || settingDefault || !canWrite}
+                  title={!canWrite ? subscriptionRequiredMessage : undefined}
                   onClick={handleSetDefault}
                 >
                   {settingDefault ? "Saving..." : "Set as Default Account"}
@@ -266,8 +291,10 @@ const Banking = () => {
               </p>
 
               <button
+                disabled={!canWrite}
+                title={!canWrite ? subscriptionRequiredMessage : undefined}
                 onClick={openAddModal}
-                className="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                className="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Add Bank Account
               </button>
@@ -298,17 +325,33 @@ const Banking = () => {
 
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => openEditModal(bank)}
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600"
-                        title="Edit"
+                        disabled={!canWrite}
+                        onClick={() => {
+                          if (!canWrite) return;
+                          openEditModal(bank);
+                        }}
+                        className={`rounded-lg p-2 transition ${
+                          !canWrite
+                            ? "opacity-50 cursor-not-allowed text-slate-300"
+                            : "text-slate-400 hover:bg-slate-100 hover:text-emerald-600"
+                        }`}
+                        title={!canWrite ? subscriptionRequiredMessage : "Edit"}
                       >
                         <Pencil size={17} />
                       </button>
 
                       <button
-                        onClick={() => handleDelete(bank.id)}
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
-                        title="Delete"
+                        disabled={!canWrite}
+                        onClick={() => {
+                          if (!canWrite) return;
+                          handleDelete(bank.id);
+                        }}
+                        className={`rounded-lg p-2 transition ${
+                          !canWrite
+                            ? "opacity-50 cursor-not-allowed text-slate-300"
+                            : "text-slate-400 hover:bg-red-50 hover:text-red-600"
+                        }`}
+                        title={!canWrite ? subscriptionRequiredMessage : "Delete"}
                       >
                         <Trash2 size={17} />
                       </button>
@@ -501,7 +544,11 @@ const Banking = () => {
               Cancel
             </Button>
 
-            <Button type="submit" disabled={saving}>
+            <Button
+              type="submit"
+              disabled={saving || !canWrite}
+              title={!canWrite ? subscriptionRequiredMessage : undefined}
+            >
               {saving
                 ? "Saving..."
                 : editingId

@@ -14,6 +14,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { getDefaultLandingPath } from "../utils/navigation";
 
 const BottomNav = () => {
   const { user } = useAuth();
@@ -22,11 +23,13 @@ const BottomNav = () => {
 
   if (!isLoggedIn) return null;
 
+  const defaultLanding = getDefaultLandingPath(user);
+
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     {
       name: "Dash",
-      path: isSuperadmin ? "/dashboard" : "/khata",
+      path: isSuperadmin ? "/dashboard" : defaultLanding,
       icon: LayoutDashboard,
     },
     { name: "Reports", path: "/reports", icon: BarChart3 },

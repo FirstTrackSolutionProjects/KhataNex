@@ -10,6 +10,7 @@ import {
   Home,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { getDefaultLandingPath } from "../utils/navigation";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ const Login = () => {
     setSubmitting(true);
     try {
       const user = await login(formData.email, formData.password);
-      navigate(user.role === "superadmin" ? "/dashboard" : "/customers");
+      const target = getDefaultLandingPath(user);
+      navigate(target, { replace: true });
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
     } finally {

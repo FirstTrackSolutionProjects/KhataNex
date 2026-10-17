@@ -23,6 +23,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const EMAIL_STYLE = {
   sent: "bg-emerald-100 text-emerald-700",
@@ -697,6 +698,8 @@ const TotalsSection = ({ totals }) => (
 );
 
 const Invoices = () => {
+  const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
+
   const [sidebarOpen, setSidebarOpen] =
     useState(false);
 
@@ -944,6 +947,10 @@ const Invoices = () => {
   };
 
   const handleDeleteInvoice = async (invoice) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const invoiceLabel = invoice.invoice_number || `Invoice #${invoice.id}`;
     if (!window.confirm(`Are you sure you want to delete ${invoiceLabel}? This action cannot be undone.`)) {
       return;
@@ -1270,6 +1277,10 @@ const Invoices = () => {
   };
 
   const openEditModal = (doc) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     setEditingDoc(doc);
     setSaveError("");
 
@@ -1374,6 +1385,11 @@ const Invoices = () => {
     event
   ) => {
     event.preventDefault();
+
+    if (!canWrite) {
+      setSaveError(subscriptionRequiredMessage);
+      return;
+    }
 
     setSaveError("");
 
@@ -1535,6 +1551,10 @@ const Invoices = () => {
   };
 
   const openCreateModal = () => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     resetForm();
     setShowModal(true);
   };
@@ -1558,6 +1578,8 @@ const Invoices = () => {
           showProfile={true}
           onNew={openCreateModal}
           newLabel="Create Invoice"
+          newDisabled={!canWrite}
+          newTooltip={!canWrite ? subscriptionRequiredMessage : undefined}
         />
 
         <div className="space-y-5 p-4 sm:p-6 lg:p-8">
@@ -1639,8 +1661,12 @@ const Invoices = () => {
 
                 <button
                   type="button"
+                  disabled={!canWrite}
                   onClick={openCreateModal}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                  title={!canWrite ? subscriptionRequiredMessage : undefined}
+                  className={`mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition ${
+                    !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-700"
+                  }`}
                 >
                   <Plus size={16} />
                   Create Invoice
@@ -1787,18 +1813,24 @@ const Invoices = () => {
                               )}
                               <button
                                 type="button"
+                                disabled={!canWrite}
                                 onClick={() => openEditModal(document)}
-                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
-                                title="Edit Invoice"
+                                className={`rounded-lg p-2 sm:p-2.5 text-slate-600 transition ${
+                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-100 hover:text-emerald-600"
+                                }`}
+                                title={!canWrite ? subscriptionRequiredMessage : "Edit Invoice"}
                                 aria-label="Edit invoice"
                               >
                                 <Pencil size={17} className="sm:w-5 sm:h-5" />
                               </button>
                               <button
                                 type="button"
+                                disabled={!canWrite}
                                 onClick={() => handleDeleteInvoice(document)}
-                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition"
-                                title="Delete Invoice"
+                                className={`rounded-lg p-2 sm:p-2.5 text-slate-600 transition ${
+                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-rose-50 hover:text-rose-600"
+                                }`}
+                                title={!canWrite ? subscriptionRequiredMessage : "Delete Invoice"}
                               >
                                 <Trash2 size={17} className="sm:w-5 sm:h-5" />
                               </button>

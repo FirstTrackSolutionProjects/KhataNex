@@ -5,6 +5,7 @@ import Sidebar from "../components/Sidebar";
 import CustomerCard from "../components/CustomerCard";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 import api from "../lib/api";
 
 const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
@@ -144,6 +145,7 @@ const AddressFields = ({ address, setAddress }) => {
 };
 
 const Customers = () => {
+  const { canWrite, isRestricted, openSubscriptionPrompt } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -172,6 +174,10 @@ const Customers = () => {
   };
 
   const handleDeleteCustomer = async (id, name) => {
+    if (!canWrite) {
+      alert("Write access restricted: An active subscription is required to delete customer accounts.");
+      return;
+    }
     if (
       !window.confirm(
         `Are you sure you want to delete ${
@@ -276,6 +282,10 @@ const Customers = () => {
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    if (!canWrite) {
+      setSaveError("Write access restricted: An active subscription is required to add customers.");
+      return;
+    }
     setSaveError("");
     setSaving(true);
 
@@ -382,7 +392,10 @@ const Customers = () => {
           <Button
             icon={Plus}
             size="sm"
+            disabled={!canWrite}
+            onDisabledClick={() => openSubscriptionPrompt("Add Customer")}
             onClick={() => setShowAddModal(true)}
+            title={!canWrite ? "Active subscription required to add customers" : undefined}
           >
             Add Customer
           </Button>

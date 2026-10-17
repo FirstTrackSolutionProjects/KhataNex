@@ -8,7 +8,6 @@ import {
   Menu,
   Bell,
   Search,
-  UserPlus,
   Ban,
   CheckCircle2,
   Home,
@@ -19,7 +18,6 @@ import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import TransactionCard from "../components/TransactionCard";
 import Button from "../components/Button";
-import Modal from "../components/Modal";
 import ProfileDropdown from "../components/ProfileDropdown";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
@@ -42,17 +40,6 @@ const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
-  const [employeeForm, setEmployeeForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    employee_role_type: "",
-  });
-  const [creatingEmployee, setCreatingEmployee] = useState(false);
-  const [employeeError, setEmployeeError] = useState("");
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -112,22 +99,6 @@ const Dashboard = () => {
 
   const handleProfileClick = () => {
     navigate("/profile");
-  };
-
-  const handleCreateEmployee = async (e) => {
-    e.preventDefault();
-    setEmployeeError("");
-    setCreatingEmployee(true);
-    try {
-      await api.post("/api/superadmin/employees", employeeForm);
-      setShowEmployeeModal(false);
-      setEmployeeForm({ name: "", email: "", password: "", phone: "", employee_role_type: "" });
-      loadDashboard();
-    } catch (err) {
-      setEmployeeError(err.message || "Could not create employee.");
-    } finally {
-      setCreatingEmployee(false);
-    }
   };
 
   const toggleEmployeeStatus = async (employee) => {
@@ -225,16 +196,6 @@ const Dashboard = () => {
                 Here's the full business overview across every account.
               </p>
             </div>
-
-            <div className="w-full sm:w-auto">
-              <Button
-                icon={UserPlus}
-                onClick={() => setShowEmployeeModal(true)}
-              >
-                Add Employee
-              </Button>
-            </div>
-
           </div>
 
           {error && (
@@ -367,80 +328,6 @@ const Dashboard = () => {
 
         </main>
       </div>
-
-      {/* ADD EMPLOYEE MODAL */}
-      <Modal open={showEmployeeModal} onClose={() => setShowEmployeeModal(false)} title="Add Employee">
-        <form onSubmit={handleCreateEmployee} className="space-y-4">
-          {employeeError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
-              {employeeError}
-            </div>
-          )}
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
-            <input
-              type="text"
-              value={employeeForm.name}
-              onChange={(e) => setEmployeeForm({ ...employeeForm, name: e.target.value })}
-              placeholder="Employee name"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              value={employeeForm.email}
-              onChange={(e) => setEmployeeForm({ ...employeeForm, email: e.target.value })}
-              placeholder="employee@example.com"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Password (you assign this)</label>
-            <input
-              type="text"
-              value={employeeForm.password}
-              onChange={(e) => setEmployeeForm({ ...employeeForm, password: e.target.value })}
-              placeholder="Set a login password for them"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
-            <input
-              type="tel"
-              value={employeeForm.phone}
-              onChange={(e) => setEmployeeForm({ ...employeeForm, phone: e.target.value })}
-              placeholder="Phone number"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Role</label>
-            <input
-              type="text"
-              value={employeeForm.employee_role_type}
-              onChange={(e) => setEmployeeForm({ ...employeeForm, employee_role_type: e.target.value })}
-              placeholder="e.g. Accountant, Manager, Stock Keeper"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={creatingEmployee}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
-          >
-            {creatingEmployee ? "Creating..." : "Create Employee"}
-          </button>
-        </form>
-      </Modal>
     </div>
   );
 };

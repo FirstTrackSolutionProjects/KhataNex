@@ -10,8 +10,9 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
 import Sidebar from "./components/Sidebar";
-import SubscriptionRestrictedBanner from "./components/SubscriptionRestrictedBanner";
-import { AuthProvider } from "./context/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import SubscriptionPromptModal from "./components/SubscriptionPromptModal";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 // =====================================
 // Public Pages
@@ -51,11 +52,28 @@ import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
 import MyUsers from "./pages/MyUsers";
 import MyUserDetails from "./pages/MyUserDetails";
+import MyEmployees from "./pages/MyEmployees";
+import MyEmployeeDetails from "./pages/MyEmployeeDetails";
+import HelpCentre from "./pages/HelpCentre";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Banking from "./pages/Banking";
 import Subscription from "./pages/Subscription";
 import BillingDashboard from "./pages/BillingDashboard";
+
+// =====================================
+// Global Subscription Prompt Modal
+// =====================================
+function GlobalSubscriptionModal() {
+  const { isPromptOpen, closeSubscriptionPrompt, promptFeature } = useAuth();
+  return (
+    <SubscriptionPromptModal
+      isOpen={isPromptOpen}
+      onClose={closeSubscriptionPrompt}
+      featureName={promptFeature}
+    />
+  );
+}
 
 // =====================================
 // Dashboard Layout (NO Navbar - pages have their own header)
@@ -64,8 +82,11 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
       <Sidebar />
-      <SubscriptionRestrictedBanner />
-      <main>{children}</main>
+      <main>
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </main>
       <BottomNav />
     </div>
   );
@@ -118,11 +139,12 @@ const NotFound = () => {
 // =====================================
 function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <ScrollToTop />
-          <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <AuthProvider>
+            <ScrollToTop />
+            <Routes>
 
           {/* =====================================
               PUBLIC WEBSITE (has Navbar)
@@ -280,7 +302,7 @@ function App() {
           <Route
             path="/banking"
             element={
-              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]}>
+              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]} requiredModule="banking">
                 <DashboardLayout>
                   <Banking />
                 </DashboardLayout>
@@ -296,7 +318,7 @@ function App() {
           <Route
             path="/customers"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="customers">
                 <DashboardLayout>
                   <Customers />
                 </DashboardLayout>
@@ -307,7 +329,7 @@ function App() {
           <Route
             path="/customers/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="customers">
                 <DashboardLayout>
                   <CustomerDetails />
                 </DashboardLayout>
@@ -318,7 +340,7 @@ function App() {
           <Route
             path="/khata"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="khata">
                 <DashboardLayout>
                   <Khata />
                 </DashboardLayout>
@@ -329,7 +351,7 @@ function App() {
           <Route
             path="/payments"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="payments">
                 <DashboardLayout>
                   <Payments />
                 </DashboardLayout>
@@ -340,7 +362,7 @@ function App() {
           <Route
             path="/invoices"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="invoices">
                 <DashboardLayout>
                   <Invoices />
                 </DashboardLayout>
@@ -351,7 +373,7 @@ function App() {
           <Route
             path="/quotations"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="quotations">
                 <DashboardLayout>
                   <Quotations />
                 </DashboardLayout>
@@ -362,7 +384,7 @@ function App() {
           <Route
             path="/money-receipts"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="invoices">
                 <DashboardLayout>
                   <MoneyReceipts />
                 </DashboardLayout>
@@ -373,7 +395,7 @@ function App() {
           <Route
             path="/inventory"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="inventory">
                 <DashboardLayout>
                   <Inventory />
                 </DashboardLayout>
@@ -384,7 +406,7 @@ function App() {
           <Route
             path="/vehicles"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="vehicles">
                 <DashboardLayout>
                   <Vehicles />
                 </DashboardLayout>
@@ -395,7 +417,7 @@ function App() {
           <Route
             path="/reports"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredModule="reports">
                 <DashboardLayout>
                   <Reports />
                 </DashboardLayout>
@@ -405,7 +427,7 @@ function App() {
           <Route
             path="/my-users"
             element={
-              <ProtectedRoute allowedRoles={["superadmin"]}>
+              <ProtectedRoute allowedRoles={["superadmin", "employee"]} requiredModule="users">
                 <DashboardLayout>
                   <MyUsers />
                 </DashboardLayout>
@@ -415,7 +437,7 @@ function App() {
           <Route
             path="/my-users/:id"
             element={
-              <ProtectedRoute allowedRoles={["superadmin"]}>
+              <ProtectedRoute allowedRoles={["superadmin", "employee"]} requiredModule="users">
                 <DashboardLayout>
                   <MyUserDetails />
                 </DashboardLayout>
@@ -423,7 +445,37 @@ function App() {
             }
           />
 
+          <Route
+            path="/my-employees"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <MyEmployees />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-employees/:id"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <DashboardLayout>
+                  <MyEmployeeDetails />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
+          <Route
+            path="/help-centre"
+            element={
+              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]}>
+                <DashboardLayout>
+                  <HelpCentre />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/profile"
@@ -479,9 +531,11 @@ function App() {
           />
 
         </Routes>
+        <GlobalSubscriptionModal />
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

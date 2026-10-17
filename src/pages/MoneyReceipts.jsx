@@ -20,6 +20,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const money = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN", {
@@ -708,6 +709,7 @@ function MoneyReceiptForm({
   onCreated,
   onCancel,
 }) {
+  const { canWrite, subscriptionRequiredMessage } = useSubscriptionAccess();
   const isEditing = Boolean(initialData);
 
   const [customerMode, setCustomerMode] = useState(() =>
@@ -934,6 +936,11 @@ function MoneyReceiptForm({
 
   const handleSubmit = async (draft = false) => {
     setError("");
+
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
 
     const numericAmount = numberValue(amount);
 
@@ -1446,6 +1453,7 @@ function MoneyReceiptForm({
 }
 
 const MoneyReceipts = () => {
+  const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [documents, setDocuments] = useState([]);
@@ -1596,6 +1604,10 @@ const MoneyReceipts = () => {
   };
 
   const handleEditReceipt = async (receipt) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     try {
       let fullReceipt = receipt;
       try {
@@ -1623,6 +1635,10 @@ const MoneyReceipts = () => {
   };
 
   const handleDeleteReceipt = async (receipt) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const num = receipt.receipt_number || `#${receipt.id}`;
     if (!window.confirm(`Are you sure you want to delete Money Receipt ${num}?`)) return;
     try {
@@ -1656,10 +1672,16 @@ const MoneyReceipts = () => {
           showSearch={true}
           showProfile={true}
           onNew={() => {
+            if (!canWrite) {
+              alert(subscriptionRequiredMessage);
+              return;
+            }
             setEditingReceipt(null);
             setShowCreate(true);
           }}
           newLabel="Create Receipt"
+          newDisabled={!canWrite}
+          newTooltip={!canWrite ? subscriptionRequiredMessage : undefined}
         />
 
         <div className="p-4 sm:p-6">
@@ -1919,9 +1941,14 @@ const MoneyReceipts = () => {
                               {/* EDIT */}
                               <button
                                 type="button"
+                                disabled={!canWrite}
                                 onClick={() => handleEditReceipt(receipt)}
-                                title="Edit Receipt"
-                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                                title={!canWrite ? subscriptionRequiredMessage : "Edit Receipt"}
+                                className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium transition ${
+                                  !canWrite
+                                    ? "opacity-40 cursor-not-allowed text-slate-400"
+                                    : "text-slate-700 hover:bg-emerald-50 hover:text-emerald-600"
+                                }`}
                               >
                                 <Pencil size={14} className="sm:w-4 sm:h-4" />
                                 Edit
@@ -1930,9 +1957,14 @@ const MoneyReceipts = () => {
                               {/* DELETE */}
                               <button
                                 type="button"
+                                disabled={!canWrite}
                                 onClick={() => handleDeleteReceipt(receipt)}
-                                title="Delete Receipt"
-                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-rose-700 hover:bg-rose-50 hover:text-rose-600 transition"
+                                title={!canWrite ? subscriptionRequiredMessage : "Delete Receipt"}
+                                className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium transition ${
+                                  !canWrite
+                                    ? "opacity-40 cursor-not-allowed text-rose-400"
+                                    : "text-rose-700 hover:bg-rose-50 hover:text-rose-600"
+                                }`}
                               >
                                 <Trash2 size={14} className="sm:w-4 sm:h-4" />
                                 Delete
@@ -2051,8 +2083,12 @@ const MoneyReceipts = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
               <button
                 type="button"
+                disabled={!canWrite}
                 onClick={() => handleDeleteReceipt(viewingReceipt)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                title={!canWrite ? subscriptionRequiredMessage : "Delete"}
+                className={`inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold transition ${
+                  !canWrite ? "opacity-40 cursor-not-allowed text-rose-400" : "text-rose-700 hover:bg-rose-100"
+                }`}
               >
                 <Trash2 size={15} className="sm:w-4 sm:h-4" /> Delete
               </button>
@@ -2060,12 +2096,16 @@ const MoneyReceipts = () => {
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   type="button"
+                  disabled={!canWrite}
                   onClick={() => {
                     const r = viewingReceipt;
                     setViewingReceipt(null);
                     handleEditReceipt(r);
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  title={!canWrite ? subscriptionRequiredMessage : "Edit"}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold transition ${
+                    !canWrite ? "opacity-40 cursor-not-allowed text-slate-400" : "text-slate-700 hover:bg-slate-50"
+                  }`}
                 >
                   <Pencil size={15} className="sm:w-4 sm:h-4" /> Edit
                 </button>

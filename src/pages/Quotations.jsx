@@ -25,6 +25,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
+import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const DOC_TYPE_LABEL = {
   invoice: "Invoice",
@@ -622,6 +623,7 @@ function QuotationForm({
   stock,
   banking,
 }) {
+  const { canWrite, subscriptionRequiredMessage } = useSubscriptionAccess();
   const isEditing = Boolean(initialData);
 
   const [customerId, setCustomerId] = useState(() =>
@@ -923,6 +925,11 @@ function QuotationForm({
 
   const submit = async (status = "issued") => {
     setError("");
+
+    if (!canWrite) {
+      setError(subscriptionRequiredMessage);
+      return;
+    }
 
     if (customerMode === "existing" && !customerId) {
       setError("Please select a customer or switch to manual entry.");
@@ -1885,6 +1892,7 @@ const PAGE_CONFIG = {
 };
 
 const Quotations = () => {
+  const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
   const pageConfig = PAGE_CONFIG.quotation;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -2043,6 +2051,10 @@ const Quotations = () => {
   };
 
   const handleDeleteQuotation = async (quotation) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     const quotationLabel =
       quotation.quotation_number || `Quotation #${quotation.id}`;
     if (
@@ -2065,6 +2077,10 @@ const Quotations = () => {
   };
 
   const resendEmail = async (document) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     try {
       await api.post(
         `/api/documents/${document.id}/resend-email?doc_type=quotation`
@@ -2079,6 +2095,10 @@ const Quotations = () => {
   };
 
   const handleEditQuotation = async (doc) => {
+    if (!canWrite) {
+      alert(subscriptionRequiredMessage);
+      return;
+    }
     try {
       let fullDoc = doc;
       try {
@@ -2151,10 +2171,16 @@ const Quotations = () => {
           showSearch={true}
           showProfile={true}
           onNew={() => {
+            if (!canWrite) {
+              alert(subscriptionRequiredMessage);
+              return;
+            }
             setEditingQuotation(null);
             setShowCreate(true);
           }}
           newLabel={pageConfig?.createLabel || "Create Quotation"}
+          newDisabled={!canWrite}
+          newTooltip={!canWrite ? subscriptionRequiredMessage : undefined}
         />
 
         <div className="p-4 sm:p-6">
@@ -2338,11 +2364,14 @@ const Quotations = () => {
 
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() =>
                                 handleEditQuotation(document)
                               }
-                              title="Edit Quotation"
-                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              title={!canWrite ? subscriptionRequiredMessage : "Edit Quotation"}
+                              className={`rounded-lg p-2 sm:p-2.5 text-slate-500 transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-emerald-50 hover:text-emerald-600"
+                              }`}
                             >
                               <Pencil size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -2361,11 +2390,14 @@ const Quotations = () => {
                             {document.customer_email && (
                               <button
                                 type="button"
+                                disabled={!canWrite}
                                 onClick={() =>
                                   resendEmail(document)
                                 }
-                                title="Resend email"
-                                className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                                title={!canWrite ? subscriptionRequiredMessage : "Resend email"}
+                                className={`rounded-lg p-2 sm:p-2.5 text-slate-500 transition ${
+                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-emerald-50 hover:text-emerald-600"
+                                }`}
                               >
                                 <Mail size={16} className="sm:w-5 sm:h-5" />
                               </button>
@@ -2373,11 +2405,14 @@ const Quotations = () => {
 
                             <button
                               type="button"
+                              disabled={!canWrite}
                               onClick={() =>
                                 handleDeleteQuotation(document)
                               }
-                              title="Delete Quotation"
-                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition"
+                              title={!canWrite ? subscriptionRequiredMessage : "Delete Quotation"}
+                              className={`rounded-lg p-2 sm:p-2.5 text-slate-500 transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-rose-50 hover:text-rose-600"
+                              }`}
                             >
                               <Trash2 size={16} className="sm:w-5 sm:h-5" />
                             </button>
