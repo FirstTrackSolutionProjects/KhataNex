@@ -24,6 +24,8 @@ export const AuthProvider = ({ children }) => {
           isIntroEligible: Boolean(data.isIntroductoryEligible),
           enforcement: data.enforcement || "off",
           orders: data.billingHistory || data.orders || [],
+          isEmployee: Boolean(data.isEmployee),
+          owner: data.owner || null,
         };
         setSubscription(subState);
         return subState;

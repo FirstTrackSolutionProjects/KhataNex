@@ -58,6 +58,7 @@ export default function Subscription() {
   const [remainingDays, setRemainingDays] = useState(0);
   const [isIntroEligible, setIsIntroEligible] = useState(false);
   const [billingHistory, setBillingHistory] = useState([]);
+  const [ownerInfo, setOwnerInfo] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -84,6 +85,7 @@ export default function Subscription() {
         setActiveSub(meRes.activeSubscription);
         setRemainingDays(meRes.remainingDays || 0);
         setBillingHistory(meRes.billingHistory || []);
+        setOwnerInfo(meRes.owner || null);
       }
     } catch (err) {
       console.error("Failed to load subscription data:", err);
@@ -408,7 +410,7 @@ export default function Subscription() {
               Subscription & Billing
             </h1>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Manage your digital ledger plan, unlock unlimited invoices, and review tax invoices.
+              Manage your KhataNex plan, unlock unlimited invoices, and review tax invoices.
             </p>
           </div>
 
@@ -467,15 +469,87 @@ export default function Subscription() {
           </div>
         )}
 
-        {/* Active Subscription Banner */}
-        {activeSub ? (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg">
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="rounded-md bg-white/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
-                    {activeSub.status === "active" ? "Active Plan" : "Expired"}
-                  </span>
+        {/* Active Subscription Banner / Employee View */}
+        {user?.role === "employee" ? (
+          <div className="space-y-6">
+            {activeSub ? (
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-white/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
+                        {activeSub.status === "active" ? "Active Plan" : "Expired"}
+                      </span>
+                      <span className="rounded-md bg-amber-400 text-slate-900 px-2 py-0.5 text-xs font-bold uppercase">
+                        Employee Entitlement
+                      </span>
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight">{activeSub.plan_name}</h2>
+                    <p className="text-xs text-emerald-100">
+                      Covered by Business Owner: <span className="font-semibold text-white">{ownerInfo?.business_name || ownerInfo?.name || "Your Account Owner"}</span>
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-emerald-100 pt-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={14} /> Started: {formatDate(activeSub.starts_at)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={14} /> Expires: {formatDate(activeSub.ends_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
+                      <p className="text-2xl font-extrabold">{remainingDays}</p>
+                      <p className="text-[11px] font-medium uppercase tracking-wider text-emerald-100">
+                        Days Remaining
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/customers")}
+                      className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-emerald-800 shadow transition hover:bg-emerald-50"
+                    >
+                      Go to Dashboard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="mt-0.5 h-6 w-6 text-amber-600 shrink-0" />
+                  <div className="space-y-1">
+                    <p className="font-bold text-amber-950 text-base">Owner's Subscription Renewal Needed</p>
+                    <p className="text-sm text-amber-800">
+                      Your business owner's subscription has expired or is inactive. Employees inherit subscription access directly from their business owner (<span className="font-semibold">{ownerInfo?.business_name || ownerInfo?.name || "your business owner"}</span>).
+                    </p>
+                    <p className="text-xs text-amber-700 pt-1">
+                      Please contact your account owner to renew their subscription plan so you can regain write access.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base mb-2">Employee Account Status</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                As an employee, you do not need to purchase or maintain an individual subscription. All feature access and digital ledger limits are inherited directly from your business owner's active plan according to your assigned module permissions.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Active Subscription Banner */}
+            {activeSub ? (
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-white/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
+                        {activeSub.status === "active" ? "Active Plan" : "Expired"}
+                      </span>
                   {activeSub.is_complimentary === 1 && (
                     <span className="rounded-md bg-amber-400 text-slate-900 px-2 py-0.5 text-xs font-bold uppercase">
                       Complimentary
@@ -830,6 +904,8 @@ export default function Subscription() {
             </div>
           </div>
         )}
+      </>
+    )}
 
         {/* Billing History Section */}
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">

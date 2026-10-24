@@ -1,5 +1,12 @@
 import { useAuth } from "../context/AuthContext";
 
+export const getSubscriptionRequiredMessage = (user) => {
+  if (user?.role === "employee") {
+    return "Your business owner's subscription has expired or is inactive. Please contact your account owner to renew.";
+  }
+  return "An active subscription is required to perform this action. Please choose or renew your plan.";
+};
+
 export const subscriptionRequiredMessage =
   "An active subscription is required to perform this action. Please choose or renew your plan.";
 
@@ -14,6 +21,7 @@ export function useSubscriptionAccess() {
   } = useAuth();
 
   const isSuperadmin = user?.role === "superadmin";
+  const isEmployee = user?.role === "employee";
   const hasActiveSubscription = isSuperadmin || Boolean(subscription?.active);
   const isEnforced = subscription?.enforcement === "on";
 
@@ -22,14 +30,18 @@ export function useSubscriptionAccess() {
   const canWrite = !isEnforced || hasActiveSubscription;
   const isRestricted = isEnforced && !hasActiveSubscription;
 
+  const currentRequiredMessage = getSubscriptionRequiredMessage(user);
+
   return {
     hasActiveSubscription,
     isEnforced,
     canWrite,
     isRestricted,
+    isEmployee,
+    isSuperadmin,
     subscription,
     remainingDays: subscription?.remainingDays || 0,
-    subscriptionRequiredMessage,
+    subscriptionRequiredMessage: currentRequiredMessage,
     openSubscriptionPrompt,
     closeSubscriptionPrompt,
     isPromptOpen,

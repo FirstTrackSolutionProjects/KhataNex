@@ -48,6 +48,7 @@ import Invoices from "./pages/Invoices";
 import Quotations from "./pages/Quotations";
 import MoneyReceipts from "./pages/MoneyReceipts";
 import Inventory from "./pages/Inventory";
+import Purchases from "./pages/Purchases";
 import Vehicles from "./pages/Vehicles";
 import Reports from "./pages/Reports";
 import MyUsers from "./pages/MyUsers";
@@ -74,6 +75,19 @@ function GlobalSubscriptionModal() {
     />
   );
 }
+
+// =====================================
+// Role-aware Dashboard
+// Superadmin sees the SaaS Owner Dashboard
+// Normal users and authorized employees see the business Reports as their Dashboard
+// =====================================
+const RoleDashboard = () => {
+  const { user } = useAuth();
+  if (user?.role === "superadmin") {
+    return <Dashboard />;
+  }
+  return <Reports isDashboardView={true} />;
+};
 
 // =====================================
 // Dashboard Layout (NO Navbar - pages have their own header)
@@ -287,9 +301,9 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["superadmin"]}>
+              <ProtectedRoute allowedRoles={["user", "employee", "superadmin"]} requiredModule="dashboard">
                 <DashboardLayout>
-                  <Dashboard />
+                  <RoleDashboard />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -398,6 +412,17 @@ function App() {
               <ProtectedRoute requiredModule="inventory">
                 <DashboardLayout>
                   <Inventory />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/purchases"
+            element={
+              <ProtectedRoute requiredModule="purchases">
+                <DashboardLayout>
+                  <Purchases />
                 </DashboardLayout>
               </ProtectedRoute>
             }
