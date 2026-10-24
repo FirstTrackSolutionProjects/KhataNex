@@ -16,14 +16,20 @@ import {
   Eye,
   Pencil,
   Trash2,
+  Download,
+  ShieldCheck,
+  DollarSign,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
-import api from "../lib/api";
+import api, { getToken } from "../lib/api";
 import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
+import { useAuth } from "../context/AuthContext";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
 const CATEGORY_LABEL = {
   money_received: "Money Received",
@@ -36,6 +42,7 @@ const CATEGORY_LABEL = {
   paid_by_business: "Paid Out",
   purchase_bill: "Purchase Bill",
   advance_from_investor: "Advance Receivable",
+  subscriptions: "Subscriptions",
 };
 
 const CATEGORY_STYLE = {
@@ -49,10 +56,12 @@ const CATEGORY_STYLE = {
   paid_by_business: "bg-red-100 text-red-700",
   purchase_bill: "bg-amber-100 text-amber-700",
   advance_from_investor: "bg-blue-100 text-blue-700",
+  subscriptions: "bg-emerald-100 text-emerald-800 font-bold",
 };
 
 export const getEffectiveCategory = (p) => {
   const cat = (p.payment_category || "").toLowerCase();
+  if (cat === "subscriptions") return "subscriptions";
   if (cat === "money_received" || cat === "normal_received" || cat === "amount_received") return "money_received";
   if (cat === "advance_receivable" || cat === "advance_from_investor") return "advance_receivable";
   if (cat === "advance_payable") return "advance_payable";
@@ -62,10 +71,13 @@ export const getEffectiveCategory = (p) => {
 };
 
 const Payments = () => {
+  const { user } = useAuth();
   const { canWrite, isRestricted, subscriptionRequiredMessage } = useSubscriptionAccess();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [payments, setPayments] = useState([]);
+  const [subscriptionPayments, setSubscriptionPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [stock, setStock] = useState([]);
   const [purchaseBills, setPurchaseBills] = useState([]);
@@ -121,12 +133,40 @@ const Payments = () => {
   // Selected Purchase Bill for "Purchase Bill" category
   const [selectedPurchaseBill, setSelectedPurchaseBill] = useState(null);
 
+  const handleDownloadSubscriptionInvoice = async (orderId, invoiceNumber) => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${BASE_URL}/api/subscriptions/orders/${orderId}/invoice`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to download invoice.");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invoiceNumber || "Subscription_Invoice"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert(err.message || "Could not download invoice.");
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     setError("");
     try {
-      const [payRes, custRes, stockRes, pbRes, khataRes, mrRes] = await Promise.all([
+      const isSuperadmin = user?.role === "superadmin";
+      const [payRes, subPayRes, custRes, stockRes, pbRes, khataRes, mrRes] = await Promise.all([
         api.get("/api/payments"),
+        isSuperadmin
+          ? api.get("/api/payments?category=subscriptions").catch(() => ({ payments: [] }))
+          : Promise.resolve({ payments: [] }),
         api.get("/api/customers").catch(() => ({ customers: [] })),
         api.get("/api/stock").catch(() => ({ stock: [] })),
         api.get("/api/purchase-bills").catch(() => ({ purchase_bills: [] })),
@@ -134,6 +174,7 @@ const Payments = () => {
         api.get("/api/documents/money-receipts/list").catch(() => ({ receipts: [] })),
       ]);
       setPayments(payRes.payments || []);
+      setSubscriptionPayments(subPayRes.payments || []);
       setCustomers(custRes.customers || []);
       setStock(stockRes.stock || []);
       setPurchaseBills(pbRes.purchase_bills || pbRes.bills || []);
@@ -499,7 +540,32 @@ const Payments = () => {
     return "";
   };
 
-  const filtered = payments
+  const filteredSubscriptionPayments = subscriptionPayments.filter((p) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (p.customer_name || "").toLowerCase().includes(q) ||
+      (p.customer_email || "").toLowerCase().includes(q) ||
+      (p.order_number || "").toLowerCase().includes(q) ||
+      (p.provider_payment_id || "").toLowerCase().includes(q)
+    );
+  });
+
+  const totalSubscriptionCollections = subscriptionPayments.reduce(
+    (sum, p) => sum + Number(p.amount || 0),
+    0
+  );
+
+  const filtered = (selectedCategory === "all"
+    ? payments
+    : payments.filter((p) => {
+        const cat = getEffectiveCategory(p);
+        if (selectedCategory === "money_received") {
+          return cat === "money_received" || cat === "due_received";
+        }
+        return cat === selectedCategory;
+      })
+  )
     .filter((p) =>
       (p.customer_name || p.party_name || "")
         .toLowerCase()
@@ -706,175 +772,415 @@ const Payments = () => {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="relative">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search payment by customer or party..."
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
-              />
+          {/* CATEGORY FILTER TABS & SEARCH */}
+          <div className="mt-6 space-y-4">
+            {/* Category Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { id: "all", label: "All Payments", count: payments.length },
+                {
+                  id: "money_received",
+                  label: "Money Received",
+                  count: payments.filter((p) =>
+                    ["money_received", "due_received"].includes(getEffectiveCategory(p))
+                  ).length,
+                },
+                {
+                  id: "advance_receivable",
+                  label: "Advance Receivable",
+                  count: payments.filter((p) => getEffectiveCategory(p) === "advance_receivable")
+                    .length,
+                },
+                {
+                  id: "advance_payable",
+                  label: "Advance Payable",
+                  count: payments.filter((p) => getEffectiveCategory(p) === "advance_payable")
+                    .length,
+                },
+                {
+                  id: "paid_out",
+                  label: "Paid Out",
+                  count: payments.filter((p) => getEffectiveCategory(p) === "paid_out").length,
+                },
+                ...(user?.role === "superadmin"
+                  ? [
+                      {
+                        id: "subscriptions",
+                        label: "Subscriptions",
+                        count: subscriptionPayments.length,
+                        isSuperadmin: true,
+                      },
+                    ]
+                  : []),
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                    selectedCategory === tab.id
+                      ? tab.isSuperadmin
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "bg-slate-900 text-white shadow-sm"
+                      : tab.isSuperadmin
+                      ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[10px] ${
+                      selectedCategory === tab.id
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Transparent Accounting Principle Banner for Subscriptions */}
+            {selectedCategory === "subscriptions" && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-emerald-950">
+                      Payment Gateway Verified Collections
+                    </p>
+                    <p className="text-xs text-emerald-700">
+                      Total Verified Collections: ₹{totalSubscriptionCollections.toLocaleString("en-IN")} · Funds collected via online payment gateway; bank settlement subject to gateway payout cycle (T+2 business days).
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-emerald-200 px-3 py-1 text-[11px] font-bold text-emerald-900 uppercase tracking-wider">
+                  Razorpay Verified
+                </span>
+              </div>
+            )}
+
+            {/* Search Input */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="relative">
+                <Search
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={
+                    selectedCategory === "subscriptions"
+                      ? "Search by subscriber name, email, order ID, or payment ID..."
+                      : "Search payment by customer or party..."
+                  }
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
+                />
+              </div>
             </div>
           </div>
 
           <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-            <table className="w-full min-w-[700px] text-left">
-              <thead className="border-b border-slate-200 bg-slate-50">
-                <tr>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Party / Customer
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Purpose
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Amount
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Date &amp; Time
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Mode
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
-                    Category
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
+            {selectedCategory === "subscriptions" ? (
+              /* DEDICATED SUBSCRIPTION PAYMENTS TABLE */
+              <table className="w-full min-w-[900px] text-left">
+                <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-5 py-6 text-center text-sm text-slate-400"
-                    >
-                      Loading payments...
-                    </td>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Customer / Account
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Plan
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Order &amp; Ref
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Base Price
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Discount
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Tax (GST)
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Net Paid
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Date &amp; Time
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Settlement
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500 text-right">
+                      Actions
+                    </th>
                   </tr>
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-5 py-6 text-center text-sm text-slate-400"
-                    >
-                      No payments recorded yet.
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-slate-50">
-                      <td className="px-5 py-4 text-sm font-semibold text-slate-800">
-                        {payment.customer_name ||
-                          payment.party_name ||
-                          "-"}
-                      </td>
+                </thead>
 
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {payment.purpose || "—"}
+                <tbody className="divide-y divide-slate-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={10} className="px-5 py-8 text-center text-sm text-slate-400">
+                        Loading subscription collections...
                       </td>
-
-                      <td className="px-5 py-4 text-sm font-bold text-emerald-600">
-                        ₹{Number(payment.amount).toLocaleString("en-IN")}
+                    </tr>
+                  ) : filteredSubscriptionPayments.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="px-5 py-8 text-center text-sm text-slate-400">
+                        No subscription payments found matching your search.
                       </td>
+                    </tr>
+                  ) : (
+                    filteredSubscriptionPayments.map((payment) => (
+                      <tr key={payment.id} className="hover:bg-slate-50">
+                        <td className="px-5 py-4">
+                          <span className="text-sm font-bold text-slate-900 block">
+                            {payment.customer_name || payment.party_name || "—"}
+                          </span>
+                          <span className="text-xs text-slate-500 block">
+                            {payment.customer_email || "—"}
+                          </span>
+                        </td>
 
-                      <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
-                        <div className="font-medium text-slate-700">
-                          {payment.payment_date || payment.effective_date
-                            ? new Date(
-                                payment.payment_date || payment.effective_date
-                              ).toLocaleDateString("en-IN")
-                            : payment.created_at
-                            ? new Date(payment.created_at).toLocaleDateString("en-IN")
+                        <td className="px-5 py-4 text-sm font-semibold text-slate-800">
+                          {payment.plan_name || "SaaS Plan"}
+                        </td>
+
+                        <td className="px-5 py-4 text-xs font-mono">
+                          <span className="font-bold text-slate-900 block">
+                            {payment.order_number}
+                          </span>
+                          <span className="text-[11px] text-slate-400 block truncate max-w-[140px]">
+                            {payment.provider_payment_id || payment.provider_order_id || "—"}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-600">
+                          ₹{Number(payment.base_amount || payment.amount || 0).toLocaleString("en-IN")}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm font-medium text-emerald-600">
+                          {Number(payment.discount || 0) > 0
+                            ? `-₹${Number(payment.discount).toLocaleString("en-IN")}`
                             : "—"}
-                        </div>
-                        {formatTransactionTime(
-                          payment.time || payment.payment_time,
-                          payment.created_at
-                        ) ? (
-                          <div className="text-xs text-slate-400">
-                            {formatTransactionTime(
-                              payment.time || payment.payment_time,
-                              payment.created_at
-                            )}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-500">
+                          ₹{Number(payment.tax || 0).toLocaleString("en-IN")}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm font-bold text-emerald-600">
+                          ₹{Number(payment.amount || 0).toLocaleString("en-IN")}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                          <div className="font-medium text-slate-700">
+                            {payment.payment_date
+                              ? new Date(payment.payment_date).toLocaleDateString("en-IN")
+                              : "—"}
                           </div>
-                        ) : null}
-                      </td>
+                          <div className="text-xs text-slate-400">
+                            {formatTransactionTime(payment.time, payment.created_at)}
+                          </div>
+                        </td>
 
-                      <td className="px-5 py-4 text-sm capitalize text-slate-500">
-                        {payment.payment_mode}
-                      </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                            <ShieldCheck size={12} />
+                            <span>Verified</span>
+                          </span>
+                        </td>
 
-                      <td className="px-5 py-4">
-                        {(() => {
-                          const cat = getEffectiveCategory(payment);
-                          return (
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                CATEGORY_STYLE[cat] || "bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {CATEGORY_LABEL[cat] || cat}
-                            </span>
-                          );
-                        })()}
-                      </td>
-
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <td className="px-5 py-4 text-right space-x-1.5 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => setViewingPayment(payment)}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-emerald-600"
+                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-emerald-600 transition"
                             title="View Details"
-                            aria-label="View Details"
                           >
-                            <Eye size={18} />
+                            <Eye size={17} />
                           </button>
+                          {payment.invoice_number && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDownloadSubscriptionInvoice(payment.id, payment.invoice_number)
+                              }
+                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition"
+                              title="Download GST Invoice"
+                            >
+                              <Download size={13} />
+                              <span>Invoice</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              /* REGULAR ACCOUNTING PAYMENTS TABLE */
+              <table className="w-full min-w-[700px] text-left">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Party / Customer
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Purpose
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Amount
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Date &amp; Time
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Mode
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500">
+                      Category
+                    </th>
+                    <th className="px-5 py-4 text-xs font-semibold uppercase text-slate-500 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
 
-                          <button
-                            type="button"
-                            disabled={!canWrite}
-                            onClick={() => openEditModal(payment)}
-                            className={`rounded-lg p-2 transition ${
-                              !canWrite
-                                ? "opacity-40 cursor-not-allowed text-slate-400"
-                                : "text-slate-500 hover:bg-slate-100 hover:text-blue-600"
-                            }`}
-                            title={!canWrite ? subscriptionRequiredMessage : "Edit Payment"}
-                            aria-label="Edit Payment"
-                          >
-                            <Pencil size={18} />
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!canWrite}
-                            onClick={() => handleDeletePayment(payment.id)}
-                            className={`rounded-lg p-2 transition ${
-                              !canWrite
-                                ? "opacity-40 cursor-not-allowed text-rose-300"
-                                : "text-slate-500 hover:bg-rose-50 hover:text-rose-600"
-                            }`}
-                            title={!canWrite ? subscriptionRequiredMessage : "Delete Payment"}
-                            aria-label="Delete Payment"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                <tbody className="divide-y divide-slate-100">
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-5 py-6 text-center text-sm text-slate-400"
+                      >
+                        Loading payments...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : filtered.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-5 py-6 text-center text-sm text-slate-400"
+                      >
+                        No payments recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map((payment) => (
+                      <tr key={payment.id} className="hover:bg-slate-50">
+                        <td className="px-5 py-4 text-sm font-semibold text-slate-800">
+                          {payment.customer_name ||
+                            payment.party_name ||
+                            "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-600">
+                          {payment.purpose || "—"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm font-bold text-emerald-600">
+                          ₹{Number(payment.amount).toLocaleString("en-IN")}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                          <div className="font-medium text-slate-700">
+                            {payment.payment_date || payment.effective_date
+                              ? new Date(
+                                  payment.payment_date || payment.effective_date
+                                ).toLocaleDateString("en-IN")
+                              : payment.created_at
+                              ? new Date(payment.created_at).toLocaleDateString("en-IN")
+                              : "—"}
+                          </div>
+                          {formatTransactionTime(
+                            payment.time || payment.payment_time,
+                            payment.created_at
+                          ) ? (
+                            <div className="text-xs text-slate-400">
+                              {formatTransactionTime(
+                                payment.time || payment.payment_time,
+                                payment.created_at
+                              )}
+                            </div>
+                          ) : null}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm capitalize text-slate-500">
+                          {payment.payment_mode}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          {(() => {
+                            const cat = getEffectiveCategory(payment);
+                            return (
+                              <span
+                                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                  CATEGORY_STYLE[cat] || "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                {CATEGORY_LABEL[cat] || cat}
+                              </span>
+                            );
+                          })()}
+                        </td>
+
+                        <td className="px-5 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setViewingPayment(payment)}
+                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-emerald-600"
+                              title="View Details"
+                              aria-label="View Details"
+                            >
+                              <Eye size={18} />
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={!canWrite}
+                              onClick={() => openEditModal(payment)}
+                              className={`rounded-lg p-2 transition ${
+                                !canWrite
+                                  ? "opacity-40 cursor-not-allowed text-slate-400"
+                                  : "text-slate-500 hover:bg-slate-100 hover:text-blue-600"
+                              }`}
+                              title={!canWrite ? subscriptionRequiredMessage : "Edit Payment"}
+                              aria-label="Edit Payment"
+                            >
+                              <Pencil size={18} />
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={!canWrite}
+                              onClick={() => handleDeletePayment(payment.id)}
+                              className={`rounded-lg p-2 transition ${
+                                !canWrite
+                                  ? "opacity-40 cursor-not-allowed text-rose-300"
+                                  : "text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                              }`}
+                              title={!canWrite ? subscriptionRequiredMessage : "Delete Payment"}
+                              aria-label="Delete Payment"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </main>
       </div>
@@ -1458,100 +1764,214 @@ const Payments = () => {
               </div>
             </div>
 
-            {/* Details Grid */}
-            <div className="grid gap-3 sm:grid-cols-2 text-sm">
-              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                <p className="text-xs font-medium text-slate-400">Party / Customer</p>
-                <p className="mt-1 font-semibold text-slate-800">
-                  {viewingPayment.customer_name || viewingPayment.party_name || "—"}
-                </p>
-                {viewingPayment.customer_phone && (
-                  <p className="text-xs text-slate-500 mt-0.5">Phone: {viewingPayment.customer_phone}</p>
-                )}
-              </div>
+            {viewingPayment.payment_category === "subscriptions" ? (
+              /* DEDICATED SUBSCRIPTION BREAKDOWN */
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Subscriber Name</p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {viewingPayment.customer_name || viewingPayment.party_name || "—"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">{viewingPayment.customer_email}</p>
+                    {viewingPayment.customer_phone && (
+                      <p className="text-xs text-slate-500">Phone: {viewingPayment.customer_phone}</p>
+                    )}
+                  </div>
 
-              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                <p className="text-xs font-medium text-slate-400">Date & Time</p>
-                <p className="mt-1 font-semibold text-slate-800">
-                  {viewingPayment.payment_date
-                    ? new Date(viewingPayment.payment_date).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : "—"}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {formatTransactionTime(
-                    viewingPayment.time || viewingPayment.payment_time,
-                    viewingPayment.created_at
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Subscription Plan</p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {viewingPayment.plan_name || "SaaS Plan"}
+                    </p>
+                    {viewingPayment.duration_months && (
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Duration: {viewingPayment.duration_months} Months
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Order Number</p>
+                    <p className="mt-1 font-mono font-bold text-slate-800">
+                      {viewingPayment.order_number || `#${viewingPayment.id}`}
+                    </p>
+                    {viewingPayment.invoice_number && (
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Invoice: {viewingPayment.invoice_number}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Gateway Transaction</p>
+                    <p className="mt-1 font-mono text-xs font-semibold text-slate-800 break-all">
+                      {viewingPayment.provider_payment_id || viewingPayment.provider_order_id || "Direct Fulfillment"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 capitalize">
+                      Provider: {viewingPayment.provider || "Razorpay"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Financial Reconciled Breakdown */}
+                <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs space-y-2">
+                  <h5 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                    Billing &amp; Tax Reconciled Breakdown
+                  </h5>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Base List Price:</span>
+                    <span>₹{Number(viewingPayment.base_amount || viewingPayment.amount || 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  {Number(viewingPayment.discount || 0) > 0 && (
+                    <div className="flex justify-between font-semibold text-emerald-600">
+                      <span>Discount Granted:</span>
+                      <span>-₹{Number(viewingPayment.discount).toLocaleString("en-IN")}</span>
+                    </div>
                   )}
-                </p>
-              </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>GST (18% Included):</span>
+                    <span>₹{Number(viewingPayment.tax || 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="border-t border-slate-100 pt-2 flex justify-between font-bold text-slate-900 text-sm">
+                    <span>Net Paid Amount:</span>
+                    <span className="text-emerald-700">₹{Number(viewingPayment.amount || 0).toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
 
-              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
-                <p className="text-xs font-medium text-slate-400">Purpose / Description</p>
-                <p className="mt-1 font-medium text-slate-800 break-words">
-                  {viewingPayment.purpose || "—"}
-                </p>
-              </div>
-
-              {viewingPayment.reference_number && (
-                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                  <p className="text-xs font-medium text-slate-400">Reference / Txn ID</p>
-                  <p className="mt-1 font-medium text-slate-800">
-                    {viewingPayment.reference_number}
+                {/* Transparent Accounting Principle Box */}
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                  <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
+                    <ShieldCheck size={16} />
+                    <span>Payment Gateway Verified Collection</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-emerald-700 leading-relaxed">
+                    Funds collected via payment gateway; bank settlement subject to gateway payout cycle (T+2 business days). Gateway collections are held by the payment processor until settled to the merchant bank account.
                   </p>
                 </div>
-              )}
 
-              {viewingPayment.notes && (
-                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
-                  <p className="text-xs font-medium text-slate-400">Notes</p>
-                  <p className="mt-1 text-slate-700">{viewingPayment.notes}</p>
+                {/* Modal Footer for Subscriptions */}
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                  {viewingPayment.invoice_number ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDownloadSubscriptionInvoice(viewingPayment.id, viewingPayment.invoice_number)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition"
+                    >
+                      <Download size={14} />
+                      <span>Download Invoice PDF</span>
+                    </button>
+                  ) : <span />}
+
+                  <button
+                    type="button"
+                    onClick={() => setViewingPayment(null)}
+                    className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Close
+                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* Actions Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
-              <button
-                type="button"
-                disabled={!canWrite}
-                onClick={() => handleDeletePayment(viewingPayment.id)}
-                title={!canWrite ? subscriptionRequiredMessage : "Delete"}
-                className={`inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold transition ${
-                  !canWrite ? "opacity-40 cursor-not-allowed text-rose-400" : "text-rose-700 hover:bg-rose-100"
-                }`}
-              >
-                <Trash2 size={15} /> Delete
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={!canWrite}
-                  onClick={() => {
-                    const p = viewingPayment;
-                    setViewingPayment(null);
-                    openEditModal(p);
-                  }}
-                  title={!canWrite ? subscriptionRequiredMessage : "Edit"}
-                  className={`inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold transition ${
-                    !canWrite ? "opacity-40 cursor-not-allowed text-slate-400" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <Pencil size={15} /> Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewingPayment(null)}
-                  className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                >
-                  Close
-                </button>
               </div>
-            </div>
+            ) : (
+              /* REGULAR ACCOUNTING PAYMENT DETAILS */
+              <>
+                <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Party / Customer</p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {viewingPayment.customer_name || viewingPayment.party_name || "—"}
+                    </p>
+                    {viewingPayment.customer_phone && (
+                      <p className="text-xs text-slate-500 mt-0.5">Phone: {viewingPayment.customer_phone}</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                    <p className="text-xs font-medium text-slate-400">Date & Time</p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {viewingPayment.payment_date
+                        ? new Date(viewingPayment.payment_date).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {formatTransactionTime(
+                        viewingPayment.time || viewingPayment.payment_time,
+                        viewingPayment.created_at
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                    <p className="text-xs font-medium text-slate-400">Purpose / Description</p>
+                    <p className="mt-1 font-medium text-slate-800 break-words">
+                      {viewingPayment.purpose || "—"}
+                    </p>
+                  </div>
+
+                  {viewingPayment.reference_number && (
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                      <p className="text-xs font-medium text-slate-400">Reference / Txn ID</p>
+                      <p className="mt-1 font-medium text-slate-800">
+                        {viewingPayment.reference_number}
+                      </p>
+                    </div>
+                  )}
+
+                  {viewingPayment.notes && (
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 sm:col-span-2">
+                      <p className="text-xs font-medium text-slate-400">Notes</p>
+                      <p className="mt-1 text-slate-700">{viewingPayment.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions Footer */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                  <button
+                    type="button"
+                    disabled={!canWrite}
+                    onClick={() => handleDeletePayment(viewingPayment.id)}
+                    title={!canWrite ? subscriptionRequiredMessage : "Delete"}
+                    className={`inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold transition ${
+                      !canWrite ? "opacity-40 cursor-not-allowed text-rose-400" : "text-rose-700 hover:bg-rose-100"
+                    }`}
+                  >
+                    <Trash2 size={15} /> Delete
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={!canWrite}
+                      onClick={() => {
+                        const p = viewingPayment;
+                        setViewingPayment(null);
+                        openEditModal(p);
+                      }}
+                      title={!canWrite ? subscriptionRequiredMessage : "Edit"}
+                      className={`inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold transition ${
+                        !canWrite ? "opacity-40 cursor-not-allowed text-slate-400" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Pencil size={15} /> Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewingPayment(null)}
+                      className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </Modal>

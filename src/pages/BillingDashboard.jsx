@@ -136,6 +136,9 @@ export default function BillingDashboard() {
     is_active: 1,
   });
 
+  // Campaign Analytics (Gross value, discounts granted, net collected revenue)
+  const [campaignAnalytics, setCampaignAnalytics] = useState({ coupons: [], promotions: [] });
+
   // Orders
   const [orders, setOrders] = useState([]);
   const [orderSearch, setOrderSearch] = useState("");
@@ -218,8 +221,12 @@ export default function BillingDashboard() {
   // 4. Load Coupons
   const loadCoupons = async () => {
     try {
-      const res = await api.get("/api/superadmin/billing/coupons");
+      const [res, analyticsRes] = await Promise.all([
+        api.get("/api/superadmin/billing/coupons"),
+        api.get("/api/superadmin/dashboard/campaign-analytics").catch(() => null),
+      ]);
       if (res?.success) setCoupons(res.coupons || []);
+      if (analyticsRes?.success) setCampaignAnalytics(analyticsRes);
     } catch (err) {
       console.error("Coupons load failed:", err);
     }
@@ -228,8 +235,12 @@ export default function BillingDashboard() {
   // 4b. Load Promotions
   const loadPromotions = async () => {
     try {
-      const res = await api.get("/api/superadmin/billing/promotions");
+      const [res, analyticsRes] = await Promise.all([
+        api.get("/api/superadmin/billing/promotions"),
+        api.get("/api/superadmin/dashboard/campaign-analytics").catch(() => null),
+      ]);
       if (res?.success) setPromotions(res.promotions || []);
+      if (analyticsRes?.success) setCampaignAnalytics(analyticsRes);
     } catch (err) {
       console.error("Promotions load failed:", err);
     }
@@ -1533,13 +1544,12 @@ export default function BillingDashboard() {
                 <table className="w-full text-left text-xs text-slate-600">
                   <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
                     <tr>
-                      <th className="py-3 px-3">Code & Name</th>
+                      <th className="py-3 px-3">Code &amp; Name</th>
                       <th className="py-3 px-3">Discount</th>
-                      <th className="py-3 px-3">Max Cap</th>
+                      <th className="py-3 px-3">Performance (Revenue)</th>
                       <th className="py-3 px-3">Redemptions</th>
                       <th className="py-3 px-3">Expiry Date</th>
-                      <th className="py-3 px-3">Target Cohort</th>
-                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3">Safety &amp; Status</th>
                       <th className="py-3 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -1557,46 +1567,54 @@ export default function BillingDashboard() {
                         }
                         return true;
                       })
-                      .map((c) => (
-                        <tr key={c.id}>
-                          <td className="py-3 px-3">
-                            <span className="font-mono font-bold text-emerald-700 block">{c.code}</span>
-                            {c.name && <span className="font-semibold text-slate-800 text-[11px] block">{c.name}</span>}
-                            {c.description && (
-                              <span className="text-[10px] text-slate-400 block line-clamp-1">{c.description}</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-3 font-semibold text-slate-900">
-                            {c.discount_type === "percent"
-                              ? `${c.discount_value}% OFF`
-                              : `₹${formatRupees(c.discount_value)} OFF`}
-                          </td>
-                          <td className="py-3 px-3">
-                            {c.max_discount_paise ? `₹${formatRupees(c.max_discount_paise)}` : "No Cap"}
-                          </td>
-                          <td className="py-3 px-3">
-                            {c.redemptions_count} {c.max_redemptions ? `/ ${c.max_redemptions}` : "(unlimited)"}
-                          </td>
-                          <td className="py-3 px-3">{c.valid_until ? formatDate(c.valid_until) : "Never"}</td>
-                          <td className="py-3 px-3">
-                            {c.target_cohort ? (
-                              <span className="rounded bg-sky-50 text-sky-700 px-1.5 py-0.5 text-[10px] font-bold">
-                                {c.target_cohort}
+                      .map((c) => {
+                        const stat = (campaignAnalytics.coupons || []).find((s) => s.id === c.id);
+                        return (
+                          <tr key={c.id}>
+                            <td className="py-3 px-3">
+                              <span className="font-mono font-bold text-emerald-700 block">{c.code}</span>
+                              {c.name && <span className="font-semibold text-slate-800 text-[11px] block">{c.name}</span>}
+                              {c.description && (
+                                <span className="text-[10px] text-slate-400 block line-clamp-1">{c.description}</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 font-semibold text-slate-900">
+                              {c.discount_type === "percent"
+                                ? `${c.discount_value}% OFF`
+                                : `₹${formatRupees(c.discount_value)} OFF`}
+                              {c.max_discount_paise ? (
+                                <span className="text-[10px] text-slate-400 block">
+                                  Cap: ₹{formatRupees(c.max_discount_paise)}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="text-[11px]">
+                                <span className="font-bold text-slate-900 block">
+                                  Net: ₹{stat ? Number(stat.netRevenue || 0).toLocaleString("en-IN") : "0"}
+                                </span>
+                                <span className="text-slate-400 block text-[10px]">
+                                  Disc: ₹{stat ? Number(stat.discountsGranted || 0).toLocaleString("en-IN") : "0"} · {stat?.paid_orders || 0} paid
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              {c.redemptions_count} {c.max_redemptions ? `/ ${c.max_redemptions}` : "(unlimited)"}
+                            </td>
+                            <td className="py-3 px-3">{c.valid_until ? formatDate(c.valid_until) : "Never"}</td>
+                            <td className="py-3 px-3 space-y-1">
+                              <span
+                                className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                  c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                                }`}
+                              >
+                                {c.is_active ? "Active" : "Disabled"}
                               </span>
-                            ) : (
-                              "All Users"
-                            )}
-                          </td>
-                          <td className="py-3 px-3">
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
-                              }`}
-                            >
-                              {c.is_active ? "Active" : "Disabled"}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-right">
+                              <span className="block rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
+                                Atomically Enforced
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1624,7 +1642,8 @@ export default function BillingDashboard() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1959,20 +1978,21 @@ export default function BillingDashboard() {
                 <table className="w-full text-left text-xs text-slate-600">
                   <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200">
                     <tr>
-                      <th className="py-3 px-3">Campaign Name & Code</th>
+                      <th className="py-3 px-3">Campaign Name &amp; Code</th>
                       <th className="py-3 px-3">Discount</th>
+                      <th className="py-3 px-3">Performance (Revenue)</th>
                       <th className="py-3 px-3">Active Window</th>
                       <th className="py-3 px-3">Audience</th>
                       <th className="py-3 px-3">Redemptions</th>
                       <th className="py-3 px-3">Stacking</th>
-                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3">Safety &amp; Status</th>
                       <th className="py-3 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {promotions.length === 0 ? (
                       <tr>
-                        <td colSpan="8" className="py-8 text-center text-slate-400">
+                        <td colSpan="9" className="py-8 text-center text-slate-400">
                           No promotional campaigns configured yet. Click "Create Campaign" to launch a flash sale or seasonal discount.
                         </td>
                       </tr>
@@ -1984,6 +2004,7 @@ export default function BillingDashboard() {
                         const isExpired = ends < now;
                         const isPending = starts > now;
                         const isLive = p.is_active && !isExpired && !isPending;
+                        const pStat = (campaignAnalytics.promotions || []).find((s) => s.id === p.id);
 
                         return (
                           <tr key={p.id}>
@@ -2005,6 +2026,16 @@ export default function BillingDashboard() {
                                   Cap: ₹{formatRupees(p.max_discount_paise)}
                                 </span>
                               )}
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="text-[11px]">
+                                <span className="font-bold text-slate-900 block">
+                                  Net: ₹{pStat ? Number(pStat.netRevenue || 0).toLocaleString("en-IN") : "0"}
+                                </span>
+                                <span className="text-slate-400 block text-[10px]">
+                                  Disc: ₹{pStat ? Number(pStat.discountsGranted || 0).toLocaleString("en-IN") : "0"} · {pStat?.paid_orders || 0} paid
+                                </span>
+                              </div>
                             </td>
                             <td className="py-3 px-3">
                               <span className="block">{formatDate(p.starts_at)}</span>
@@ -2032,9 +2063,9 @@ export default function BillingDashboard() {
                                 {p.can_stack_with_coupon ? "Stackable" : "Non-stacking"}
                               </span>
                             </td>
-                            <td className="py-3 px-3">
+                            <td className="py-3 px-3 space-y-1">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                                   isLive
                                     ? "bg-emerald-100 text-emerald-800"
                                     : isPending
@@ -2045,6 +2076,9 @@ export default function BillingDashboard() {
                                 }`}
                               >
                                 {isLive ? "Live" : isPending ? "Scheduled" : isExpired ? "Expired" : "Disabled"}
+                              </span>
+                              <span className="block rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
+                                Atomically Enforced
                               </span>
                             </td>
                             <td className="py-3 px-3 text-right">
