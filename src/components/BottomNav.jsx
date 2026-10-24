@@ -32,7 +32,9 @@ const BottomNav = () => {
       path: isSuperadmin ? "/dashboard" : defaultLanding,
       icon: LayoutDashboard,
     },
-    { name: "Reports", path: "/reports", icon: BarChart3 },
+    ...(isSuperadmin
+      ? [{ name: "Reports", path: "/reports", icon: BarChart3 }]
+      : [{ name: "Customers", path: "/customers", icon: Users }]),
     { name: "Profile", path: "/profile", icon: User },
     { name: "Settings", path: "/settings", icon: Settings },
   ];

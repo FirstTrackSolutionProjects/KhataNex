@@ -187,8 +187,14 @@ export default function Subscription() {
 
       const orderData = res.order;
 
-      // Check if Mock Provider (in local dev without Razorpay keys)
-      if (orderData.provider === "mock") {
+      // Check if Mock Provider or simulated local test order
+      const isMockOrder =
+        orderData.provider === "mock" ||
+        orderData.providerOrderId?.startsWith("mock_") ||
+        orderData.providerOrderId?.startsWith("order_test_") ||
+        (orderData.keyId && orderData.keyId.includes("mock"));
+
+      if (isMockOrder) {
         const verifyRes = await api.post(`/api/subscriptions/orders/${orderData.id}/verify`, {
           provider_payment_id: `mock_pay_${Date.now()}`,
           provider_signature: "mock_sig_dev",
@@ -208,11 +214,25 @@ export default function Subscription() {
         return;
       }
 
+      // Validate gateway credentials before launching external Razorpay SDK
+      if (!orderData.keyId || !orderData.providerOrderId) {
+        throw new Error("Payment gateway configuration error: missing Razorpay key or order ID.");
+      }
+
+      if (!orderData.keyId.startsWith("rzp_test_") && !orderData.keyId.startsWith("rzp_live_")) {
+        throw new Error("Invalid Razorpay Key ID received from server.");
+      }
+
       // Load Razorpay script dynamically
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
         throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
       }
+
+      const logoUrl =
+        typeof window !== "undefined" && window.location.protocol === "https:"
+          ? `${window.location.origin}/images/Logo.jpeg`
+          : undefined;
 
       const options = {
         key: orderData.keyId,
@@ -220,7 +240,7 @@ export default function Subscription() {
         currency: orderData.currency || "INR",
         name: "FIRST TRACK KHATANEX",
         description: `${orderData.planName} Subscription`,
-        image: "/images/Logo.jpeg",
+        ...(logoUrl ? { image: logoUrl } : {}),
         order_id: orderData.providerOrderId,
         prefill: {
           name: orderData.userName || user?.name || "",
@@ -286,7 +306,17 @@ export default function Subscription() {
       rzp.open();
     } catch (err) {
       console.error("Checkout initialization failed:", err);
-      setStatusMessage({ type: "error", text: err.message || "Failed to start checkout." });
+      const isAuthError =
+        err.status === 401 ||
+        err.code === 401 ||
+        err.message?.toLowerCase().includes("session") ||
+        err.message?.toLowerCase().includes("authenticated");
+      setStatusMessage({
+        type: "error",
+        text: isAuthError
+          ? "Your session has expired. Please log in again to complete your subscription."
+          : err.message || "Failed to start checkout.",
+      });
     } finally {
       setCheckoutLoading(false);
     }

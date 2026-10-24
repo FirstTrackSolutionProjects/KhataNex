@@ -10,12 +10,27 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Receipt,
+  Download,
+  Printer,
+  RefreshCw,
+  ShieldCheck,
+  Tag,
+  DollarSign,
+  Search,
+  Eye,
+  Filter,
+  CheckCircle2,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
-import api from "../lib/api";
+import api, { getToken } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
 const PERIOD_OPTIONS = [
   { id: "today", label: "Today", months: 1 },
@@ -66,6 +81,77 @@ const Reports = () => {
   const [expenseFilterCategory, setExpenseFilterCategory] = useState("all");
 
   const urlMetricHandledRef = useRef(false);
+
+  const { user } = useAuth();
+  const [activeReportTab, setActiveReportTab] = useState("accounting"); // "accounting" | "subscriptions"
+
+  // Subscriptions Report State (Superadmin)
+  const [subReportPeriod, setSubReportPeriod] = useState("this_month");
+  const [subReportStatus, setSubReportStatus] = useState("paid");
+  const [subReportSearch, setSubReportSearch] = useState("");
+  const [subReportPlan, setSubReportPlan] = useState("");
+  const [subReportPage, setSubReportPage] = useState(1);
+  const [subReportData, setSubReportData] = useState({ metrics: {}, pagination: {}, rows: [] });
+  const [subReportLoading, setSubReportLoading] = useState(false);
+  const [subReportError, setSubReportError] = useState("");
+  const [selectedSubOrder, setSelectedSubOrder] = useState(null);
+
+  const loadSubscriptionReports = async (page = 1) => {
+    setSubReportLoading(true);
+    setSubReportError("");
+    try {
+      const q = new URLSearchParams({
+        period: subReportPeriod,
+        status: subReportStatus,
+        search: subReportSearch.trim(),
+        page: String(page),
+        limit: "20",
+      });
+      if (subReportPlan) q.append("plan_code", subReportPlan);
+      const res = await api.get(`/api/superadmin/billing/reports?${q.toString()}`);
+      if (res?.success) {
+        setSubReportData(res);
+        setSubReportPage(page);
+      } else {
+        setSubReportError(res?.message || "Failed to load subscription reports.");
+      }
+    } catch (err) {
+      setSubReportError(err.message || "Failed to load subscription reports.");
+    } finally {
+      setSubReportLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeReportTab === "subscriptions") {
+      loadSubscriptionReports(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeReportTab, subReportPeriod, subReportStatus, subReportPlan]);
+
+  const handleDownloadSubInvoice = async (orderId, invoiceNumber) => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${BASE_URL}/api/subscriptions/orders/${orderId}/invoice`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to download invoice.");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invoiceNumber || "Invoice"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert(err.message || "Could not download invoice.");
+    }
+  };
 
   const loadReports = async (selectedPeriod, m) => {
     setLoading(true);
@@ -1027,8 +1113,16 @@ const Reports = () => {
 
       <div className="lg:pl-64">
         <PageHeader
-          title="Reports"
-          subtitle="Understand your business performance"
+          title={
+            user?.role !== "superadmin"
+              ? `Welcome to KhataNex, ${user?.name || "Business Owner"} 👋`
+              : "Reports"
+          }
+          subtitle={
+            user?.role !== "superadmin"
+              ? "Your business overview and financial activity"
+              : "Understand your business performance"
+          }
           onMenuClick={() => setSidebarOpen(true)}
           showHome={true}
           showProfile={true}
@@ -1041,7 +1135,344 @@ const Reports = () => {
             </div>
           )}
 
-          {/* PERIOD SELECTOR */}
+          {user?.role === "superadmin" && (
+            <div className="mb-6 flex border-b border-slate-200 bg-white px-2 rounded-2xl border shadow-sm">
+              <button
+                type="button"
+                onClick={() => setActiveReportTab("accounting")}
+                className={`flex items-center gap-2 border-b-2 px-5 py-3.5 text-xs font-bold transition ${
+                  activeReportTab === "accounting"
+                    ? "border-emerald-600 text-emerald-600"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <BarChart3 size={16} />
+                <span>Accounting Reports</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveReportTab("subscriptions")}
+                className={`flex items-center gap-2 border-b-2 px-5 py-3.5 text-xs font-bold transition ${
+                  activeReportTab === "subscriptions"
+                    ? "border-emerald-600 text-emerald-600"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <Receipt size={16} />
+                <span>Subscriptions Report</span>
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                  Platform
+                </span>
+              </button>
+            </div>
+          )}
+
+          {activeReportTab === "subscriptions" ? (
+            /* DEDICATED SAAS SUBSCRIPTIONS REPORT VIEW */
+            <div className="space-y-6">
+              {/* Report Header Bar */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    SaaS Subscription Revenue &amp; Financial Reports
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Server-side aggregated billing intelligence, tax collections, and active subscriber metrics
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm"
+                  >
+                    <Printer size={15} />
+                    <span>Print / Export</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => loadSubscriptionReports(subReportPage)}
+                    disabled={subReportLoading}
+                    className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm disabled:opacity-50"
+                  >
+                    <RefreshCw size={14} className={subReportLoading ? "animate-spin" : ""} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              {subReportError && (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700">
+                  {subReportError}
+                </div>
+              )}
+
+              {/* 5 KPI SUMMARY CARDS */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                      <DollarSign size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">Total Collections</p>
+                      <p className="text-xl font-bold text-slate-900">
+                        {subReportLoading
+                          ? "..."
+                          : `₹${Number(subReportData.metrics?.totalCollections || 0).toLocaleString("en-IN")}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-teal-100 p-3 text-teal-600">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">Paid Orders</p>
+                      <p className="text-xl font-bold text-slate-900">
+                        {subReportLoading ? "..." : subReportData.metrics?.paidOrdersCount ?? 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-purple-100 p-3 text-purple-600">
+                      <Tag size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">Discounts Granted</p>
+                      <p className="text-xl font-bold text-purple-700">
+                        {subReportLoading
+                          ? "..."
+                          : `₹${Number(subReportData.metrics?.totalDiscountsGranted || 0).toLocaleString("en-IN")}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
+                      <Receipt size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">Tax Collected (GST)</p>
+                      <p className="text-xl font-bold text-slate-900">
+                        {subReportLoading
+                          ? "..."
+                          : `₹${Number(subReportData.metrics?.taxCollected || 0).toLocaleString("en-IN")}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-amber-100 p-3 text-amber-600">
+                      <Calendar size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">Expiring in 7 Days</p>
+                      <p className="text-xl font-bold text-amber-700">
+                        {subReportLoading ? "..." : subReportData.metrics?.expiringSubscriptions ?? 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* FILTERS & SEARCH BAR */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                  {[
+                    { id: "today", label: "Today" },
+                    { id: "this_week", label: "This Week" },
+                    { id: "this_month", label: "This Month" },
+                    { id: "this_year", label: "This Year" },
+                    { id: "all", label: "All Time" },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSubReportPeriod(p.id)}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                        subReportPeriod === p.id
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <select
+                    value={subReportStatus}
+                    onChange={(e) => setSubReportStatus(e.target.value)}
+                    className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="paid">Status: Paid</option>
+                    <option value="all">Status: All</option>
+                    <option value="created">Status: Pending</option>
+                    <option value="failed">Status: Failed</option>
+                  </select>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    loadSubscriptionReports(1);
+                  }}
+                  className="relative flex-1 w-full"
+                >
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={subReportSearch}
+                    onChange={(e) => setSubReportSearch(e.target.value)}
+                    placeholder="Search by subscriber, email, or order ID..."
+                    className="w-full rounded-xl border border-slate-300 py-1.5 pl-9 pr-3 text-xs focus:border-emerald-600 focus:outline-none"
+                  />
+                </form>
+              </div>
+
+              {/* ORDERS DRILLDOWN TABLE */}
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full min-w-[850px] text-left text-xs text-slate-600">
+                  <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <tr>
+                      <th className="py-3 px-4">Order # &amp; Date</th>
+                      <th className="py-3 px-4">Subscriber</th>
+                      <th className="py-3 px-4">Plan</th>
+                      <th className="py-3 px-4">Base Price</th>
+                      <th className="py-3 px-4">Discount</th>
+                      <th className="py-3 px-4">Tax (GST)</th>
+                      <th className="py-3 px-4">Paid Total</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {subReportLoading ? (
+                      <tr>
+                        <td colSpan={9} className="py-8 text-center text-slate-400">
+                          Loading subscription financial records...
+                        </td>
+                      </tr>
+                    ) : !subReportData.rows || subReportData.rows.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-8 text-center text-slate-400">
+                          No subscription orders found for this filter period.
+                        </td>
+                      </tr>
+                    ) : (
+                      subReportData.rows.map((row) => (
+                        <tr key={row.id} className="hover:bg-slate-50 transition">
+                          <td className="py-3 px-4">
+                            <span className="font-mono font-bold text-slate-900 block">{row.order_number}</span>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(row.paid_at || row.created_at).toLocaleDateString("en-IN")}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-semibold text-slate-800 block">{row.customer_name}</span>
+                            <span className="text-[11px] text-slate-400">{row.customer_email}</span>
+                          </td>
+                          <td className="py-3 px-4 font-medium text-slate-700">
+                            {row.plan_name}
+                          </td>
+                          <td className="py-3 px-4">
+                            ₹{Number(row.base_amount || 0).toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-3 px-4 text-emerald-600 font-medium">
+                            {Number(row.discount_amount || 0) > 0
+                              ? `-₹${Number(row.discount_amount).toLocaleString("en-IN")}`
+                              : "—"}
+                          </td>
+                          <td className="py-3 px-4">
+                            ₹{Number(row.tax_amount || 0).toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-3 px-4 font-bold text-slate-900">
+                            ₹{Number(row.final_amount || 0).toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                row.status === "paid"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : row.status === "created"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-rose-100 text-rose-800"
+                              }`}
+                            >
+                              {row.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSubOrder(row)}
+                              className="rounded-lg bg-slate-100 p-1.5 text-slate-600 hover:bg-slate-200 transition"
+                              title="View Details"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            {row.invoice_number && (
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadSubInvoice(row.id, row.invoice_number)}
+                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 transition"
+                                title="Download GST Invoice"
+                              >
+                                <Download size={12} />
+                                <span>PDF</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* PAGINATION */}
+              {subReportData.pagination?.totalPages > 1 && (
+                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-xs">
+                  <span className="text-slate-500">
+                    Page {subReportData.pagination.currentPage} of {subReportData.pagination.totalPages} · {subReportData.pagination.totalCount} records
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={subReportPage <= 1}
+                      onClick={() => loadSubscriptionReports(subReportPage - 1)}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      disabled={subReportPage >= subReportData.pagination.totalPages}
+                      onClick={() => loadSubscriptionReports(subReportPage + 1)}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* PERIOD SELECTOR */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-emerald-600" />
@@ -1262,7 +1693,9 @@ const Reports = () => {
               </div>
             </div>
           </div>
-        </main>
+        </>
+      )}
+      </main>
       </div>
 
       {/* DRILL-DOWN MODAL */}
@@ -1507,6 +1940,132 @@ const Reports = () => {
             </>
           )}
         </div>
+      </Modal>
+
+      {/* SUBSCRIPTION ORDER DETAIL MODAL */}
+      <Modal
+        open={Boolean(selectedSubOrder)}
+        onClose={() => setSelectedSubOrder(null)}
+        title="Subscription Order Details"
+      >
+        {selectedSubOrder && (
+          <div className="space-y-4 text-xs">
+            {/* Amount Banner */}
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+                Total Amount Paid
+              </p>
+              <p className="mt-1 text-2xl font-black text-slate-900">
+                ₹{Number(selectedSubOrder.final_amount || 0).toLocaleString("en-IN")}
+              </p>
+              <div className="mt-2 flex items-center justify-center gap-2">
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                  {selectedSubOrder.status}
+                </span>
+                <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-medium text-slate-700 capitalize">
+                  {selectedSubOrder.provider || "Razorpay"}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="text-slate-400 font-medium">Subscriber</p>
+                <p className="font-bold text-slate-800 mt-0.5">{selectedSubOrder.customer_name}</p>
+                <p className="text-slate-500">{selectedSubOrder.customer_email}</p>
+                {selectedSubOrder.customer_phone && (
+                  <p className="text-slate-500">Phone: {selectedSubOrder.customer_phone}</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="text-slate-400 font-medium">Plan Information</p>
+                <p className="font-bold text-slate-800 mt-0.5">{selectedSubOrder.plan_name}</p>
+                <p className="text-slate-500">Duration: {selectedSubOrder.duration_months} Months</p>
+                {selectedSubOrder.business_name && (
+                  <p className="text-slate-500">Business: {selectedSubOrder.business_name}</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="text-slate-400 font-medium">Order Number</p>
+                <p className="font-mono font-bold text-slate-800 mt-0.5">{selectedSubOrder.order_number}</p>
+                <p className="text-slate-500">
+                  {new Date(selectedSubOrder.paid_at || selectedSubOrder.created_at).toLocaleString("en-IN")}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="text-slate-400 font-medium">Payment ID</p>
+                <p className="font-mono text-[11px] font-semibold text-slate-800 mt-0.5 break-all">
+                  {selectedSubOrder.provider_payment_id || selectedSubOrder.provider_order_id || "Direct Fulfillment"}
+                </p>
+                {selectedSubOrder.invoice_number && (
+                  <p className="text-emerald-700 font-medium mt-1">Invoice: {selectedSubOrder.invoice_number}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Financial Breakdown */}
+            <div className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-1.5">
+              <h5 className="font-bold text-slate-800 uppercase tracking-wider text-[10px]">
+                Accounting Reconciliation
+              </h5>
+              <div className="flex justify-between text-slate-600">
+                <span>Base Price:</span>
+                <span>₹{Number(selectedSubOrder.base_amount || 0).toLocaleString("en-IN")}</span>
+              </div>
+              {Number(selectedSubOrder.discount_amount || 0) > 0 && (
+                <div className="flex justify-between font-semibold text-emerald-600">
+                  <span>Discount:</span>
+                  <span>-₹{Number(selectedSubOrder.discount_amount).toLocaleString("en-IN")}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-600">
+                <span>GST (18% Included):</span>
+                <span>₹{Number(selectedSubOrder.tax_amount || 0).toLocaleString("en-IN")}</span>
+              </div>
+              <div className="border-t border-slate-100 pt-1.5 flex justify-between font-bold text-slate-900">
+                <span>Net Collected:</span>
+                <span className="text-emerald-700">₹{Number(selectedSubOrder.final_amount || 0).toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+
+            {/* Transparent Accounting Principle */}
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+              <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-[11px]">
+                <ShieldCheck size={14} />
+                <span>Payment Gateway Verified Collection</span>
+              </div>
+              <p className="mt-1 text-[10px] text-emerald-700 leading-relaxed">
+                Funds collected via payment gateway; bank settlement subject to gateway payout cycle (T+2 business days).
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+              {selectedSubOrder.invoice_number ? (
+                <button
+                  type="button"
+                  onClick={() => handleDownloadSubInvoice(selectedSubOrder.id, selectedSubOrder.invoice_number)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition"
+                >
+                  <Download size={13} />
+                  <span>Download Invoice PDF</span>
+                </button>
+              ) : <span />}
+
+              <button
+                type="button"
+                onClick={() => setSelectedSubOrder(null)}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

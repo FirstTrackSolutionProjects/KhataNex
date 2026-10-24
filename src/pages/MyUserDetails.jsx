@@ -32,6 +32,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Wallet,
+  Pencil,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
@@ -1265,6 +1266,67 @@ const MyUserDetails = () => {
   const [recordSearch, setRecordSearch] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    business_name: "",
+    business_type: "",
+    gstin: "",
+    pan: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
+
+  const openEditModal = () => {
+    if (!user) return;
+    setEditForm({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      business_name: user.business_name || "",
+      business_type: user.business_type || "",
+      gstin: user.gstin || "",
+      pan: user.pan || "",
+      address: user.address || user.address_line1 || "",
+      city: user.city || "",
+      state: user.state || "",
+      pincode: user.pincode || "",
+    });
+    setEditError("");
+    setEditSuccess("");
+    setEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+    try {
+      const res = await api.patch(`/api/superadmin/users/${id}`, editForm);
+      if (res?.success) {
+        setEditSuccess("Profile updated successfully.");
+        await loadUser();
+        setTimeout(() => {
+          setEditModalOpen(false);
+          setEditSuccess("");
+        }, 800);
+      } else {
+        setEditError(res?.message || "Failed to update profile.");
+      }
+    } catch (err) {
+      setEditError(err.message || "Failed to update profile.");
+    } finally {
+      setEditLoading(false);
+    }
+  };
   const [showReports, setShowReports] = useState(false);
   const [selectedBusinessSection, setSelectedBusinessSection] = useState("");
 
@@ -2593,6 +2655,28 @@ const MyUserDetails = () => {
             </div>
 
             <div className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+              {isSuperadmin && (
+                <button
+                  type="button"
+                  onClick={openEditModal}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-left transition hover:bg-emerald-100/80"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                      <Pencil size={18} />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-emerald-800">
+                        Edit Profile
+                      </span>
+                      <span className="block text-xs text-emerald-700/80">
+                        Update name, phone, business, GSTIN and contact details.
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              )}
+
               {user.status === "active" ? (
                 <button
                   type="button"
@@ -3740,6 +3824,172 @@ const MyUserDetails = () => {
           navigate("/my-users");
         }}
       />
+
+      {/* Edit User Profile Modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Edit User Details</h3>
+                <p className="text-xs text-slate-500">Update account #{user.id} profile and business data</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {editError && (
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs text-rose-700">
+                {editError}
+              </div>
+            )}
+            {editSuccess && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-700">
+                {editSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="mt-4 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Business Name</label>
+                  <input
+                    type="text"
+                    value={editForm.business_name}
+                    onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Business Type</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Retail, Service"
+                    value={editForm.business_type}
+                    onChange={(e) => setEditForm({ ...editForm, business_type: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">GSTIN</label>
+                  <input
+                    type="text"
+                    value={editForm.gstin}
+                    onChange={(e) => setEditForm({ ...editForm, gstin: e.target.value.toUpperCase() })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">PAN</label>
+                  <input
+                    type="text"
+                    value={editForm.pan}
+                    onChange={(e) => setEditForm({ ...editForm, pan: e.target.value.toUpperCase() })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Address</label>
+                <input
+                  type="text"
+                  value={editForm.address}
+                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    value={editForm.city}
+                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">State</label>
+                  <input
+                    type="text"
+                    value={editForm.state}
+                    onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Pincode</label>
+                  <input
+                    type="text"
+                    value={editForm.pincode}
+                    onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {editLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
