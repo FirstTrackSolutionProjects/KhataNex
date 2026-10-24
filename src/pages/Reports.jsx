@@ -54,7 +54,7 @@ const METRIC_LABELS = {
   "net-profit": "Net Profit",
 };
 
-const Reports = () => {
+const Reports = ({ isDashboardView = false }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [period, setPeriod] = useState("this_month");
   const [months, setMonths] = useState(1);
@@ -1114,12 +1114,12 @@ const Reports = () => {
       <div className="lg:pl-64">
         <PageHeader
           title={
-            user?.role !== "superadmin"
+            (isDashboardView || user?.role !== "superadmin")
               ? `Welcome to KhataNex, ${user?.name || "Business Owner"} 👋`
               : "Reports"
           }
           subtitle={
-            user?.role !== "superadmin"
+            (isDashboardView || user?.role !== "superadmin")
               ? "Your business overview and financial activity"
               : "Understand your business performance"
           }

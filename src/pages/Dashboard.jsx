@@ -102,6 +102,43 @@ export default function Dashboard() {
   // Action feedback
   const [actionFeedback, setActionFeedback] = useState(null);
 
+  // Superadmin Audit Activity Trail Modal
+  const [auditTrailModal, setAuditTrailModal] = useState({
+    open: false,
+    loading: false,
+    logs: [],
+    pagination: { page: 1, limit: 20, total: 0, pages: 1 },
+    search: "",
+    error: "",
+  });
+
+  const loadAuditLogs = useCallback(async (page = 1, search = "") => {
+    setAuditTrailModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      const q = new URLSearchParams({ page: String(page), limit: "20" });
+      if (search) q.set("search", search);
+      const res = await api.get(`/api/superadmin/audit-logs?${q.toString()}`);
+      setAuditTrailModal((prev) => ({
+        ...prev,
+        loading: false,
+        logs: res.data || res.audit_logs || [],
+        pagination: res.pagination || { page, limit: 20, total: 0, pages: 1 },
+      }));
+    } catch (err) {
+      setAuditTrailModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err.message || "Failed to load audit logs",
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (auditTrailModal.open) {
+      loadAuditLogs(auditTrailModal.pagination.page, auditTrailModal.search);
+    }
+  }, [auditTrailModal.open, auditTrailModal.pagination.page, loadAuditLogs]);
+
   // Redirect non-superadmin users to /customers
   useEffect(() => {
     if (user && user.role !== "superadmin") {
@@ -278,7 +315,7 @@ export default function Dashboard() {
       <div className="lg:pl-64">
         {/* Topbar */}
         <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-2 sm:h-16 sm:py-0 backdrop-blur sm:px-6">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3 py-1">
+          <div className="flex items-center gap-2 sm:gap-3 py-1">
             <button
               onClick={() => setSidebarOpen(true)}
               className="shrink-0 rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
@@ -286,20 +323,6 @@ export default function Dashboard() {
             >
               <Menu size={22} />
             </button>
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-slate-900 sm:text-lg sm:truncate break-words leading-tight">
-                  SaaS Owner Dashboard
-                </h1>
-                <span className="hidden rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 sm:inline-block">
-                  KhataNex Platform
-                </span>
-              </div>
-              <p className="hidden text-xs text-slate-400 sm:block truncate">
-                Platform-wide subscription revenue, subscribers, and system health
-              </p>
-            </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -364,9 +387,6 @@ export default function Dashboard() {
               <h2 className="text-xl font-extrabold text-slate-900 sm:text-2xl break-words leading-snug">
                 Welcome, {user?.name || "Super Admin"} 👋
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm break-words">
-                Real-time operational intelligence and financial performance of KhataNex SaaS.
-              </p>
             </div>
 
             {/* Period Filter Buttons */}
@@ -838,11 +858,8 @@ export default function Dashboard() {
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">
-                    Recent Subscription Orders
+                    Subscription Orders
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Latest SaaS subscription purchases and fulfilled orders
-                  </p>
                 </div>
                 <button
                   type="button"
@@ -957,12 +974,9 @@ export default function Dashboard() {
             <div className="space-y-4">
               {/* Quick Links Card */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="font-bold text-slate-900 text-base mb-1">
-                  Superadmin Controls
+                <h3 className="font-bold text-slate-900 text-base mb-4">
+                  Quick Access
                 </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Quick navigation to platform administration modules
-                </p>
 
                 <div className="space-y-2.5">
                   <button
@@ -1028,6 +1042,23 @@ export default function Dashboard() {
                       <div>
                         <p className="text-xs font-bold text-slate-900">Financial Reports</p>
                         <p className="text-[11px] text-slate-500">Subscription & business analytics</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAuditTrailModal((prev) => ({ ...prev, open: true }))}
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-emerald-100 p-2 text-emerald-700">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">Audit Activity Trail</p>
+                        <p className="text-[11px] text-slate-500">Employee & system security logs</p>
                       </div>
                     </div>
                     <ChevronRight size={16} className="text-slate-400" />
@@ -1783,6 +1814,140 @@ export default function Dashboard() {
                   Open in My Users
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Superadmin Audit Activity Trail Modal */}
+      {auditTrailModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-amber-100 p-2 text-amber-700">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Platform Activity & Audit Trail</h3>
+                  <p className="text-xs text-slate-500">Real-time log of administrative and employee operations</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAuditTrailModal((prev) => ({ ...prev, open: false }))}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="border-b border-slate-100 bg-slate-50 px-6 py-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Filter by action, actor, target type, or details (press Enter)..."
+                  value={auditTrailModal.search}
+                  onChange={(e) => setAuditTrailModal((prev) => ({ ...prev, search: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      loadAuditLogs(1, auditTrailModal.search);
+                    }
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Log List */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-2.5 min-h-[300px]">
+              {auditTrailModal.loading ? (
+                <div className="flex items-center justify-center py-16 text-slate-400 gap-2 text-xs">
+                  <RefreshCw size={16} className="animate-spin" />
+                  Loading audit logs...
+                </div>
+              ) : auditTrailModal.error ? (
+                <div className="rounded-xl bg-rose-50 p-4 text-xs text-rose-700 border border-rose-200">
+                  {auditTrailModal.error}
+                </div>
+              ) : auditTrailModal.logs.length === 0 ? (
+                <div className="py-16 text-center text-xs text-slate-400">
+                  No activity logs recorded yet.
+                </div>
+              ) : (
+                auditTrailModal.logs.map((log) => {
+                  let detailsParsed = null;
+                  try {
+                    detailsParsed = typeof log.details === "string" ? JSON.parse(log.details) : log.details;
+                  } catch (_) {
+                    detailsParsed = log.details;
+                  }
+                  return (
+                    <div
+                      key={log.id}
+                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 transition hover:bg-slate-50"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-xs text-slate-900">{log.action}</span>
+                            <span className="rounded-md bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+                              {log.target_type || "general"} #{log.target_id || "—"}
+                            </span>
+                            <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                              {log.actor_role}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">
+                            {detailsParsed?.message || detailsParsed?.details || (typeof detailsParsed === "string" ? detailsParsed : JSON.stringify(detailsParsed || ""))}
+                          </p>
+                          <div className="mt-1.5 flex items-center gap-3 text-[11px] text-slate-400">
+                            <span>Actor: <strong className="text-slate-600">{log.actor_name || `User #${log.actor_id}`}</strong> ({log.actor_email || "no email"})</span>
+                            {log.ip_address && <span>IP: {log.ip_address}</span>}
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-[11px] text-slate-400 whitespace-nowrap">
+                          {formatDateTime(log.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Pagination Footer */}
+            <div className="border-t border-slate-200 bg-slate-50 px-6 py-3 flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                Total {auditTrailModal.pagination.total || 0} entries · Page {auditTrailModal.pagination.page || 1} of {auditTrailModal.pagination.pages || 1}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={auditTrailModal.pagination.page <= 1}
+                  onClick={() => setAuditTrailModal((prev) => ({
+                    ...prev,
+                    pagination: { ...prev.pagination, page: Math.max(1, prev.pagination.page - 1) },
+                  }))}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={auditTrailModal.pagination.page >= (auditTrailModal.pagination.pages || 1)}
+                  onClick={() => setAuditTrailModal((prev) => ({
+                    ...prev,
+                    pagination: { ...prev.pagination, page: prev.pagination.page + 1 },
+                  }))}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>

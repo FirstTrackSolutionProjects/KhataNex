@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileText,
   Package,
+  ShoppingBag,
   BarChart3,
   Settings,
   LogOut,
@@ -29,14 +30,20 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
   const navigate = useNavigate();
   const isSuperadmin = user?.role === "superadmin";
   const isEmployee = user?.role === "employee";
+  const isNormalUser = user?.role === "user";
 
   const canAccessModule = (modId) => hasModuleAccess(user, modId);
 
   const menuItems = [
-    ...(isSuperadmin ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }] : []),
+    // 1. Dashboard is always the first item for Superadmin, Normal Users, and Employees with reports/dashboard access
+    ...(isSuperadmin || isNormalUser || canAccessModule("reports") || canAccessModule("dashboard")
+      ? [{ name: "Dashboard", path: "/dashboard", icon: LayoutDashboard }]
+      : []),
+    // Administrative Superadmin / Delegation items
     ...(isSuperadmin || (isEmployee && canAccessModule("users")) ? [{ name: "My Users", path: "/my-users", icon: UserRound }] : []),
     ...(isSuperadmin ? [{ name: "My Employees", path: "/my-employees", icon: Briefcase }] : []),
     ...(isSuperadmin ? [{ name: "Billing", path: "/billing", icon: CreditCard }] : []),
+    // Operational business modules
     ...(canAccessModule("customers") ? [{ name: "Customers", path: "/customers", icon: Users }] : []),
     ...(canAccessModule("khata") ? [{ name: "Khata", path: "/khata", icon: BookOpen }] : []),
     ...(canAccessModule("payments") ? [{ name: "Payments", path: "/payments", icon: CreditCard }] : []),
@@ -46,9 +53,12 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
       ? [{ name: "Receipts", path: "/money-receipts", icon: FileText }]
       : []),
     ...(canAccessModule("inventory") ? [{ name: "Inventory", path: "/inventory", icon: Package }] : []),
+    // Purchases placed immediately below Inventory
+    ...(canAccessModule("purchases") ? [{ name: "Purchases", path: "/purchases", icon: ShoppingBag }] : []),
     ...(canAccessModule("banking") ? [{ name: "Banking", path: "/banking", icon: Landmark }] : []),
     ...(canAccessModule("vehicles") ? [{ name: "Vehicles", path: "/vehicles", icon: Truck }] : []),
-    ...(canAccessModule("reports") ? [{ name: "Reports", path: "/reports", icon: BarChart3 }] : []),
+    // Separate Reports page retained only for Superadmin platform analytics
+    ...(isSuperadmin ? [{ name: "Reports", path: "/reports", icon: BarChart3 }] : []),
     { name: "Help Centre", path: "/help-centre", icon: HelpCircle },
   ];
 

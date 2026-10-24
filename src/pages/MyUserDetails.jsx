@@ -33,6 +33,10 @@ import {
   ArrowUpRight,
   Wallet,
   Pencil,
+  Gift,
+  Sparkles,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
@@ -1267,6 +1271,13 @@ const MyUserDetails = () => {
   const [statusLoading, setStatusLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [grantModalOpen, setGrantModalOpen] = useState(false);
+  const [grantPlanCode, setGrantPlanCode] = useState("monthly");
+  const [grantDuration, setGrantDuration] = useState(1);
+  const [grantNotes, setGrantNotes] = useState("");
+  const [grantLoading, setGrantLoading] = useState(false);
+  const [grantError, setGrantError] = useState("");
+  const [grantSuccess, setGrantSuccess] = useState("");
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
@@ -1327,6 +1338,37 @@ const MyUserDetails = () => {
       setEditLoading(false);
     }
   };
+
+  const handleGrantSubmit = async (e) => {
+    e.preventDefault();
+    setGrantLoading(true);
+    setGrantError("");
+    setGrantSuccess("");
+    try {
+      const res = await api.post("/api/superadmin/billing/grant", {
+        user_id: user.id,
+        plan_code: grantPlanCode,
+        duration_months: Number(grantDuration),
+        notes: grantNotes.trim() || undefined,
+      });
+      if (res?.success) {
+        setGrantSuccess(`Complimentary subscription successfully granted for ${user.name}!`);
+        await loadUser();
+        setTimeout(() => {
+          setGrantModalOpen(false);
+          setGrantSuccess("");
+          setGrantNotes("");
+        }, 1200);
+      } else {
+        setGrantError(res?.message || "Failed to grant complimentary subscription.");
+      }
+    } catch (err) {
+      setGrantError(err.response?.data?.message || err.message || "Failed to grant complimentary subscription.");
+    } finally {
+      setGrantLoading(false);
+    }
+  };
+
   const [showReports, setShowReports] = useState(false);
   const [selectedBusinessSection, setSelectedBusinessSection] = useState("");
 
@@ -2721,6 +2763,33 @@ const MyUserDetails = () => {
                 </button>
               )}
 
+              {currentUser?.role === "superadmin" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGrantError("");
+                    setGrantSuccess("");
+                    setGrantModalOpen(true);
+                  }}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-left transition hover:bg-purple-100"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                      <Sparkles size={18} />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-purple-900">
+                        Grant Complimentary Subscription
+                      </span>
+                      <span className="block text-xs text-purple-700/80">
+                        Provide a free subscription term to this user without payment.
+                      </span>
+                    </span>
+                  </span>
+                  <ChevronRight size={16} className="text-purple-400" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(true)}
@@ -2782,7 +2851,13 @@ const MyUserDetails = () => {
                       Plan and validity details
                     </p>
                   </div>
-                  <div>
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                    {(user?.subscription || billingData?.user?.subscription)?.is_complimentary ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
+                        <Sparkles size={11} />
+                        Complimentary
+                      </span>
+                    ) : null}
                     {(user?.subscription || billingData?.user?.subscription)?.status === "active" ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -2805,7 +2880,6 @@ const MyUserDetails = () => {
                     <span className="text-slate-500 block text-[11px]">Plan</span>
                     <span className="font-semibold text-slate-900">
                       {(user?.subscription || billingData?.user?.subscription)?.plan_name || "—"}
-                      {(user?.subscription || billingData?.user?.subscription)?.is_complimentary ? " (Free)" : ""}
                     </span>
                   </div>
                   <div className="text-right">
@@ -2822,10 +2896,26 @@ const MyUserDetails = () => {
                   </div>
                 </div>
 
-                {(user?.subscription || billingData?.user?.subscription)?.ends_at && (
-                  <div className="text-[11px] text-slate-500 pt-0.5">
-                    Valid until: {formatDate((user?.subscription || billingData?.user?.subscription)?.ends_at)}
+                {(user?.subscription || billingData?.user?.subscription)?.starts_at && (
+                  <div className="flex justify-between text-[11px] text-slate-500 pt-0.5 border-t border-slate-100">
+                    <span>Started: {formatDate((user?.subscription || billingData?.user?.subscription)?.starts_at)}</span>
+                    <span>Valid until: {formatDate((user?.subscription || billingData?.user?.subscription)?.ends_at)}</span>
                   </div>
+                )}
+
+                {currentUser?.role === "superadmin" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGrantError("");
+                      setGrantSuccess("");
+                      setGrantModalOpen(true);
+                    }}
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2.5 text-xs font-bold shadow-xs transition"
+                  >
+                    <Sparkles size={14} />
+                    <span>Grant Complimentary Subscription</span>
+                  </button>
                 )}
               </div>
             </div>
@@ -2874,6 +2964,56 @@ const MyUserDetails = () => {
               />
               <InfoRow label="Payment Terms" value={user.payment_terms} />
             </div>
+          </Section>
+
+          {/* Complimentary Grant History */}
+          <Section title="Complimentary Grant History">
+            {(!user?.grant_history?.length && !billingData?.grantHistory?.length) ? (
+              <p className="text-xs text-slate-400 py-3 text-center">
+                No complimentary subscriptions granted yet.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="py-2 px-2.5">Date</th>
+                      <th className="py-2 px-2.5">Plan / Duration</th>
+                      <th className="py-2 px-2.5">Granted By</th>
+                      <th className="py-2 px-2.5">Reason / Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(user?.grant_history || billingData?.grantHistory || []).map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50">
+                        <td className="py-2.5 px-2.5 text-slate-700 whitespace-nowrap">
+                          {formatDateTime(item.created_at)}
+                        </td>
+                        <td className="py-2.5 px-2.5 font-semibold text-slate-900">
+                          {item.plan_name}
+                          <span className="ml-1 text-[11px] font-normal text-slate-500">
+                            ({item.duration_months} mo)
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-2.5">
+                          <span className="font-medium text-slate-800 block">
+                            {item.granted_by_name || "Superadmin"}
+                          </span>
+                          {item.granted_by_email && (
+                            <span className="text-[10px] text-slate-400 block">
+                              {item.granted_by_email}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-2.5 text-slate-600 max-w-xs truncate">
+                          {item.notes || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Section>
 
           {billingData?.orders?.length > 0 && (
@@ -3984,6 +4124,215 @@ const MyUserDetails = () => {
                   className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
                   {editLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Grant Complimentary Subscription Modal */}
+      {grantModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl max-h-[92vh] overflow-y-auto border border-slate-100 dark:border-slate-800">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
+                  <Sparkles size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Grant Complimentary Subscription
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Provide a free subscription term to this user
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGrantModalOpen(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {grantError && (
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs text-rose-700 flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{grantError}</span>
+              </div>
+            )}
+            {grantSuccess && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-700 flex items-center gap-2">
+                <CheckCircle2 size={16} className="shrink-0" />
+                <span>{grantSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGrantSubmit} className="mt-4 space-y-4 text-xs">
+              {/* Target User Summary Card */}
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-200 dark:border-slate-700/50 space-y-1.5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Target Account</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{user.name}</span>
+                  <span className="text-slate-500 font-mono">#{user.id}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300 pt-1 text-[11px]">
+                  <div>Email: <span className="font-medium text-slate-800 dark:text-slate-200">{user.email || "—"}</span></div>
+                  <div>Business: <span className="font-medium text-slate-800 dark:text-slate-200">{user.business_name || "—"}</span></div>
+                </div>
+                <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-200 dark:border-slate-700/50 flex items-center justify-between">
+                  <span>Current Subscription:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 capitalize">
+                    {user?.subscription?.status || "None"} {user?.subscription?.plan_name ? `(${user.subscription.plan_name})` : ""}
+                  </span>
+                </div>
+              </div>
+
+              {/* Select Subscription Plan */}
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                  Select Subscription Plan <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { code: "monthly", name: "Monthly Plan", defaultDuration: 1 },
+                    { code: "six_months", name: "6 Months", defaultDuration: 6 },
+                    { code: "yearly", name: "1 Year", defaultDuration: 13 },
+                  ].map((p) => {
+                    const isSelected = grantPlanCode === p.code;
+                    return (
+                      <button
+                        key={p.code}
+                        type="button"
+                        onClick={() => {
+                          setGrantPlanCode(p.code);
+                          setGrantDuration(p.defaultDuration);
+                        }}
+                        className={`p-3 rounded-xl border text-left transition ${
+                          isSelected
+                            ? "border-purple-600 bg-purple-50/50 dark:bg-purple-950/30 ring-2 ring-purple-500/20"
+                            : "border-slate-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800"
+                        }`}
+                      >
+                        <p className={`font-bold ${isSelected ? "text-purple-900 dark:text-purple-200" : "text-slate-800 dark:text-slate-200"}`}>
+                          {p.name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">
+                          Default: {p.defaultDuration} mo
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Choose Subscription Duration */}
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  Subscription Duration <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={grantDuration}
+                  onChange={(e) => setGrantDuration(Number(e.target.value))}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                >
+                  <option value={1}>1 Month</option>
+                  <option value={3}>3 Months</option>
+                  <option value={6}>6 Months</option>
+                  <option value={12}>12 Months (1 Year)</option>
+                  <option value={13}>13 Months (Yearly + 1 Mo Free)</option>
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Duration supported by the platform subscription model.
+                </p>
+              </div>
+
+              {/* Optional Admin Reason / Notes */}
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  Reason / Notes <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={grantNotes}
+                  onChange={(e) => setGrantNotes(e.target.value)}
+                  placeholder="e.g., Customer courtesy, promotional partner, annual beta trial"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Review & Calculations Summary */}
+              {(() => {
+                const currentEndsAt = user?.subscription?.ends_at ? new Date(user.subscription.ends_at) : null;
+                const isCurrentlyActive = user?.subscription?.status === "active" && currentEndsAt && currentEndsAt > new Date();
+                const startDate = isCurrentlyActive ? currentEndsAt : new Date();
+                const expiryDate = new Date(startDate);
+                expiryDate.setMonth(expiryDate.getMonth() + Number(grantDuration));
+
+                return (
+                  <div className="rounded-xl border border-purple-200 dark:border-purple-900/60 bg-purple-50/40 dark:bg-purple-950/20 p-3.5 space-y-2">
+                    <p className="text-[11px] font-bold text-purple-950 dark:text-purple-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles size={12} className="text-purple-600" />
+                      Grant Review & Confirmation
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div>
+                        <span className="text-slate-500 block">Effective Start:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {formatDate(startDate)} {isCurrentlyActive ? "(Extends active)" : "(Immediate)"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">New Expiry Date:</span>
+                        <span className="font-semibold text-purple-700 dark:text-purple-300">
+                          {formatDate(expiryDate)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">Duration:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {grantDuration} Month{grantDuration > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">Charged Amount:</span>
+                        <span className="font-bold text-emerald-600">
+                          ₹0.00 (Complimentary)
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-purple-100 dark:border-purple-900/40">
+                      No payment gateway transaction will be initiated. Subscription will activate immediately and record an administrative audit entry.
+                    </p>
+                  </div>
+                );
+              })()}
+
+              {/* Form Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setGrantModalOpen(false)}
+                  disabled={grantLoading}
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={grantLoading}
+                  className="inline-flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition disabled:opacity-50"
+                >
+                  {grantLoading ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                  <span>{grantLoading ? "Granting..." : "Confirm & Grant Subscription"}</span>
                 </button>
               </div>
             </form>
