@@ -119,6 +119,23 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const data = await api.post("/api/auth/login", { email, password });
+    if (data?.mfa_required) {
+      return { mfa_required: true, mfa_token: data.mfa_token };
+    }
+    setToken(data.token);
+    setUser(data.user);
+    if (data.user) {
+      await refreshSubscription();
+    }
+    return data.user;
+  };
+
+  const login2FA = async (mfa_token, { code, recovery_code }) => {
+    const data = await api.post("/api/auth/login/2fa", {
+      mfa_token,
+      code,
+      recovery_code,
+    });
     setToken(data.token);
     setUser(data.user);
     if (data.user) {
@@ -171,6 +188,7 @@ export const AuthProvider = ({ children }) => {
         refreshSubscription,
         refreshUser,
         login,
+        login2FA,
         register,
         logout,
         updateProfile,
