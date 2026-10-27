@@ -134,12 +134,12 @@ const Login = () => {
                 <label className="text-sm font-medium text-slate-700">
                   Password
                 </label>
-                <button
-                  type="button"
+                <Link
+                  to="/forgot-password"
                   className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
                 >
                   Forgot Password?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <Lock

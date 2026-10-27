@@ -330,13 +330,13 @@ const Settings = () => {
               </div>
 
               <div className="mt-5">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                <a
+                  href="/forgot-password"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
                 >
                   <Lock size={16} />
-                  Change Password
-                </button>
+                  Change / Reset Password
+                </a>
               </div>
             </div>
 
