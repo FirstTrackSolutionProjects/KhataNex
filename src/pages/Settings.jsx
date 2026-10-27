@@ -16,6 +16,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import PageHeader from "../components/PageHeader";
+import TwoFactorSettings from "../components/TwoFactorSettings";
 import { useTheme } from "../context/ThemeContext";
 import api from "../lib/api";
 import { useSubscriptionAccess, subscriptionRequiredMessage } from "../hooks/useSubscriptionAccess";
@@ -314,6 +315,9 @@ const Settings = () => {
                 )}
               </div>
             </div>
+
+            {/* Two-Step Verification (2FA) */}
+            <TwoFactorSettings />
 
             {/* Security */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
