@@ -37,11 +37,14 @@ import {
   Sparkles,
   Clock,
   AlertCircle,
+  RotateCcw,
+  Archive,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api, { secureFileObjectUrl } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import DeleteUserModal from "../components/DeleteUserModal";
+import RestoreUserModal from "../components/RestoreUserModal";
 
 const formatDateTime = (value) => {
   if (!value) return "—";
@@ -1270,6 +1273,7 @@ const MyUserDetails = () => {
   const [recordSearch, setRecordSearch] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [restoreModalOpen, setRestoreModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [grantModalOpen, setGrantModalOpen] = useState(false);
   const [grantPlanCode, setGrantPlanCode] = useState("monthly");
@@ -2601,6 +2605,8 @@ const MyUserDetails = () => {
     },
   ];
 
+  const isDeleted = Boolean(user?.is_deleted || user?.deleted_at || user?.status === "deleted");
+
   return (
     <div className="space-y-5 pb-8 lg:pl-64">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2622,6 +2628,47 @@ const MyUserDetails = () => {
           Refresh
         </button>
       </div>
+
+      {/* Archive / Soft-Deleted Account Banner */}
+      {isDeleted && (
+        <div className="rounded-2xl border-2 border-red-300 bg-red-50/90 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white tracking-wide uppercase">
+                  <Archive size={14} />
+                  Archived / Soft-Deleted Account
+                </span>
+                <span className="text-xs font-semibold text-red-700 bg-red-100 rounded-full px-2.5 py-0.5">
+                  Read-Only Mode
+                </span>
+              </div>
+              <p className="text-sm font-bold text-red-950 mt-1.5">
+                This account was soft-deleted on {formatDateTime(user.deleted_at)} by {user.deleted_by_name || (user.deleted_by ? `Admin #${user.deleted_by}` : "Superadmin")}.
+              </p>
+              {user.deletion_reason && (
+                <p className="text-xs text-red-800">
+                  <span className="font-semibold text-red-900">Deletion Reason:</span> {user.deletion_reason}
+                </p>
+              )}
+              <p className="text-xs text-red-700 pt-1">
+                User login access is revoked and employee accounts are suspended. All historical financial transactions, invoices, quotations, receipts, payments, khata entries, inventory, and customer ledgers remain intact for legal and audit compliance.
+              </p>
+            </div>
+
+            {currentUser?.role === "superadmin" && (
+              <button
+                type="button"
+                onClick={() => setRestoreModalOpen(true)}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition"
+              >
+                <RotateCcw size={16} />
+                Restore Account
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(330px,390px)_minmax(0,1fr)]">
         <div className="space-y-5">
@@ -2683,132 +2730,168 @@ const MyUserDetails = () => {
 
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs text-slate-500">Current Status</span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    user.status === "active"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  <CheckCircle2 size={13} />
-                  {user.status || "active"}
-                </span>
+                {isDeleted ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-800">
+                    DELETED (ARCHIVE)
+                  </span>
+                ) : (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      user.status === "active"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    <CheckCircle2 size={13} />
+                    {user.status || "active"}
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="mt-5 space-y-3 border-t border-slate-100 pt-5">
-              {isSuperadmin && (
-                <button
-                  type="button"
-                  onClick={openEditModal}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-left transition hover:bg-emerald-100/80"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                      <Pencil size={18} />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-emerald-800">
-                        Edit Profile
+              {isDeleted ? (
+                currentUser?.role === "superadmin" ? (
+                  <button
+                    type="button"
+                    onClick={() => setRestoreModalOpen(true)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                        <RotateCcw size={18} />
                       </span>
-                      <span className="block text-xs text-emerald-700/80">
-                        Update name, phone, business, GSTIN and contact details.
-                      </span>
-                    </span>
-                  </span>
-                </button>
-              )}
-
-              {user.status === "active" ? (
-                <button
-                  type="button"
-                  onClick={toggleAccountStatus}
-                  disabled={statusLoading}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
-                      <UserRound size={18} />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-red-700">
-                        {statusLoading ? "Deactivating..." : "Deactivate Account"}
-                      </span>
-                      <span className="block text-xs text-red-600/80">
-                        Disable this user's access without deleting their data.
+                      <span>
+                        <span className="block text-sm font-semibold text-emerald-800">
+                          Restore Account
+                        </span>
+                        <span className="block text-xs text-emerald-700/80">
+                          Reactivate account access and restore staff.
+                        </span>
                       </span>
                     </span>
-                  </span>
-                </button>
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500 text-center">
+                    This account is archived. Contact Superadmin to restore.
+                  </div>
+                )
               ) : (
-                <button
-                  type="button"
-                  onClick={toggleAccountStatus}
-                  disabled={statusLoading}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                      <UserRound size={18} />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-emerald-700">
-                        {statusLoading ? "Reactivating..." : "Reactivate Account"}
+                <>
+                  {isSuperadmin && (
+                    <button
+                      type="button"
+                      onClick={openEditModal}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-left transition hover:bg-emerald-100/80"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                          <Pencil size={18} />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold text-emerald-800">
+                            Edit Profile
+                          </span>
+                          <span className="block text-xs text-emerald-700/80">
+                            Update name, phone, business, GSTIN and contact details.
+                          </span>
+                        </span>
                       </span>
-                      <span className="block text-xs text-emerald-600/80">
-                        Restore this user's access.
-                      </span>
-                    </span>
-                  </span>
-                </button>
-              )}
+                    </button>
+                  )}
 
-              {currentUser?.role === "superadmin" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGrantError("");
-                    setGrantSuccess("");
-                    setGrantModalOpen(true);
-                  }}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-left transition hover:bg-purple-100"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-                      <Sparkles size={18} />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-purple-900">
-                        Grant Complimentary Subscription
+                  {user.status === "active" ? (
+                    <button
+                      type="button"
+                      onClick={toggleAccountStatus}
+                      disabled={statusLoading}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                          <UserRound size={18} />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold text-red-700">
+                            {statusLoading ? "Deactivating..." : "Deactivate Account"}
+                          </span>
+                          <span className="block text-xs text-red-600/80">
+                            Disable this user's access without deleting their data.
+                          </span>
+                        </span>
                       </span>
-                      <span className="block text-xs text-purple-700/80">
-                        Provide a free subscription term to this user without payment.
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={toggleAccountStatus}
+                      disabled={statusLoading}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                          <UserRound size={18} />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold text-emerald-700">
+                            {statusLoading ? "Reactivating..." : "Reactivate Account"}
+                          </span>
+                          <span className="block text-xs text-emerald-600/80">
+                            Restore this user's access.
+                          </span>
+                        </span>
                       </span>
-                    </span>
-                  </span>
-                  <ChevronRight size={16} className="text-purple-400" />
-                </button>
-              )}
+                    </button>
+                  )}
 
-              <button
-                type="button"
-                onClick={() => setDeleteModalOpen(true)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-left transition hover:bg-red-50 hover:border-red-300"
-              >
-                <span className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
-                    <Trash2 size={18} />
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-red-700">
-                      Delete User Account
+                  {currentUser?.role === "superadmin" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGrantError("");
+                        setGrantSuccess("");
+                        setGrantModalOpen(true);
+                      }}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-left transition hover:bg-purple-100"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                          <Sparkles size={18} />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold text-purple-900">
+                            Grant Complimentary Subscription
+                          </span>
+                          <span className="block text-xs text-purple-700/80">
+                            Provide a free subscription term to this user without payment.
+                          </span>
+                        </span>
+                      </span>
+                      <ChevronRight size={16} className="text-purple-400" />
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-left transition hover:bg-red-50 hover:border-red-300"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                        <Trash2 size={18} />
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold text-red-700">
+                          Delete User Account
+                        </span>
+                        <span className="block text-xs text-slate-500">
+                          Safely soft delete and archive this user account.
+                        </span>
+                      </span>
                     </span>
-                    <span className="block text-xs text-slate-500">
-                      Permanently delete empty user or safely deactivate if records exist.
-                    </span>
-                  </span>
-                </span>
-              </button>
+                  </button>
+                </>
+              )}
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
@@ -3962,6 +4045,17 @@ const MyUserDetails = () => {
         onSuccess={(res) => {
           alert(res.message || "User account updated successfully.");
           navigate("/my-users");
+        }}
+      />
+
+      {/* Restore User Modal */}
+      <RestoreUserModal
+        isOpen={restoreModalOpen}
+        user={user}
+        onClose={() => setRestoreModalOpen(false)}
+        onSuccess={(res) => {
+          alert(res.message || "User account restored successfully.");
+          loadUser();
         }}
       />
 
