@@ -326,3 +326,20 @@ html.dark {
 .dark .hover\:bg-emerald-700:hover {
   background-color: #047857 !important;
 }
+
+/* ==========================================================================
+   Global Dashboard Layout & Desktop Sidebar Alignment
+   Prevents nested page content from double-padding or overflowing
+   when DashboardLayout provides the global lg:pl-64 desktop offset.
+   ========================================================================== */
+.dashboard-layout-content .lg\:pl-64,
+.dashboard-layout-content .lg\:pl-72,
+.dashboard-layout-content .lg\:ml-64 {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Ensure child main containers fit available width and avoid horizontal overflow */
+.dashboard-layout-content main {
+  max-width: 100%;
+}

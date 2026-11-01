@@ -169,7 +169,7 @@ export default function Sales() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-slate-50">
       {/* PAGE HEADER */}
       <PageHeader
         title="Sales Management"
@@ -188,7 +188,8 @@ export default function Sales() {
         }
       />
 
-      {/* METRIC CARDS */}
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* METRIC CARDS */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Sales */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -540,6 +541,7 @@ export default function Sales() {
           </div>
         </div>
       )}
+      </div>
 
       {/* ADD SALE MODAL */}
       <AddSaleModal
