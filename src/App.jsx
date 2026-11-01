@@ -43,6 +43,7 @@ import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import CustomerDetails from "./pages/CustomerDetails";
 import Khata from "./pages/Khata";
+import Sales from "./pages/Sales";
 import Payments from "./pages/Payments";
 import Invoices from "./pages/Invoices";
 import Quotations from "./pages/Quotations";
@@ -357,6 +358,17 @@ function App() {
               <ProtectedRoute requiredModule="khata">
                 <DashboardLayout>
                   <Khata />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/sales"
+            element={
+              <ProtectedRoute requiredModule="sales">
+                <DashboardLayout>
+                  <Sales />
                 </DashboardLayout>
               </ProtectedRoute>
             }
