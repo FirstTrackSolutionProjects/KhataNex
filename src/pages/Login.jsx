@@ -8,13 +8,16 @@ import {
   ArrowRight,
   ArrowLeft,
   Home,
+  ShieldCheck,
+  KeyRound,
+  RotateCcw,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getDefaultLandingPath } from "../utils/navigation";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, login2FA } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -25,6 +28,14 @@ const Login = () => {
     password: "",
   });
 
+  const [mfaChallenge, setMfaChallenge] = useState({
+    active: false,
+    mfaToken: "",
+    code: "",
+    recoveryCode: "",
+    useRecovery: false,
+  });
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,19 +43,65 @@ const Login = () => {
     });
   };
 
+  const handleMfaChange = (e) => {
+    setMfaChallenge((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      const user = await login(formData.email, formData.password);
-      const target = getDefaultLandingPath(user);
+      const result = await login(formData.email, formData.password);
+      if (result?.mfa_required) {
+        setMfaChallenge({
+          active: true,
+          mfaToken: result.mfa_token,
+          code: "",
+          recoveryCode: "",
+          useRecovery: false,
+        });
+        return;
+      }
+      const target = getDefaultLandingPath(result);
       navigate(target, { replace: true });
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handle2FASubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const user = await login2FA(mfaChallenge.mfaToken, {
+        code: mfaChallenge.useRecovery ? undefined : mfaChallenge.code,
+        recovery_code: mfaChallenge.useRecovery ? mfaChallenge.recoveryCode : undefined,
+      });
+      const target = getDefaultLandingPath(user);
+      navigate(target, { replace: true });
+    } catch (err) {
+      setError(err.message || "Invalid verification code.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelMfa = () => {
+    setMfaChallenge({
+      active: false,
+      mfaToken: "",
+      code: "",
+      recoveryCode: "",
+      useRecovery: false,
+    });
+    setError("");
   };
 
   return (
@@ -85,95 +142,212 @@ const Login = () => {
             </Link>
           </div>
 
-          <div className="mb-8 text-center lg:text-left">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white lg:hidden">
-              K
-            </div>
-            <h2 className="text-3xl font-bold text-slate-900">
-              Login
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Sign in to manage your business.
-            </p>
-          </div>
-
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-          >
-            {error && (
-              <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {error}
+          {mfaChallenge.active ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="mb-6 flex flex-col items-center text-center">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                  <ShieldCheck size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Two-Step Verification
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  {mfaChallenge.useRecovery
+                    ? "Enter one of your emergency backup recovery codes."
+                    : "Enter the 6-digit verification code from your authenticator app (Google Authenticator or Microsoft Authenticator)."}
+                </p>
               </div>
-            )}
 
-            {/* Email */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
-            </div>
+              {error && (
+                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
 
-            {/* Password */}
-            <div className="mt-5">
-              <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700">
-                  Password
-                </label>
+              <form onSubmit={handle2FASubmit} className="space-y-4">
+                {!mfaChallenge.useRecovery ? (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      6-Digit Security Code
+                    </label>
+                    <div className="relative">
+                      <KeyRound
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <input
+                        type="text"
+                        name="code"
+                        autoFocus
+                        autoComplete="one-time-code"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={mfaChallenge.code}
+                        onChange={handleMfaChange}
+                        placeholder="123456"
+                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-center font-mono text-lg font-bold tracking-widest outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Emergency Backup Recovery Code
+                    </label>
+                    <div className="relative">
+                      <KeyRound
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <input
+                        type="text"
+                        name="recoveryCode"
+                        autoFocus
+                        autoComplete="off"
+                        value={mfaChallenge.recoveryCode}
+                        onChange={handleMfaChange}
+                        placeholder="e.g. A1B2-C3D4"
+                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 font-mono text-sm uppercase tracking-wider outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Each backup recovery code is single-use and will be permanently consumed upon entry.
+                    </p>
+                  </div>
+                )}
+
                 <button
-                  type="button"
-                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                  type="submit"
+                  disabled={submitting || (!mfaChallenge.useRecovery && mfaChallenge.code.length < 6) || (mfaChallenge.useRecovery && !mfaChallenge.recoveryCode.trim())}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                 >
-                  Forgot Password?
+                  {submitting ? "Verifying..." : "Verify & Continue"}
+                  <ArrowRight size={17} />
                 </button>
-              </div>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
-            >
-              {submitting ? "Logging in..." : "Login"}
-              <ArrowRight size={17} />
-            </button>
-          </form>
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMfaChallenge((prev) => ({
+                        ...prev,
+                        useRecovery: !prev.useRecovery,
+                        code: "",
+                        recoveryCode: "",
+                      }));
+                      setError("");
+                    }}
+                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
+                    {mfaChallenge.useRecovery
+                      ? "← Use authenticator app code instead"
+                      : "Lost access? Use a backup recovery code →"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCancelMfa}
+                    className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800"
+                  >
+                    <RotateCcw size={13} />
+                    Back to email & password
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <>
+              <div className="mb-8 text-center lg:text-left">
+                <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white lg:hidden">
+                  K
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900">
+                  Login
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Sign in to manage your business.
+                </p>
+              </div>
+
+              <form
+                onSubmit={handleSubmit}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+              >
+                {error && (
+                  <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
+                {/* Email */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="text-sm font-medium text-slate-700">
+                      Password
+                    </label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {submitting ? "Logging in..." : "Login"}
+                  <ArrowRight size={17} />
+                </button>
+              </form>
+            </>
+          )}
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Don't have an account?{" "}

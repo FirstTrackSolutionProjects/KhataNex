@@ -17,6 +17,7 @@ import {
 
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
+import TwoFactorSettings from "../components/TwoFactorSettings";
 import { useAuth } from "../context/AuthContext";
 import { api, secureFileObjectUrl } from "../lib/api";
 
@@ -897,6 +898,11 @@ const Profile = () => {
                 </div>
               )}
             </form>
+
+            {/* Two-Step Verification Section */}
+            <div className="pt-2">
+              <TwoFactorSettings />
+            </div>
           </div>
         </main>
       </div>
