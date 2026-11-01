@@ -6,6 +6,7 @@ export const MODULE_ROUTES = [
   { module: "dashboard", path: "/dashboard", label: "Dashboard" },
   { module: "customers", path: "/customers", label: "Customers" },
   { module: "khata", path: "/khata", label: "Khata" },
+  { module: "sales", path: "/sales", label: "Sales" },
   { module: "invoices", path: "/invoices", label: "Invoices" },
   { module: "quotations", path: "/quotations", label: "Quotations" },
   { module: "receipts", path: "/money-receipts", label: "Money Receipts" },
@@ -61,6 +62,13 @@ export function hasModuleAccess(user, requiredModule) {
     if (
       requiredModule === "purchases" &&
       (assigned.includes("purchases") || assigned.includes("inventory") || assigned.includes("stock"))
+    ) {
+      return true;
+    }
+
+    if (
+      requiredModule === "sales" &&
+      (assigned.includes("sales") || assigned.includes("khata") || assigned.includes("invoices"))
     ) {
       return true;
     }

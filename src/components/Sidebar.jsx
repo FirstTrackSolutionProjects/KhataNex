@@ -19,6 +19,7 @@ import {
   Sparkles,
   Briefcase,
   HelpCircle,
+  BadgePercent,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { hasModuleAccess } from "../utils/navigation";
@@ -46,6 +47,7 @@ const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
     // Operational business modules
     ...(canAccessModule("customers") ? [{ name: "Customers", path: "/customers", icon: Users }] : []),
     ...(canAccessModule("khata") ? [{ name: "Khata", path: "/khata", icon: BookOpen }] : []),
+    ...(canAccessModule("sales") ? [{ name: "Sales", path: "/sales", icon: BadgePercent }] : []),
     ...(canAccessModule("payments") ? [{ name: "Payments", path: "/payments", icon: CreditCard }] : []),
     ...(canAccessModule("invoices") ? [{ name: "Invoices", path: "/invoices", icon: FileText }] : []),
     ...(canAccessModule("quotations") ? [{ name: "Quotations", path: "/quotations", icon: FileText }] : []),
