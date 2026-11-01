@@ -16,6 +16,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Button from "../components/Button";
 import PageHeader from "../components/PageHeader";
+import TwoFactorSettings from "../components/TwoFactorSettings";
 import { useTheme } from "../context/ThemeContext";
 import api from "../lib/api";
 import { useSubscriptionAccess, subscriptionRequiredMessage } from "../hooks/useSubscriptionAccess";
@@ -315,28 +316,31 @@ const Settings = () => {
               </div>
             </div>
 
-            {/* Security */}
+            {/* Two-Step Verification (2FA) */}
+            <TwoFactorSettings />
+
+            {/* Password & Security */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
                   <Shield size={20} />
                 </div>
                 <div>
-                  <h2 className="font-bold">Security</h2>
+                  <h2 className="font-bold">Password & Authentication</h2>
                   <p className="text-xs text-slate-400">
-                    Protect your KHATANEX account
+                    Manage your account password and security credentials
                   </p>
                 </div>
               </div>
 
               <div className="mt-5">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                <a
+                  href="/forgot-password"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
                 >
                   <Lock size={16} />
-                  Change Password
-                </button>
+                  Change / Reset Password
+                </a>
               </div>
             </div>
 
