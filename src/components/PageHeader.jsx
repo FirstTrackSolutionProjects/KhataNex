@@ -3,6 +3,9 @@ import { Menu, Home, Search, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProfileDropdown from "./ProfileDropdown";
 import Button from "./Button";
+import { useAuth } from "../context/AuthContext";
+import { useSidebar } from "../context/SidebarContext";
+import { getDefaultLandingPath } from "../utils/navigation";
 import { useSubscriptionAccess } from "../hooks/useSubscriptionAccess";
 
 const PageHeader = ({
@@ -22,7 +25,11 @@ const PageHeader = ({
   children,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { openSidebar, isLayoutMounted } = useSidebar();
   const { openSubscriptionPrompt } = useSubscriptionAccess();
+  const homePath = getDefaultLandingPath(user);
+  const handleMenuClick = onMenuClick || openSidebar;
 
   const handleSearch = () => {
     if (onSearchClick) {
@@ -42,10 +49,11 @@ const PageHeader = ({
     <>
       <header className="flex min-h-16 items-center justify-between border-b border-slate-200 bg-white px-4 py-2 sm:h-16 sm:py-0 sm:px-6">
       <div className="flex items-center gap-3 min-w-0 py-1">
-        {onMenuClick && (
+        {/* Suppress duplicate hamburger when MobileHeader is already provided by DashboardLayout */}
+        {!isLayoutMounted && onMenuClick && (
           <button
             type="button"
-            onClick={onMenuClick}
+            onClick={handleMenuClick}
             className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden"
             aria-label="Open menu"
           >
@@ -69,10 +77,10 @@ const PageHeader = ({
         {showHome && (
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate(homePath)}
             className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
             aria-label="Home"
-            title="Home"
+            title="Dashboard Home"
           >
             <Home size={19} />
           </button>

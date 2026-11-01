@@ -22,11 +22,28 @@ import {
   BadgePercent,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useSidebar } from "../context/SidebarContext";
 import { hasModuleAccess } from "../utils/navigation";
 
-const Sidebar = ({ isOpen = false, open, onClose, onCancel }) => {
-  const isSidebarOpen = open !== undefined ? Boolean(open) : Boolean(isOpen);
-  const handleClose = onClose || onCancel;
+const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
+  const sidebarContext = useSidebar();
+  const contextIsOpen = sidebarContext?.isOpen ?? false;
+  const contextCloseSidebar = sidebarContext?.closeSidebar;
+  const isLayoutMounted = sidebarContext?.isLayoutMounted ?? false;
+
+  // Suppress duplicate sidebar rendering when already mounted by the root DashboardLayout
+  if (!isRootLayout && isLayoutMounted) {
+    return null;
+  }
+
+  const isSidebarOpen =
+    open !== undefined
+      ? Boolean(open)
+      : isOpen !== undefined
+      ? Boolean(isOpen)
+      : contextIsOpen;
+
+  const handleClose = onClose || onCancel || contextCloseSidebar;
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isSuperadmin = user?.role === "superadmin";

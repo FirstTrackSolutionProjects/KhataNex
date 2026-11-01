@@ -10,9 +10,11 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
 import Sidebar from "./components/Sidebar";
+import DashboardLayout from "./components/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SubscriptionPromptModal from "./components/SubscriptionPromptModal";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { SidebarProvider } from "./context/SidebarContext";
 import { ThemeProvider } from "./context/ThemeContext";
 // =====================================
 // Public Pages
@@ -92,24 +94,6 @@ const RoleDashboard = () => {
   return <Reports isDashboardView={true} />;
 };
 
-// =====================================
-// Dashboard Layout (NO Navbar - pages have their own header)
-// =====================================
-const DashboardLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
-      <Sidebar />
-      <main>
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
-      </main>
-      <BottomNav />
-    </div>
-  );
-};
-
-// =====================================
 // Public Layout (includes Navbar for public pages)
 // =====================================
 const PublicLayout = ({ children }) => {
@@ -160,8 +144,9 @@ function App() {
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
-            <ScrollToTop />
-            <Routes>
+            <SidebarProvider>
+              <ScrollToTop />
+              <Routes>
 
           {/* =====================================
               PUBLIC WEBSITE (has Navbar)
@@ -581,7 +566,8 @@ function App() {
 
         </Routes>
         <GlobalSubscriptionModal />
-        </AuthProvider>
+            </SidebarProvider>
+          </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
     </ErrorBoundary>

@@ -26,7 +26,7 @@ const BottomNav = () => {
   const defaultLanding = getDefaultLandingPath(user);
 
   const navItems = [
-    { name: "Home", path: "/", icon: Home },
+    { name: "Home", path: defaultLanding, icon: Home },
     {
       name: "Dash",
       path: isSuperadmin ? "/dashboard" : defaultLanding,
