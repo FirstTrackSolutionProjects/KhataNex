@@ -267,32 +267,51 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
     paymentStatusBadge = { text: "Unpaid / Credit", color: "bg-red-100 text-red-800 border-red-200" };
   }
 
+  const showError = (msg) => {
+    setError(msg);
+    if (typeof document !== "undefined") {
+      const modalBody = document.querySelector(".overflow-y-auto");
+      if (modalBody) {
+        modalBody.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setError(null);
 
     if (customerMode === "existing" && !customerId) {
-      setError("Please select an existing customer or switch to manual/walk-in entry.");
+      showError("Please select an existing customer or switch to manual/walk-in entry.");
       return;
     }
 
-    const finalCustomerName = customerName.trim() || "Walk-in Customer";
+    const finalCustomerName = customerName.trim() || (customerMode === "manual" ? "Walk-in Customer" : "");
+    if (!finalCustomerName) {
+      showError("Please enter a customer or buyer name.");
+      return;
+    }
 
     // Validate items
-    if (items.length === 0) {
-      setError("Please add at least one line item.");
+    if (!items || items.length === 0) {
+      showError("Please add at least one line item.");
       return;
     }
 
     for (let i = 0; i < items.length; i++) {
       const it = items[i];
-      if (!it.product_name.trim()) {
-        setError(`Item #${i + 1} must have a valid product or service name.`);
+      if (!it.product_name || !it.product_name.trim()) {
+        showError(`Item #${i + 1} must have a valid product or service name.`);
         return;
       }
       const qty = Number(it.quantity);
-      if (qty <= 0 || Number.isNaN(qty)) {
-        setError(`Item #${i + 1} ("${it.product_name}") has an invalid quantity.`);
+      if (it.quantity === "" || Number.isNaN(qty) || qty <= 0) {
+        showError(`Item #${i + 1} ("${it.product_name.trim()}") has an invalid quantity.`);
+        return;
+      }
+      const rate = Number(it.unit_price);
+      if (it.unit_price === "" || it.unit_price === null || Number.isNaN(rate) || rate < 0) {
+        showError(`Item #${i + 1} ("${it.product_name.trim()}") must have a valid price / rate.`);
         return;
       }
       if (
@@ -300,8 +319,8 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
         it.available_stock !== null &&
         qty > it.available_stock
       ) {
-        setError(
-          `Insufficient stock for "${it.product_name}". Requested: ${qty}, Available: ${it.available_stock}`
+        showError(
+          `Insufficient stock for "${it.product_name.trim()}". Requested: ${qty}, Available: ${it.available_stock}`
         );
         return;
       }
@@ -346,7 +365,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || "Failed to record sale.");
+      showError(err?.response?.data?.message || err.message || "Failed to record sale.");
     } finally {
       setSubmitting(false);
     }
@@ -354,7 +373,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Record Sale" maxWidth="max-w-4xl">
-      <form onSubmit={handleSubmit} className="space-y-6 text-slate-800">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6 text-slate-800">
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
@@ -411,6 +430,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   Select Existing Customer *
                 </label>
                 <select
+                  id="sale-customer-select"
                   value={customerId}
                   onChange={(e) => handleSelectCustomer(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -453,7 +473,6 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                 </label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Walk-in Customer or Rajesh Kumar"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
@@ -553,6 +572,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         Select from Stock
                       </label>
                       <select
+                        id={`sale-stock-select-${idx}`}
                         value={item.product_id || ""}
                         onChange={(e) => handleSelectStockItem(idx, e.target.value)}
                         className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white"
@@ -573,7 +593,6 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                       </label>
                       <input
                         type="text"
-                        required
                         placeholder="e.g. Copper Wire, Consulting"
                         value={item.product_name}
                         onChange={(e) => handleItemFieldChange(idx, "product_name", e.target.value)}
@@ -618,7 +637,6 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         type="number"
                         min="0.01"
                         step="any"
-                        required
                         value={item.quantity}
                         onChange={(e) => handleItemFieldChange(idx, "quantity", e.target.value)}
                         className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
@@ -648,7 +666,6 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         type="number"
                         min="0"
                         step="any"
-                        required
                         placeholder="0.00"
                         value={item.unit_price}
                         onChange={(e) => handleItemFieldChange(idx, "unit_price", e.target.value)}
@@ -903,6 +920,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
           <button
             type="submit"
             disabled={submitting}
+            onClick={handleSubmit}
             className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
           >
             {submitting ? "Recording..." : createInvoice ? "Record & Issue Invoice" : "Record Sale"}

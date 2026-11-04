@@ -162,9 +162,17 @@ export default function Sales() {
   const handleDownloadInvoice = async (pdfPath, invNum) => {
     if (!pdfPath) return;
     try {
-      await fetchSecureFile(pdfPath, `${invNum || "Tax-Invoice"}.pdf`);
+      const blob = await fetchSecureFile(pdfPath);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invNum || "Tax-Invoice"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      alert("Could not download invoice: " + (err.message || "File unavailable"));
+      console.warn("Could not auto-download invoice:", err.message);
     }
   };
 
@@ -222,6 +230,8 @@ export default function Sales() {
         title="Sales Management"
         subtitle="Record business sales, manage customer transactions, and seamlessly issue official GST tax invoices"
         icon={BadgePercent}
+        onNew={() => setIsAddModalOpen(true)}
+        newLabel="Record Sale"
         actions={
           <div className="flex items-center gap-3">
             <button

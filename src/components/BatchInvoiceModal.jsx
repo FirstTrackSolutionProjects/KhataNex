@@ -46,7 +46,7 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Generate Tax Invoice from Sales" maxWidth="max-w-xl">
-      <form onSubmit={handleSubmit} className="space-y-5 text-slate-800">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5 text-slate-800">
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
@@ -131,6 +131,7 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
           <button
             type="submit"
             disabled={submitting}
+            onClick={handleSubmit}
             className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
           >
             {submitting ? "Generating..." : "Generate Official Invoice"}

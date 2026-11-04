@@ -22,6 +22,7 @@ const PageHeader = ({
   newDisabled = false,
   newTooltip,
   onDisabledNew,
+  actions,
   children,
 }) => {
   const navigate = useNavigate();
@@ -100,6 +101,7 @@ const PageHeader = ({
 
         {showProfile && <ProfileDropdown />}
 
+        {actions}
         {children}
 
         {onNew && (
