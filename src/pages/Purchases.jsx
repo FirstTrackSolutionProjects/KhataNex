@@ -82,6 +82,7 @@ const Purchases = () => {
         quantity: 1,
         unit: "Unit",
         price: 0,
+        selling_price: 0,
         discount: 0,
         gst_rate: "18",
         hsn_code: "",
@@ -193,6 +194,7 @@ const Purchases = () => {
               quantity: Number(it.quantity || 1),
               unit: it.unit || "Unit",
               price: Number(it.price || it.rate || 0),
+              selling_price: Number(it.selling_price || it.price || it.rate || 0),
               discount: Number(it.discount || 0),
               gst_rate: String(it.gst_rate ?? "18"),
               hsn_code: it.hsn_code || "",
@@ -224,6 +226,7 @@ const Purchases = () => {
           quantity: 1,
           unit: "Unit",
           price: 0,
+          selling_price: 0,
           discount: 0,
           gst_rate: "18",
           hsn_code: "",
@@ -289,12 +292,14 @@ const Purchases = () => {
         total_amount: calculatedTotals.grandTotal,
         gst_amount: calculatedTotals.totalTax,
         notes: form.notes || "",
+        update_inventory: Boolean(form.update_inventory),
         items: validItems.map((it) => ({
           item_name: it.item_name.trim(),
           item_type: it.item_type || "goods",
           quantity: Number(it.quantity || 1),
           unit: it.unit || "Unit",
           price: Number(it.price || 0),
+          selling_price: Number(it.selling_price || it.price || 0),
           discount: Number(it.discount || 0),
           gst_rate: Number(it.gst_rate || 0),
           hsn_code: it.hsn_code || "",
@@ -305,37 +310,6 @@ const Purchases = () => {
         await api.put(`/api/purchase-bills/${editingId}`, payload);
       } else {
         await api.post("/api/purchase-bills", payload);
-
-        // Auto-update or create inventory stock if checked
-        if (form.update_inventory) {
-          for (const it of validItems) {
-            const name = it.item_name.trim();
-            const existing = stock.find(
-              (p) => (p.product_name || p.name || "").trim().toLowerCase() === name.toLowerCase()
-            );
-            if (existing) {
-              try {
-                await api.patch(`/api/stock/${existing.id}`, {
-                  quantity: Number(existing.quantity || 0) + Number(it.quantity || 0),
-                });
-              } catch (_) {}
-            } else if (it.item_type !== "service") {
-              try {
-                await api.post("/api/stock", {
-                  product_name: name,
-                  item_type: it.item_type || "goods",
-                  type: it.item_type || "goods",
-                  unit: it.unit || "Unit",
-                  hsn_code: it.hsn_code || "",
-                  gst_rate: String(it.gst_rate || 0),
-                  quantity: Number(it.quantity || 0),
-                  price: Number(it.price || 0),
-                  category: "Purchases",
-                });
-              } catch (_) {}
-            }
-          }
-        }
       }
 
       setShowModal(false);
@@ -728,7 +702,7 @@ const Purchases = () => {
                         <div key={idx} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
                           <div className="grid grid-cols-12 gap-2.5 items-end">
                             {/* Item Name */}
-                            <div className="col-span-12 sm:col-span-4">
+                            <div className="col-span-12 sm:col-span-3">
                               <label className="mb-1 block text-[11px] font-medium text-slate-600">Item Name *</label>
                               <input
                                 type="text"
@@ -741,7 +715,7 @@ const Purchases = () => {
                             </div>
 
                             {/* Quantity */}
-                            <div className="col-span-4 sm:col-span-2">
+                            <div className="col-span-6 sm:col-span-1">
                               <label className="mb-1 block text-[11px] font-medium text-slate-600">Qty</label>
                               <input
                                 type="number"
@@ -754,8 +728,8 @@ const Purchases = () => {
                             </div>
 
                             {/* Purchase Price */}
-                            <div className="col-span-4 sm:col-span-2">
-                              <label className="mb-1 block text-[11px] font-medium text-slate-600">Rate (₹)</label>
+                            <div className="col-span-6 sm:col-span-2">
+                              <label className="mb-1 block text-[11px] font-medium text-slate-600">Buy Rate (₹)</label>
                               <input
                                 type="number"
                                 min="0"
@@ -766,8 +740,24 @@ const Purchases = () => {
                               />
                             </div>
 
+                            {/* Selling Price */}
+                            <div className="col-span-6 sm:col-span-2">
+                              <label className="mb-1 block text-[11px] font-semibold text-emerald-700">
+                                Sell Price (₹)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="any"
+                                placeholder={it.price ? String(it.price) : "0.00"}
+                                value={it.selling_price || ""}
+                                onChange={(e) => updateItemField(idx, "selling_price", e.target.value)}
+                                className="w-full rounded-lg border border-emerald-300 bg-emerald-50/40 px-2 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-emerald-500"
+                              />
+                            </div>
+
                             {/* GST Rate */}
-                            <div className="col-span-4 sm:col-span-2">
+                            <div className="col-span-6 sm:col-span-2">
                               <label className="mb-1 block text-[11px] font-medium text-slate-600">GST %</label>
                               <select
                                 value={it.gst_rate}
