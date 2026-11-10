@@ -488,13 +488,13 @@ const Footer = () => {
           {/* Copyright */}
           <p className="text-center text-slate-500 md:text-left">
 
-            © {new Date().getFullYear()}{" "}
-
-            <span className="font-semibold text-slate-400">
-              KHATANEX
+          <span className="block w-full break-words sm:w-auto">
+            © 2026 KhataNex by{" "}
+            <span className="font-semibold text-brand-400">
+              First Track Solution Technologies
             </span>
-
             . All rights reserved.
+          </span>
 
           </p>
 
