@@ -36,6 +36,7 @@ import {
   Crown,
 } from "lucide-react";
 import api, { getToken } from "../lib/api";
+import { getDownloadFilename } from "../utils/downloadFilename";
 import DeleteUserModal from "../components/DeleteUserModal";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
@@ -772,7 +773,7 @@ export default function BillingDashboard() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${invoiceNumber || "Invoice"}.pdf`;
+      a.download = getDownloadFilename(res.headers.get("content-disposition"), `${invoiceNumber || "Invoice"}.pdf`);
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

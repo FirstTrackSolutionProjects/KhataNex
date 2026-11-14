@@ -26,6 +26,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { getToken } from "../lib/api";
+import { getDownloadFilename } from "../utils/downloadFilename";
 import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 import { useAuth } from "../context/AuthContext";
 
@@ -147,7 +148,7 @@ const Payments = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${invoiceNumber || "Subscription_Invoice"}.pdf`;
+      a.download = getDownloadFilename(res.headers.get("content-disposition"), `${invoiceNumber || "Subscription_Invoice"}.pdf`);
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

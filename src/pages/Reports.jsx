@@ -28,6 +28,7 @@ import Sidebar from "../components/Sidebar";
 import Modal from "../components/Modal";
 import PageHeader from "../components/PageHeader";
 import api, { getToken } from "../lib/api";
+import { getDownloadFilename } from "../utils/downloadFilename";
 import { useAuth } from "../context/AuthContext";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
@@ -143,7 +144,7 @@ const Reports = ({ isDashboardView = false }) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${invoiceNumber || "Invoice"}.pdf`;
+      a.download = getDownloadFilename(res.headers.get("content-disposition"), `${invoiceNumber || "Invoice"}.pdf`);
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

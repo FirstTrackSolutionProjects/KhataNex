@@ -21,6 +21,7 @@ import {
 import api, { getToken } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
+import { getDownloadFilename } from "../utils/downloadFilename";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
@@ -353,7 +354,7 @@ export default function Subscription() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${invoiceNumber || "Invoice"}.pdf`;
+      a.download = getDownloadFilename(res.headers.get("content-disposition"), `${invoiceNumber || "Invoice"}.pdf`);
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
