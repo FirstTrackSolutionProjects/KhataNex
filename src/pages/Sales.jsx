@@ -232,17 +232,6 @@ export default function Sales() {
         icon={BadgePercent}
         onNew={() => setIsAddModalOpen(true)}
         newLabel="Record Sale"
-        actions={
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-            >
-              <Plus size={18} />
-              Record Sale
-            </button>
-          </div>
-        }
       />
 
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -413,15 +402,8 @@ export default function Sales() {
               <BadgePercent size={44} className="mx-auto text-slate-300" />
               <h3 className="mt-3 text-base font-semibold text-slate-800">No Sales Found</h3>
               <p className="mt-1 text-xs text-slate-400 max-w-sm mx-auto">
-                Record your first sale to start tracking customer revenue, inventory movements, and generating GST invoices.
+                Record your first sale using the button above to start tracking customer revenue, inventory movements, and generating GST invoices.
               </p>
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
-              >
-                <Plus size={16} />
-                Record Sale
-              </button>
             </div>
           ) : (
             <div className="overflow-x-auto">

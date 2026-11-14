@@ -66,6 +66,9 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
   // Items state (Multi-item list)
   const [items, setItems] = useState([createEmptyItem()]);
 
+  // GST Mode state: 'cgst_sgst' (equal split) | 'igst' (single application)
+  const [gstMode, setGstMode] = useState("cgst_sgst");
+
   // Payment state
   const [paymentMode, setPaymentMode] = useState("cash");
   const [bankId, setBankId] = useState("");
@@ -99,10 +102,24 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
           api.get("/api/banking"),
         ]);
         if (custRes.status === "fulfilled" && custRes.value?.customers) {
-          setCustomers(custRes.value.customers);
+          const rawCusts = Array.isArray(custRes.value.customers) ? custRes.value.customers : [];
+          const seen = new Set();
+          const uniqueCusts = rawCusts.filter((c) => {
+            if (!c?.id || seen.has(c.id)) return false;
+            seen.add(c.id);
+            return true;
+          });
+          setCustomers(uniqueCusts);
         }
         if (stockRes.status === "fulfilled" && stockRes.value?.stock) {
-          setStockItems(stockRes.value.stock);
+          const rawStock = Array.isArray(stockRes.value.stock) ? stockRes.value.stock : [];
+          const seenStock = new Set();
+          const uniqueStock = rawStock.filter((s) => {
+            if (!s?.id || seenStock.has(s.id)) return false;
+            seenStock.add(s.id);
+            return true;
+          });
+          setStockItems(uniqueStock);
         }
         if (bankRes.status === "fulfilled") {
           const banks =
@@ -132,6 +149,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
     setCustomerGstin("");
     setCustomerState("");
     setItems([createEmptyItem()]);
+    setGstMode("cgst_sgst");
     setPaymentMode("cash");
     setBankId("");
     setPaidAmount("");
@@ -148,12 +166,21 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
     setCustomerId(id);
     const match = customers.find((c) => String(c.id) === String(id));
     if (match) {
+      const cState = match.billing_state || match.state || "";
       setCustomerName(match.name || match.business_name || "");
       setCustomerPhone(match.phone || "");
       setCustomerEmail(match.email || "");
       setCustomerAddress(match.address_line1 || match.billing_city || match.address || "");
       setCustomerGstin(match.gstin || "");
-      setCustomerState(match.billing_state || match.state || "");
+      setCustomerState(cState);
+
+      const sellerState = String(user?.state || "").trim().toLowerCase();
+      const buyerState = String(cState).trim().toLowerCase();
+      if (sellerState && buyerState && sellerState !== buyerState) {
+        setGstMode("igst");
+      } else {
+        setGstMode("cgst_sgst");
+      }
     }
   };
 
@@ -357,6 +384,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
         notes: notes.trim() || null,
         create_invoice: createInvoice,
         gst_rate: items[0]?.tax_rate ? Number(items[0].tax_rate) : 18,
+        gst_mode: gstMode,
       };
 
       const res = await api.post("/api/sales", payload);
@@ -436,11 +464,21 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">-- Choose from Customer Directory --</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name || c.business_name} {c.phone ? `(${c.phone})` : ""}
-                    </option>
-                  ))}
+                  {customers.map((c) => {
+                    const name = c.name || c.business_name || "Customer";
+                    const meta = [
+                      c.phone ? `Ph: ${c.phone}` : null,
+                      c.gstin ? `GST: ${c.gstin}` : null,
+                      `#${c.id}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" • ");
+                    return (
+                      <option key={c.id} value={c.id}>
+                        {name} ({meta})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -578,11 +616,16 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white"
                       >
                         <option value="">-- Choose Stock Item or Type Below --</option>
-                        {stockItems.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.product_name} — ₹{s.selling_price || s.price} (Stock: {s.quantity} {s.unit || "pcs"})
-                          </option>
-                        ))}
+                        {stockItems.map((s) => {
+                          const code = s.item_code || s.code || s.sku || `#${s.id}`;
+                          const cat = s.category ? ` • ${s.category}` : "";
+                          const stockQty = s.quantity !== undefined ? s.quantity : 0;
+                          return (
+                            <option key={s.id} value={s.id}>
+                              {s.product_name} [{code}] — ₹{s.selling_price || s.price || 0} (Stock: {stockQty} {s.unit || "pcs"}{cat})
+                            </option>
+                          );
+                        })}
                       </select>
                     </div>
 
@@ -610,8 +653,8 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         onChange={(e) => handleItemFieldChange(idx, "item_type", e.target.value)}
                         className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
                       >
-                        <option value="goods">Goods (Stock tracked)</option>
-                        <option value="service">Service (No stock check)</option>
+                        <option value="goods">Goods</option>
+                        <option value="service">Service</option>
                       </select>
                     </div>
 
@@ -732,37 +775,70 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
             })}
           </div>
 
-          {/* Tax Breakdown & Place of Supply Summary */}
-          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl bg-slate-100/80 p-4 border border-slate-200 text-xs">
-            <div>
-              <span className="font-semibold text-slate-700">Place of Supply:</span>{" "}
-              <span className="text-slate-900 font-bold">{customerState || "Local (Intra-State)"}</span>
-              <span className="ml-2 inline-flex items-center rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                {isInterState ? "Inter-State (IGST)" : "Intra-State (CGST + SGST)"}
-              </span>
+          {/* GST Mode & Tax Breakdown */}
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-100/80 p-4 text-xs space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <span className="font-semibold text-slate-700 block sm:inline">GST Mode:</span>
+                <span className="text-slate-500 text-[11px] sm:ml-2">
+                  {gstMode === "cgst_sgst" ? "CGST + SGST (Equal Split)" : "IGST (Single Application)"}
+                </span>
+              </div>
+
+              {/* 2-Choice Segmented Toggle */}
+              <div className="inline-flex rounded-xl bg-white p-1 border border-slate-200 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setGstMode("cgst_sgst")}
+                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                    gstMode === "cgst_sgst"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  CGST + SGST
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGstMode("igst")}
+                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                    gstMode === "igst"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  IGST
+                </button>
+              </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1 text-slate-600">
+            <div className="border-t border-slate-200/80 pt-3 flex flex-col items-end gap-1.5 text-slate-600">
               <div className="flex gap-4">
                 <span>Taxable Subtotal:</span>
-                <span className="font-semibold text-slate-900">₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <span className="font-semibold text-slate-900">
+                  ₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
-              {isInterState ? (
+              {gstMode === "igst" ? (
                 <div className="flex gap-4">
                   <span>IGST:</span>
-                  <span className="font-semibold text-slate-900">₹{totalTax.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                  <span className="font-semibold text-slate-900">
+                    ₹{totalTax.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
               ) : (
                 <div className="flex gap-4">
-                  <span>CGST + SGST:</span>
+                  <span>CGST (₹{(totalTax / 2).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) + SGST (₹{(totalTax / 2).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}):</span>
                   <span className="font-semibold text-slate-900">
-                    ₹{(totalTax / 2).toLocaleString("en-IN", { minimumFractionDigits: 2 })} + ₹{(totalTax / 2).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    ₹{totalTax.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               )}
               <div className="flex gap-4 text-sm font-bold text-slate-900 border-t border-slate-200 pt-1">
                 <span>Total Sale Value:</span>
-                <span className="text-emerald-700 text-base">₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <span className="text-emerald-700 text-base">
+                  ₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
             </div>
           </div>
@@ -901,8 +977,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
             <div>
               <span className="font-semibold text-slate-900">Generate Official GST Tax Invoice</span>
               <p className="text-xs text-slate-500">
-                Immediately create an official KhataNex PDF invoice (#INV-YYYY-XXXXX) that links with your Invoices page.
-                Single-decrement protected: inventory will only be decremented once.
+                Generate and link an official tax invoice with this sale.
               </p>
             </div>
           </label>

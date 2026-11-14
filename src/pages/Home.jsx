@@ -125,10 +125,16 @@ const Home = () => {
                     <ArrowRight size={18} />
                   </Link>
                   <Link
-                    to="/subscription"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600 shadow-xs"
+                    to="/login"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-600 bg-white px-6 py-3.5 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-50 active:scale-95"
                   >
-                    <span>View Pricing & Plans</span>
+                    <span>Log In</span>
+                  </Link>
+                  <Link
+                    to="/subscription"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-600 shadow-xs"
+                  >
+                    <span>View Pricing</span>
                   </Link>
                 </>
               )}
