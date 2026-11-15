@@ -422,23 +422,22 @@ const Navbar = () => {
             /* =====================================
                LOGGED-OUT DESKTOP BUTTONS
             ====================================== */
-            <div className="flex gap-1 sm:gap-3">
-
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* LOGIN */}
-              {/* <Link
+              <Link
                 to="/login"
-                className="rounded-xl bg-white/20 px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/30"
+                className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-sky-700 shadow-md transition hover:bg-sky-50 hover:shadow-lg active:scale-95"
               >
                 Login
-              </Link> */}
+              </Link>
 
               {/* SIGN UP */}
-              {/* <Link
+              <Link
                 to="/signup"
-                className="rounded-xl bg-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
+                className="hidden sm:inline-flex items-center justify-center rounded-xl bg-white/20 border border-white/30 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/30 active:scale-95"
               >
                 Sign Up
-              </Link> */}
+              </Link>
             </div>
           )}
 
@@ -668,15 +667,15 @@ const Navbar = () => {
                 </Link>
 
                 {/* SIGN UP */}
-                {/* <Link
+                <Link
                   to="/signup"
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="mt-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-emerald-700 text-center transition hover:bg-slate-100"
+                  className="mt-2 block rounded-xl bg-white px-4 py-3 text-sm font-semibold text-sky-700 text-center transition hover:bg-slate-100"
                 >
                   Sign Up
-                </Link> */}
+                </Link>
               </>
             )}
 

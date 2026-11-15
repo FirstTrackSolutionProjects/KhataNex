@@ -51,12 +51,12 @@ export default function MobileHeader() {
 
       {/* Right: Home & Profile Navigation Shortcuts */}
       <div className="flex shrink-0 items-center gap-1.5">
-        {/* Role-Aware Home Shortcut */}
+        {/* Public Landing Home Shortcut */}
         <Link
-          to={homePath}
+          to="/"
           className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-emerald-600 active:scale-95"
-          aria-label="Dashboard Home"
-          title="Dashboard Home"
+          aria-label="Home"
+          title="Home"
         >
           <Home size={20} />
         </Link>

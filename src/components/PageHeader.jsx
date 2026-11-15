@@ -22,6 +22,7 @@ const PageHeader = ({
   newDisabled = false,
   newTooltip,
   onDisabledNew,
+  actions,
   children,
 }) => {
   const navigate = useNavigate();
@@ -77,10 +78,10 @@ const PageHeader = ({
         {showHome && (
           <button
             type="button"
-            onClick={() => navigate(homePath)}
+            onClick={() => navigate("/")}
             className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
             aria-label="Home"
-            title="Dashboard Home"
+            title="Home"
           >
             <Home size={19} />
           </button>
@@ -100,6 +101,7 @@ const PageHeader = ({
 
         {showProfile && <ProfileDropdown />}
 
+        {actions}
         {children}
 
         {onNew && (
