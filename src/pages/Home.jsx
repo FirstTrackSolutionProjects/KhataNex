@@ -87,7 +87,7 @@ const Home = () => {
               <span>Special Launch Offer: Save up to 55% with Introductory Pricing</span>
             </div>
 
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:!text-slate-900 sm:text-5xl lg:text-6xl">
               Manage your business
               <span className="block text-emerald-600">
                 smarter with KHATANEX
