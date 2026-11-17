@@ -30,6 +30,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import FAQ from "./pages/FAQ";
 import DigitalKhata from "./pages/DigitalKhata";
 import CustomerManagement from "./pages/CustomerManagement";
+import Pricing from "./pages/Pricing";
 
 
 // =====================================
@@ -115,7 +116,7 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
       <div className="text-center">
-        <h1 className="text-8xl font-extrabold text-emerald-600">
+        <h1 className="text-8xl font-extrabold text-brand-600">
           404
         </h1>
         <h2 className="mt-4 text-2xl font-bold text-slate-800">
@@ -126,7 +127,7 @@ const NotFound = () => {
         </p>
         <a
           href="/"
-          className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
+          className="mt-6 inline-flex items-center justify-center rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition hover:bg-brand-700"
         >
           Go to Home
         </a>
@@ -196,6 +197,16 @@ function App() {
             element={
               <PublicLayout>
                 <Services />
+              </PublicLayout>
+            }
+          />
+
+          {/* Pricing (public — no login required) */}
+          <Route
+            path="/pricing"
+            element={
+              <PublicLayout>
+                <Pricing />
               </PublicLayout>
             }
           />

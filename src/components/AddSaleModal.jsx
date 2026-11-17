@@ -413,7 +413,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
         <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
                 <User size={18} />
               </div>
               <h3 className="font-semibold text-slate-900">Customer Information</h3>
@@ -461,7 +461,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   id="sale-customer-select"
                   value={customerId}
                   onChange={(e) => handleSelectCustomer(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 >
                   <option value="">-- Choose from Customer Directory --</option>
                   {customers.map((c) => {
@@ -514,7 +514,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   placeholder="e.g. Walk-in Customer or Rajesh Kumar"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <div>
@@ -526,7 +526,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   placeholder="10-digit mobile"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <div>
@@ -538,7 +538,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   placeholder="customer@example.com"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <div>
@@ -550,7 +550,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   placeholder="15-character GSTIN"
                   value={customerGstin}
                   onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <div>
@@ -562,7 +562,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   placeholder="e.g. Odisha"
                   value={customerState}
                   onChange={(e) => setCustomerState(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
             </div>
@@ -573,7 +573,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
         <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
                 <Package size={18} />
               </div>
               <div>
@@ -586,7 +586,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
             <button
               type="button"
               onClick={handleAddItem}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-50 border border-brand-200 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100 transition shadow-xs"
             >
               <Plus size={14} />
               Add Another Item
@@ -613,7 +613,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         id={`sale-stock-select-${idx}`}
                         value={item.product_id || ""}
                         onChange={(e) => handleSelectStockItem(idx, e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white"
                       >
                         <option value="">-- Choose Stock Item or Type Below --</option>
                         {stockItems.map((s) => {
@@ -639,7 +639,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         placeholder="e.g. Copper Wire, Consulting"
                         value={item.product_name}
                         onChange={(e) => handleItemFieldChange(idx, "product_name", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       />
                     </div>
 
@@ -651,7 +651,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                       <select
                         value={item.item_type}
                         onChange={(e) => handleItemFieldChange(idx, "item_type", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       >
                         <option value="goods">Goods</option>
                         <option value="service">Service</option>
@@ -682,7 +682,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         step="any"
                         value={item.quantity}
                         onChange={(e) => handleItemFieldChange(idx, "quantity", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       />
                     </div>
 
@@ -696,7 +696,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         placeholder="pcs, kg"
                         value={item.unit}
                         onChange={(e) => handleItemFieldChange(idx, "unit", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       />
                     </div>
 
@@ -712,7 +712,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         placeholder="0.00"
                         value={item.unit_price}
                         onChange={(e) => handleItemFieldChange(idx, "unit_price", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       />
                     </div>
 
@@ -728,7 +728,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                         placeholder="0.00"
                         value={item.discount}
                         onChange={(e) => handleItemFieldChange(idx, "discount", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       />
                     </div>
 
@@ -740,7 +740,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                       <select
                         value={item.tax_rate}
                         onChange={(e) => handleItemFieldChange(idx, "tax_rate", e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500"
                       >
                         <option value="0">0%</option>
                         <option value="5">5%</option>
@@ -792,7 +792,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   onClick={() => setGstMode("cgst_sgst")}
                   className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
                     gstMode === "cgst_sgst"
-                      ? "bg-emerald-600 text-white shadow-xs"
+                      ? "bg-brand-600 text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
@@ -803,7 +803,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   onClick={() => setGstMode("igst")}
                   className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
                     gstMode === "igst"
-                      ? "bg-emerald-600 text-white shadow-xs"
+                      ? "bg-brand-600 text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
@@ -836,7 +836,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               )}
               <div className="flex gap-4 text-sm font-bold text-slate-900 border-t border-slate-200 pt-1">
                 <span>Total Sale Value:</span>
-                <span className="text-emerald-700 text-base">
+                <span className="text-brand-700 text-base">
                   ₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
@@ -867,7 +867,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               >
                 <option value="cash">Cash in Hand</option>
                 <option value="online">Online / UPI</option>
@@ -886,7 +886,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                 value={bankId}
                 disabled={paymentMode === "cash" || paymentMode === "credit"}
                 onChange={(e) => setBankId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:text-slate-400"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 disabled:text-slate-400"
               >
                 <option value="">-- Choose Account (Optional) --</option>
                 {bankAccounts.map((b) => (
@@ -916,7 +916,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
                   setIsPaidAmountCustom(true);
                   setPaidAmount(e.target.value);
                 }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -933,7 +933,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               type="date"
               value={saleDate}
               onChange={(e) => setSaleDate(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -946,7 +946,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               type="time"
               value={saleTime}
               onChange={(e) => setSaleTime(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -960,7 +960,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               placeholder="e.g. Counter slip, order reference"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
         </div>
@@ -972,7 +972,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
               type="checkbox"
               checked={createInvoice}
               onChange={(e) => setCreateInvoice(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
             <div>
               <span className="font-semibold text-slate-900">Generate Official GST Tax Invoice</span>
@@ -996,7 +996,7 @@ export default function AddSaleModal({ isOpen, onClose, onSuccess }) {
             type="submit"
             disabled={submitting}
             onClick={handleSubmit}
-            className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+            className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-50"
           >
             {submitting ? "Recording..." : createInvoice ? "Record & Issue Invoice" : "Record Sale"}
           </button>

@@ -116,7 +116,7 @@ const DigitalKhata = () => {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                 <BookOpen size={23} />
               </div>
 
@@ -137,12 +137,12 @@ const DigitalKhata = () => {
               onClick={() => setShowModal(true)}
               className="
                 flex items-center justify-center gap-2
-                rounded-xl bg-emerald-600
+                rounded-xl bg-brand-600
                 px-4 py-2.5
                 text-sm font-semibold text-white
                 shadow-sm
                 transition
-                hover:bg-emerald-700
+                hover:bg-brand-700
               "
             >
               <Plus size={18} />
@@ -180,13 +180,13 @@ const DigitalKhata = () => {
                 </h2>
               </div>
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                 <ArrowDownToLine size={22} />
               </div>
 
             </div>
 
-            <p className="mt-3 text-xs text-emerald-600">
+            <p className="mt-3 text-xs text-brand-600">
               Money customers need to pay you
             </p>
 
@@ -287,10 +287,10 @@ const DigitalKhata = () => {
                   text-sm
                   outline-none
                   transition
-                  focus:border-emerald-500
+                  focus:border-brand-500
                   focus:bg-white
                   focus:ring-2
-                  focus:ring-emerald-100
+                  focus:ring-brand-100
                 "
               />
 
@@ -321,7 +321,7 @@ const DigitalKhata = () => {
                   {/* Customer */}
                   <div className="flex items-center gap-3">
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 font-bold text-brand-700">
                       {customer.name.charAt(0)}
                     </div>
 
@@ -368,9 +368,9 @@ const DigitalKhata = () => {
                         text-xs font-semibold
                         text-slate-600
                         transition
-                        hover:border-emerald-200
-                        hover:bg-emerald-50
-                        hover:text-emerald-700
+                        hover:border-brand-200
+                        hover:bg-brand-50
+                        hover:text-brand-700
                       "
                     >
                       View Khata
@@ -461,7 +461,7 @@ const DigitalKhata = () => {
                       transition
                       ${
                         entryType === "credit"
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                          ? "border-brand-500 bg-emerald-50 text-emerald-700"
                           : "border-slate-200 text-slate-500"
                       }
                     `}
@@ -511,9 +511,9 @@ const DigitalKhata = () => {
                     px-4 py-3
                     text-sm
                     outline-none
-                    focus:border-emerald-500
+                    focus:border-brand-500
                     focus:ring-2
-                    focus:ring-emerald-100
+                    focus:ring-brand-100
                   "
                 >
 
@@ -561,9 +561,9 @@ const DigitalKhata = () => {
                       py-3 pl-10 pr-4
                       text-sm
                       outline-none
-                      focus:border-emerald-500
+                      focus:border-brand-500
                       focus:ring-2
-                      focus:ring-emerald-100
+                      focus:ring-brand-100
                     "
                   />
 
@@ -596,9 +596,9 @@ const DigitalKhata = () => {
                       py-3 pl-10 pr-4
                       text-sm
                       outline-none
-                      focus:border-emerald-500
+                      focus:border-brand-500
                       focus:ring-2
-                      focus:ring-emerald-100
+                      focus:ring-brand-100
                     "
                   />
 
@@ -625,9 +625,9 @@ const DigitalKhata = () => {
                     px-4 py-3
                     text-sm
                     outline-none
-                    focus:border-emerald-500
+                    focus:border-brand-500
                     focus:ring-2
-                    focus:ring-emerald-100
+                    focus:ring-brand-100
                   "
                 />
 
@@ -656,11 +656,11 @@ const DigitalKhata = () => {
                   type="submit"
                   className="
                     flex flex-1 items-center justify-center gap-2
-                    rounded-xl bg-emerald-600
+                    rounded-xl bg-brand-600
                     px-4 py-3
                     text-sm font-semibold text-white
                     transition
-                    hover:bg-emerald-700
+                    hover:bg-brand-700
                   "
                 >
                   <CheckCircle size={17} />

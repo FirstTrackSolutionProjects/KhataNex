@@ -274,7 +274,7 @@ const Profile = () => {
 
   const inputClass = `w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none ${
     editing
-      ? "bg-white focus:border-emerald-500"
+      ? "bg-white focus:border-brand-500"
       : "cursor-default bg-slate-50 text-slate-600"
   }`;
 
@@ -405,14 +405,14 @@ const Profile = () => {
                     </p>
                   </div>
 
-                  <span className="text-sm font-bold text-emerald-600">
+                  <span className="text-sm font-bold text-brand-600">
                     {completion}%
                   </span>
                 </div>
 
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-emerald-500 transition-all"
+                    className="h-full rounded-full bg-brand-500 transition-all"
                     style={{ width: `${completion}%` }}
                   />
                 </div>
@@ -421,7 +421,7 @@ const Profile = () => {
 
             {/* Messages */}
             {message && (
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700">
                 <CheckCircle2 size={18} />
                 {message}
               </div>
@@ -857,7 +857,7 @@ const Profile = () => {
                       checked={formData.tcs_enabled}
                       onChange={handleChange}
                       disabled={!editing}
-                      className="h-4 w-4 accent-emerald-600"
+                      className="h-4 w-4 accent-brand-600"
                     />
                   </label>
 
@@ -879,7 +879,7 @@ const Profile = () => {
                       checked={formData.tds_enabled}
                       onChange={handleChange}
                       disabled={!editing}
-                      className="h-4 w-4 accent-emerald-600"
+                      className="h-4 w-4 accent-brand-600"
                     />
                   </label>
                 </div>

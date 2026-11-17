@@ -418,7 +418,7 @@ export default function MyEmployees() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
                   <Briefcase size={22} />
                 </div>
                 <div>
@@ -445,7 +445,7 @@ export default function MyEmployees() {
                 icon={Plus}
                 size="sm"
                 onClick={handleOpenCreate}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2"
+                className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2"
               >
                 Add Employee
               </Button>
@@ -459,7 +459,7 @@ export default function MyEmployees() {
                 <CheckCircle2 size={16} className="text-emerald-600" />
                 <span>{successMessage}</span>
               </div>
-              <button onClick={() => setSuccessMessage("")} className="text-emerald-600 hover:text-emerald-800">
+              <button onClick={() => setSuccessMessage("")} className="text-emerald-600 hover:text-brand-800">
                 <X size={14} />
               </button>
             </div>
@@ -477,7 +477,7 @@ export default function MyEmployees() {
                   setPage(1);
                 }}
                 placeholder="Search by name, email, employee code, or title..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2 text-xs outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2 text-xs outline-none focus:border-brand-600 focus:bg-white transition"
               />
             </div>
 
@@ -489,7 +489,7 @@ export default function MyEmployees() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-600 focus:bg-white transition"
+                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-600 focus:bg-white transition"
               >
                 <option value="all">All Employees</option>
                 <option value="active">Active Only</option>
@@ -542,7 +542,7 @@ export default function MyEmployees() {
                                   className="h-10 w-10 shrink-0 rounded-xl object-cover border border-slate-200 shadow-sm"
                                 />
                               ) : (
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700 font-bold text-sm">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700 font-bold text-sm">
                                   {emp.name ? emp.name.charAt(0).toUpperCase() : "E"}
                                 </div>
                               )}
@@ -550,7 +550,7 @@ export default function MyEmployees() {
                                 <button
                                   type="button"
                                   onClick={() => navigate(`/my-employees/${emp.id}`)}
-                                  className="font-bold text-slate-900 hover:text-purple-700 block text-left transition"
+                                  className="font-bold text-slate-900 hover:text-brand-700 block text-left transition"
                                 >
                                   {emp.name || "Staff Member"}
                                 </button>
@@ -567,7 +567,7 @@ export default function MyEmployees() {
                           <td className="py-3.5 px-4">
                             <span className="font-semibold text-slate-800 block">{emp.employee_title || "Staff Member"}</span>
                             {emp.employee_code && (
-                              <span className="font-mono text-[10px] text-purple-700 bg-purple-50 rounded px-1.5 py-0.5 inline-block mt-0.5 font-bold">
+                              <span className="font-mono text-[10px] text-brand-700 bg-brand-50 rounded px-1.5 py-0.5 inline-block mt-0.5 font-bold">
                                 {emp.employee_code}
                               </span>
                             )}
@@ -576,7 +576,7 @@ export default function MyEmployees() {
                           <td className="py-3.5 px-4">
                             <div className="flex flex-wrap gap-1 max-w-[240px]">
                               {assigned.includes("all") ? (
-                                <span className="rounded-md bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
+                                <span className="rounded-md bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-800">
                                   All Modules
                                 </span>
                               ) : assigned.length > 0 ? (
@@ -614,12 +614,12 @@ export default function MyEmployees() {
                               onClick={() => handleToggleStatus(emp)}
                               className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase transition flex items-center gap-1 ${
                                 emp.status === "active"
-                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                  ? "bg-brand-100 text-brand-800 hover:bg-brand-200"
                                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                               }`}
                               title="Click to toggle status"
                             >
-                              <span className={`h-1.5 w-1.5 rounded-full ${emp.status === "active" ? "bg-emerald-500" : "bg-slate-400"}`} />
+                              <span className={`h-1.5 w-1.5 rounded-full ${emp.status === "active" ? "bg-brand-500" : "bg-slate-400"}`} />
                               {emp.status === "active" ? "Active" : "Inactive"}
                             </button>
                           </td>
@@ -627,8 +627,8 @@ export default function MyEmployees() {
                           <td className="py-3.5 px-4">
                             <span className="block text-[11px] text-slate-700 font-medium">
                               {emp.activity_status === "logged_in" ? (
-                                <span className="text-emerald-600 font-bold flex items-center gap-1">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                                <span className="text-brand-600 font-bold flex items-center gap-1">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-ping" />
                                   Online Now
                                 </span>
                               ) : emp.last_active_at ? (
@@ -647,7 +647,7 @@ export default function MyEmployees() {
                                   e.stopPropagation();
                                   setActiveDropdownId(activeDropdownId === emp.id ? null : emp.id);
                                 }}
-                                className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition"
+                                className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition"
                                 aria-label="Actions"
                                 title="Employee Actions"
                               >
@@ -670,7 +670,7 @@ export default function MyEmployees() {
                                         setActiveDropdownId(null);
                                         navigate(`/my-employees/${emp.id}`);
                                       }}
-                                      className="flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-purple-50 hover:text-purple-700 transition"
+                                      className="flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition"
                                     >
                                       <Eye size={15} />
                                       <span>View Profile</span>
@@ -782,7 +782,7 @@ export default function MyEmployees() {
 
               {/* Personal Information */}
               <div className="space-y-3">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700">1. Account Credentials & Contact</h4>
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700">1. Account Credentials & Contact</h4>
 
                 {/* Optional Profile Photo */}
                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3">
@@ -791,7 +791,7 @@ export default function MyEmployees() {
                   </label>
                   <div className="flex items-center gap-3.5">
                     {photoPreview ? (
-                      <div className="relative group h-14 w-14 rounded-xl overflow-hidden border border-purple-300 shadow-sm shrink-0">
+                      <div className="relative group h-14 w-14 rounded-xl overflow-hidden border border-brand-300 shadow-sm shrink-0">
                         <img src={photoPreview} alt="Preview" className="h-full w-full object-cover" />
                         <button
                           type="button"
@@ -803,13 +803,13 @@ export default function MyEmployees() {
                         </button>
                       </div>
                     ) : (
-                      <div className="h-14 w-14 rounded-xl bg-purple-50 border border-purple-200 flex flex-col items-center justify-center text-purple-400 shrink-0">
+                      <div className="h-14 w-14 rounded-xl bg-brand-50 border border-brand-200 flex flex-col items-center justify-center text-brand-400 shrink-0">
                         <Camera size={20} />
                       </div>
                     )}
                     <div className="space-y-1">
                       <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer shadow-sm transition">
-                        <Camera size={13} className="text-purple-600" />
+                        <Camera size={13} className="text-brand-600" />
                         <span>{photoPreview ? "Change Photo" : "Upload Photo"}</span>
                         <input
                           type="file"
@@ -841,7 +841,7 @@ export default function MyEmployees() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. Rahul Sharma"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                       required
                     />
                   </div>
@@ -853,7 +853,7 @@ export default function MyEmployees() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="e.g. rahul@khatanex.com"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                       required
                       disabled={Boolean(editingEmployee)}
                     />
@@ -870,7 +870,7 @@ export default function MyEmployees() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder={editingEmployee ? "Leave blank to keep" : "Minimum 6 characters"}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 pr-9 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 pr-9 focus:border-brand-600 focus:outline-none"
                       required={!editingEmployee}
                     />
                     <button
@@ -889,7 +889,7 @@ export default function MyEmployees() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="e.g. 9876543210"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -900,7 +900,7 @@ export default function MyEmployees() {
                       value={formData.emergency_contact}
                       onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
                       placeholder="Contact name & number"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -908,7 +908,7 @@ export default function MyEmployees() {
 
               {/* Role & Identification */}
               <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700">2. Role & Identification</h4>
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700">2. Role & Identification</h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
@@ -918,7 +918,7 @@ export default function MyEmployees() {
                       value={formData.employee_code}
                       onChange={(e) => setFormData({ ...formData, employee_code: e.target.value })}
                       placeholder="e.g. EMP-1001"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -929,7 +929,7 @@ export default function MyEmployees() {
                       value={formData.employee_title}
                       onChange={(e) => setFormData({ ...formData, employee_title: e.target.value })}
                       placeholder="e.g. Invoicing Executive"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -939,7 +939,7 @@ export default function MyEmployees() {
                       type="date"
                       value={formData.joining_date}
                       onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -951,7 +951,7 @@ export default function MyEmployees() {
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="Responsibilities, department notes, or onboarding remarks..."
-                    className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none text-xs"
+                    className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none text-xs"
                   />
                 </div>
               </div>
@@ -960,7 +960,7 @@ export default function MyEmployees() {
               <div className="space-y-3 pt-3 border-t border-slate-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+                    <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700 flex items-center gap-1.5">
                       <Shield size={14} />
                       3. Delegated Module Access Matrix
                     </h4>
@@ -973,7 +973,7 @@ export default function MyEmployees() {
                     <button
                       type="button"
                       onClick={handleSelectAllModules}
-                      className="text-[11px] font-bold text-purple-600 hover:text-purple-800"
+                      className="text-[11px] font-bold text-brand-600 hover:text-brand-800"
                     >
                       Select All
                     </button>
@@ -998,7 +998,7 @@ export default function MyEmployees() {
                         key={mod.id}
                         className={`rounded-xl border p-3 transition ${
                           isChecked
-                            ? "bg-purple-50/50 border-purple-200 text-purple-950"
+                            ? "bg-brand-50/50 border-brand-200 text-brand-950"
                             : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                         }`}
                       >
@@ -1010,13 +1010,13 @@ export default function MyEmployees() {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => {}}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 pointer-events-none"
+                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 pointer-events-none"
                           />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-xs">{mod.label}</span>
                               {isChecked && (
-                                <span className="text-[10px] font-semibold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-md">
+                                <span className="text-[10px] font-semibold text-brand-700 bg-brand-100/70 px-2 py-0.5 rounded-md">
                                   Enabled
                                 </span>
                               )}
@@ -1029,8 +1029,8 @@ export default function MyEmployees() {
 
                         {/* Granular Operation Checkboxes when module is checked */}
                         {isChecked && (
-                          <div className="mt-2.5 pt-2.5 border-t border-purple-100/80 pl-6 flex flex-wrap gap-2 sm:gap-3">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 self-center mr-1">
+                          <div className="mt-2.5 pt-2.5 border-t border-brand-100/80 pl-6 flex flex-wrap gap-2 sm:gap-3">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-800 self-center mr-1">
                               Operations:
                             </span>
                             {ops.map((op) => {
@@ -1041,15 +1041,15 @@ export default function MyEmployees() {
                                   key={op}
                                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold cursor-pointer select-none transition ${
                                     opChecked
-                                      ? "bg-white border-purple-300 text-purple-800 shadow-xs"
-                                      : "bg-purple-50/30 border-purple-100 text-slate-400 hover:text-slate-600"
+                                      ? "bg-white border-brand-300 text-brand-800 shadow-xs"
+                                      : "bg-brand-50/30 border-brand-100 text-slate-400 hover:text-slate-600"
                                   }`}
                                 >
                                   <input
                                     type="checkbox"
                                     checked={opChecked}
                                     onChange={() => handleOperationToggle(mod.id, op)}
-                                    className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                                    className="h-3.5 w-3.5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                                   />
                                   <span className="capitalize">{op}</span>
                                 </label>
@@ -1077,7 +1077,7 @@ export default function MyEmployees() {
                 type="submit"
                 form="employee-form"
                 disabled={modalLoading}
-                className="rounded-xl bg-purple-600 px-5 py-2 font-bold text-white hover:bg-purple-700 text-xs shadow-sm transition disabled:opacity-60 flex items-center gap-1.5"
+                className="rounded-xl bg-brand-600 px-5 py-2 font-bold text-white hover:bg-brand-700 text-xs shadow-sm transition disabled:opacity-60 flex items-center gap-1.5"
               >
                 {modalLoading && <RefreshCw size={13} className="animate-spin" />}
                 <span>{editingEmployee ? "Save Changes" : "Create Account"}</span>

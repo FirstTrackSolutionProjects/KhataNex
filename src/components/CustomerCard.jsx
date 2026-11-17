@@ -25,7 +25,7 @@ const CustomerCard = ({
       <div className="flex items-center gap-3">
 
         {/* Avatar */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700">
           <UserRound size={21} />
         </div>
 
@@ -104,7 +104,7 @@ const CustomerCard = ({
 
           <Link
             to={`/customers/${id}`}
-            className="flex items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
+            className="flex items-center gap-1 text-xs font-semibold text-brand-600 transition hover:text-brand-700"
           >
             View Details
             <ArrowRight size={14} />

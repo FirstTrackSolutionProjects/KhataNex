@@ -177,7 +177,7 @@ function ReceiptCustomerPicker({
                 setSelectedCustomer(null);
               }}
               placeholder="Search name, business, phone, email or customer ID..."
-              className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -200,7 +200,7 @@ function ReceiptCustomerPicker({
                     }}
                     className="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50"
                   >
-                    <div className="mt-0.5 rounded-lg bg-indigo-50 p-2 text-indigo-600">
+                    <div className="mt-0.5 rounded-lg bg-brand-50 p-2 text-brand-600">
                       <User size={16} />
                     </div>
 
@@ -220,9 +220,9 @@ function ReceiptCustomerPicker({
           )}
 
           {selectedCustomer && (
-            <div className="flex items-start justify-between gap-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
               <div className="flex min-w-0 items-start gap-3">
-                <div className="rounded-lg bg-indigo-100 p-2 text-indigo-600">
+                <div className="rounded-lg bg-brand-100 p-2 text-brand-600">
                   <User size={17} />
                 </div>
 
@@ -263,7 +263,7 @@ function ReceiptCustomerPicker({
                 updateManualCustomer("name", e.target.value)
               }
               placeholder="Customer name"
-              className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
         </div>
@@ -526,7 +526,7 @@ function InvoiceAllocation({
   }, [receivedAmount, invoices]);
 
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-base font-semibold text-gray-900">
@@ -541,7 +541,7 @@ function InvoiceAllocation({
         <button
           type="button"
           onClick={addAllocation}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-brand-200 px-3 py-2 text-xs font-medium text-brand-700 hover:bg-brand-50"
         >
           <Plus size={15} />
           Add Invoice
@@ -585,7 +585,7 @@ function InvoiceAllocation({
           <button
             type="button"
             onClick={addAllocation}
-            className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+            className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white hover:bg-brand-700"
           >
             Add Invoice
           </button>
@@ -617,7 +617,7 @@ function InvoiceAllocation({
                         e.target.value
                       )
                     }
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   >
                     <option value="">
                       Select invoice
@@ -670,7 +670,7 @@ function InvoiceAllocation({
                       )
                     }
                     placeholder="0.00"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
 
@@ -686,12 +686,12 @@ function InvoiceAllocation({
             );
           })}
 
-          <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50/50 px-4 py-3">
             <span className="text-sm font-medium text-gray-600">
               Allocation Total
             </span>
 
-            <span className="text-base font-semibold text-emerald-700">
+            <span className="text-base font-semibold text-brand-700">
               {money(allocationTotal)}
             </span>
           </div>
@@ -1196,7 +1196,7 @@ function MoneyReceiptForm({
                       onChange={(e) =>
                         setReceiptDate(e.target.value)
                       }
-                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
 
@@ -1212,7 +1212,7 @@ function MoneyReceiptForm({
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
 
@@ -1226,7 +1226,7 @@ function MoneyReceiptForm({
                       onChange={(e) =>
                         setAgainstType(e.target.value)
                       }
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     >
                       <option value="invoice">
                         Invoice
@@ -1253,7 +1253,7 @@ function MoneyReceiptForm({
                       onChange={(e) =>
                         setPaymentMode(e.target.value)
                       }
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     >
                       <option value="cash">Cash</option>
                       <option value="upi">UPI</option>
@@ -1274,7 +1274,7 @@ function MoneyReceiptForm({
                         onChange={(e) =>
                           setTransferType(e.target.value)
                         }
-                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                       >
                         <option value="">None / Standard</option>
                         <option value="RTGS">RTGS</option>
@@ -1297,7 +1297,7 @@ function MoneyReceiptForm({
                         )
                       }
                       placeholder="UPI ID, cheque number, transaction ID..."
-                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
 
@@ -1311,7 +1311,7 @@ function MoneyReceiptForm({
                       onChange={(e) =>
                         setBankAccountId(e.target.value)
                       }
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     >
                       <option value="">
                         Use default / no selected account
@@ -1391,7 +1391,7 @@ function MoneyReceiptForm({
                         setDescription(e.target.value)
                       }
                       placeholder="Payment received for..."
-                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
 
@@ -1407,7 +1407,7 @@ function MoneyReceiptForm({
                         setNotes(e.target.value)
                       }
                       placeholder="Optional notes..."
-                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
                 </div>
@@ -1436,7 +1436,7 @@ function MoneyReceiptForm({
                   type="button"
                   onClick={() => handleSubmit(false)}
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
                 >
                   <Download size={17} />
                   {saving
@@ -1753,7 +1753,7 @@ const MoneyReceipts = () => {
                     setSearch(e.target.value)
                   }
                   placeholder="Search receipt number, customer, amount or payment reference..."
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 />
               </div>
             </div>
@@ -1791,7 +1791,7 @@ const MoneyReceipts = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreate(true)}
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                   >
                     <Plus size={16} />
                     Create Receipt
@@ -1802,7 +1802,7 @@ const MoneyReceipts = () => {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] text-left">
                   <thead>
-                    <tr className="bg-emerald-600 text-white">
+                    <tr className="bg-brand-600 text-white">
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Receipt
                       </th>
@@ -1852,7 +1852,7 @@ const MoneyReceipts = () => {
                         >
                           <td className="whitespace-nowrap px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600">
+                              <div className="rounded-lg bg-brand-50 p-2 text-brand-600">
                                 <FileText size={16} />
                               </div>
 
@@ -1918,7 +1918,7 @@ const MoneyReceipts = () => {
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                                 status === "draft"
                                   ? "bg-slate-100 text-slate-600"
-                                  : "bg-emerald-50 text-emerald-700"
+                                  : "bg-brand-50 text-brand-700"
                               }`}
                             >
                               {status === "draft" ? "Draft" : "Issued"}
@@ -1932,7 +1932,7 @@ const MoneyReceipts = () => {
                                 type="button"
                                 onClick={() => setViewingReceipt(receipt)}
                                 title="View Receipt"
-                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600 transition"
                               >
                                 <Eye size={14} className="sm:w-4 sm:h-4" />
                                 View
@@ -1947,7 +1947,7 @@ const MoneyReceipts = () => {
                                 className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium transition ${
                                   !canWrite
                                     ? "opacity-40 cursor-not-allowed text-slate-400"
-                                    : "text-slate-700 hover:bg-emerald-50 hover:text-emerald-600"
+                                    : "text-slate-700 hover:bg-brand-50 hover:text-brand-600"
                                 }`}
                               >
                                 <Pencil size={14} className="sm:w-4 sm:h-4" />
@@ -1974,7 +1974,7 @@ const MoneyReceipts = () => {
                               <button
                                 type="button"
                                 onClick={() => downloadReceipt(receipt)}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600 transition"
                               >
                                 <Download size={14} className="sm:w-4 sm:h-4" />
                                 PDF
@@ -2023,7 +2023,7 @@ const MoneyReceipts = () => {
                 {money(viewingReceipt.amount_received ?? viewingReceipt.amount ?? 0)}
               </p>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
                   {viewingReceipt.receipt_number || `Receipt #${viewingReceipt.id}`}
                 </span>
                 <span className="rounded-full bg-slate-200/80 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
@@ -2113,7 +2113,7 @@ const MoneyReceipts = () => {
                 <button
                   type="button"
                   onClick={() => downloadReceipt(viewingReceipt)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-brand-300 bg-brand-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
                 >
                   <Download size={15} className="sm:w-4 sm:h-4" /> PDF
                 </button>

@@ -515,7 +515,7 @@ const Vehicles = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by vehicle number..."
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500"
               />
             </div>
           </div>
@@ -548,11 +548,11 @@ const Vehicles = () => {
 
                   <div className="mt-4 space-y-1.5 text-sm text-slate-500">
                     {trip.trip_type !== "incoming" && (trip.invoice_number ? (
-                      <p className="font-medium text-emerald-700">
+                      <p className="font-medium text-brand-700">
                         Against Invoice: #{trip.invoice_number}
                       </p>
                     ) : trip.invoice_id ? (
-                      <p className="font-medium text-emerald-700">
+                      <p className="font-medium text-brand-700">
                         Against Invoice: #{trip.invoice_id}
                       </p>
                     ) : null)}
@@ -657,7 +657,7 @@ const Vehicles = () => {
                       <button
                         type="button"
                         onClick={() => handleOpenEWayModal(trip)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100"
                       >
                         <Eye size={13} /> View E-Way Bill
                       </button>
@@ -752,8 +752,8 @@ const Vehicles = () => {
                         }}
                         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ${
                           !canWrite
-                            ? "cursor-not-allowed bg-emerald-50 text-emerald-300 opacity-60"
-                            : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            ? "cursor-not-allowed bg-brand-50 text-brand-300 opacity-60"
+                            : "bg-brand-100 text-brand-700 hover:bg-brand-200"
                         }`}
                       >
                         <CheckCircle2 size={13} /> Mark Reached
@@ -791,7 +791,7 @@ const Vehicles = () => {
               onClick={() => setTripType("outgoing")}
               className={`flex-1 rounded-xl border py-2.5 text-sm font-semibold transition ${
                 tripType === "outgoing"
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                  ? "border-brand-600 bg-brand-50 text-brand-700"
                   : "border-slate-200 text-slate-500"
               }`}
             >
@@ -818,7 +818,7 @@ const Vehicles = () => {
               <select
                 value={form.invoice_id}
                 onChange={(e) => setForm({ ...form, invoice_id: e.target.value })}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               >
                 <option value="">None / Not linked to invoice</option>
                 {invoices.map((inv) => (
@@ -838,7 +838,7 @@ const Vehicles = () => {
                 value={form.vehicle_number}
                 onChange={(e) => setForm({ ...form, vehicle_number: e.target.value })}
                 placeholder="Optional"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
             <div>
@@ -848,7 +848,7 @@ const Vehicles = () => {
                 value={form.driver_name}
                 onChange={(e) => setForm({ ...form, driver_name: e.target.value })}
                 placeholder="Optional"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -860,7 +860,7 @@ const Vehicles = () => {
               value={form.driver_phone}
               onChange={(e) => setForm({ ...form, driver_phone: e.target.value })}
               placeholder="Optional"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -872,7 +872,7 @@ const Vehicles = () => {
                 value={form.from_location}
                 onChange={(e) => setForm({ ...form, from_location: e.target.value })}
                 placeholder="Optional"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
             <div>
@@ -882,7 +882,7 @@ const Vehicles = () => {
                 value={form.to_location}
                 onChange={(e) => setForm({ ...form, to_location: e.target.value })}
                 placeholder="Optional"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -894,7 +894,7 @@ const Vehicles = () => {
               value={form.goods_description}
               onChange={(e) => setForm({ ...form, goods_description: e.target.value })}
               placeholder="Optional"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -907,7 +907,7 @@ const Vehicles = () => {
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => setWaybillFile(e.target.files?.[0] || null)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
               />
             </div>
 
@@ -920,7 +920,7 @@ const Vehicles = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setLoadingPhoto(e.target.files?.[0] || null)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
                 />
               </div>
 
@@ -932,7 +932,7 @@ const Vehicles = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setUnloadingPhoto(e.target.files?.[0] || null)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
                 />
               </div>
 
@@ -944,7 +944,7 @@ const Vehicles = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setVehiclePhoto(e.target.files?.[0] || null)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
                 />
               </div>
 
@@ -956,7 +956,7 @@ const Vehicles = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setTripPhoto(e.target.files?.[0] || null)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
                 />
               </div>
             </div>
@@ -966,7 +966,7 @@ const Vehicles = () => {
             type="submit"
             disabled={saving || !canWrite}
             title={!canWrite ? subscriptionRequiredMessage : undefined}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
             {saving ? "Saving..." : (editingTrip ? "Update Vehicle" : "Add Vehicle")}
           </button>
@@ -1096,7 +1096,7 @@ const Vehicles = () => {
                 <button
                   type="button"
                   onClick={() => replaceFileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-brand-300 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700 transition hover:bg-brand-100"
                 >
                   <Pencil size={14} /> Edit / Replace
                 </button>

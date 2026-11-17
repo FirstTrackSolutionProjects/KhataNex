@@ -66,7 +66,7 @@ export default function SubscriptionRestrictedBanner({ compact = false }) {
           <div className="flex items-center gap-2 shrink-0">
             <Link
               to="/subscription"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700 transition"
             >
               <Sparkles size={14} />
               <span>Choose a Plan</span>

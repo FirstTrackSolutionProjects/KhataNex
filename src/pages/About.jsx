@@ -71,11 +71,11 @@ const About = () => {
       {/* =====================================================
           HERO SECTION
       ====================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600">
 
         {/* Background Decoration */}
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-teal-300/20 blur-3xl" />
+        <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-brand-300/20 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
 
@@ -96,7 +96,7 @@ const About = () => {
             </h1>
 
             {/* Description */}
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-emerald-50 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-brand-50 sm:text-lg">
               KHATANEX is a smart digital business management platform
               designed to help businesses manage customers, transactions,
               payments, invoices and accounts with ease.
@@ -107,7 +107,7 @@ const About = () => {
 
               <Link
                 to="/dashboard"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-brand-50"
               >
                 Explore Dashboard
                 <ArrowRight size={17} />
@@ -137,7 +137,7 @@ const About = () => {
           {/* Left Content */}
           <div>
 
-            <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+            <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
               Who We Are
             </span>
 
@@ -168,7 +168,7 @@ const About = () => {
                 >
                   <CheckCircle2
                     size={19}
-                    className="shrink-0 text-emerald-600"
+                    className="shrink-0 text-brand-600"
                   />
 
                   <span className="text-sm font-medium text-slate-700">
@@ -184,13 +184,13 @@ const About = () => {
           {/* Right Card */}
           <div className="relative">
 
-            <div className="rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-600 p-1 shadow-2xl">
+            <div className="rounded-3xl bg-gradient-to-br from-brand-700 to-brand-500 p-1 shadow-2xl">
 
               <div className="rounded-[22px] bg-white p-7 sm:p-9">
 
                 <div className="flex items-center gap-4">
 
-                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-emerald-600 shadow-lg">
+                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-brand-600 shadow-lg">
                     <img
                       src="/images/Logo.jpeg"
                       alt="KHATANEX Logo"
@@ -203,7 +203,7 @@ const About = () => {
                       KHATANEX
                     </h3>
 
-                    <p className="text-sm text-emerald-600">
+                    <p className="text-sm text-brand-600">
                       Smart Khata. Simple Business.
                     </p>
                   </div>
@@ -212,10 +212,10 @@ const About = () => {
 
                 <div className="mt-8 grid grid-cols-2 gap-4">
 
-                  <div className="rounded-2xl bg-emerald-50 p-5">
+                  <div className="rounded-2xl bg-brand-50 p-5">
                     <Users
                       size={25}
-                      className="text-emerald-600"
+                      className="text-brand-600"
                     />
 
                     <p className="mt-3 text-2xl font-extrabold text-slate-900">
@@ -227,10 +227,10 @@ const About = () => {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-teal-50 p-5">
+                  <div className="rounded-2xl bg-brand-50 p-5">
                     <CreditCard
                       size={25}
-                      className="text-teal-600"
+                      className="text-brand-600"
                     />
 
                     <p className="mt-3 text-2xl font-extrabold text-slate-900">
@@ -292,7 +292,7 @@ const About = () => {
 
           <div className="mx-auto max-w-2xl text-center">
 
-            <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+            <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
               Our Purpose
             </span>
 
@@ -310,9 +310,9 @@ const About = () => {
           <div className="mt-12 grid gap-6 md:grid-cols-2">
 
             {/* Mission */}
-            <div className="rounded-3xl border border-emerald-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-9">
+            <div className="rounded-3xl border border-brand-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-9">
 
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600">
                 <Target size={28} />
               </div>
 
@@ -330,9 +330,9 @@ const About = () => {
             </div>
 
             {/* Vision */}
-            <div className="rounded-3xl border border-teal-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-9">
+            <div className="rounded-3xl border border-brand-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-9">
 
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100 text-teal-600">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600">
                 <Eye size={28} />
               </div>
 
@@ -362,7 +362,7 @@ const About = () => {
 
           <div className="mx-auto max-w-2xl text-center">
 
-            <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+            <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
               What We Offer
             </span>
 
@@ -385,10 +385,10 @@ const About = () => {
               return (
                 <div
                   key={feature.title}
-                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg"
                 >
 
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:bg-emerald-600 group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
                     <Icon size={23} />
                   </div>
 
@@ -412,14 +412,14 @@ const About = () => {
       {/* =====================================================
           WHY KHATANEX
       ====================================================== */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 py-16 sm:py-20">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-brand-950 py-16 sm:py-20">
 
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
 
           {/* Left */}
           <div>
 
-            <span className="text-sm font-bold uppercase tracking-wider text-emerald-400">
+            <span className="text-sm font-bold uppercase tracking-wider text-brand-400">
               Why KHATANEX
             </span>
 
@@ -440,10 +440,10 @@ const About = () => {
                   key={benefit}
                   className="flex items-center gap-3"
                 >
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500/20">
                     <CheckCircle2
                       size={15}
-                      className="text-emerald-400"
+                      className="text-brand-400"
                     />
                   </div>
 
@@ -478,7 +478,7 @@ const About = () => {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
               <ShieldCheck
                 size={28}
-                className="text-emerald-400"
+                className="text-brand-400"
               />
 
               <h3 className="mt-5 font-bold text-white">
@@ -532,7 +532,7 @@ const About = () => {
 
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
 
-          <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-emerald-600 shadow-lg">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-brand-600 shadow-lg">
             <img
               src="/images/Logo.jpeg"
               alt="KHATANEX"
@@ -553,7 +553,7 @@ const About = () => {
 
             <Link
               to="/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700"
             >
               Get Started
               <ArrowRight size={17} />
@@ -561,7 +561,7 @@ const About = () => {
 
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3 text-sm font-bold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3 text-sm font-bold text-slate-700 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
             >
               Contact Us
             </Link>

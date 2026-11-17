@@ -1,0 +1,403 @@
+/* =========================================================
+   KhataNex brand component classes (Tailwind v4 compatible)
+   Imported from index.css via:  @import "./brand.css";
+   Wrapped in @layer components so Tailwind utilities
+   (pt-0, mt-8, bg-white, ...) can still override them.
+   Colour tokens (brand-50 ... brand-950, accent-*) live in the
+   @theme block in index.css.
+   ========================================================= */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: #1e1b2e;
+  }
+}
+
+@layer components {
+  /* ---------- Backgrounds ---------- */
+  .bg-brand-radial {
+    background:
+      radial-gradient(900px 480px at 88% -8%, rgba(154, 112, 245, 0.5), transparent 62%),
+      radial-gradient(700px 420px at -8% 108%, rgba(123, 71, 227, 0.4), transparent 58%),
+      linear-gradient(135deg, #4b1d9c 0%, #2d1a8a 100%);
+  }
+
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #4b1d9c 0%, #2d1a8a 100%);
+  }
+
+  .bg-grid-faint {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+
+  .bg-brand-soft {
+    background: linear-gradient(180deg, #f5f1ff 0%, #ffffff 100%);
+  }
+
+  /* ---------- Layout ---------- */
+  .section-pad {
+    padding: 4.5rem 1.25rem;
+  }
+  @media (min-width: 1024px) {
+    .section-pad {
+      padding: 6rem 2rem;
+    }
+  }
+
+  /* ---------- Eyebrow labels ---------- */
+  .eyebrow,
+  .eyebrow-on-dark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .eyebrow {
+    background: #f0e9ff;
+    color: #4f23a8;
+    border: 1px solid #e0d3ff;
+  }
+  .eyebrow-on-dark {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn-brand,
+  .btn-light,
+  .btn-outline-light,
+  .btn-ghost-brand,
+  .btn-accent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.85rem;
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .btn-brand:hover,
+  .btn-light:hover,
+  .btn-outline-light:hover,
+  .btn-ghost-brand:hover,
+  .btn-accent:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Solid violet — primary action on light backgrounds */
+  .btn-brand {
+    background: linear-gradient(135deg, #6330c8 0%, #4b1d9c 100%);
+    color: #ffffff;
+    box-shadow: 0 8px 20px -8px rgba(75, 29, 156, 0.6);
+  }
+  .btn-brand:hover {
+    box-shadow: 0 12px 26px -8px rgba(75, 29, 156, 0.7);
+  }
+
+  /* Gold — primary action on dark backgrounds (high contrast on the violet hero) */
+  .btn-accent {
+    background: #ffbf47;
+    color: #2d1568;
+    box-shadow: 0 8px 20px -8px rgba(245, 165, 36, 0.7);
+  }
+  .btn-accent:hover {
+    background: #ffd27a;
+  }
+
+  /* White — alternative on dark backgrounds */
+  .btn-light {
+    background: #ffffff;
+    color: #3d1b86;
+  }
+  .btn-light:hover {
+    background: #f5f1ff;
+  }
+
+  /* Glass outline — secondary action on dark backgrounds */
+  .btn-outline-light {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+  }
+  .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Outlined violet — secondary action on light backgrounds */
+  .btn-ghost-brand {
+    background: #ffffff;
+    color: #4f23a8;
+    border: 1.5px solid #c9b5ff;
+  }
+  .btn-ghost-brand:hover {
+    background: #f5f1ff;
+    border-color: #9a70f5;
+  }
+
+  /* ---------- Cards ---------- */
+  .card-brand {
+    background: #ffffff;
+    border: 1px solid #ebe3ff;
+    border-radius: 1.1rem;
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .card-brand:hover {
+    transform: translateY(-3px);
+    border-color: #c9b5ff;
+    box-shadow: 0 18px 36px -16px rgba(75, 29, 156, 0.35);
+  }
+
+  /* ---------- FAQ <details> marker ---------- */
+  details.kn-faq > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  details.kn-faq > summary::-webkit-details-marker {
+    display: none;
+  }
+  details.kn-faq[open] .kn-faq-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+/* ---------- Gentle float animation for hero chips ---------- */
+@keyframes kn-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.kn-float {
+  animation: kn-float 5s ease-in-out infinite;
+}
+.kn-float-slow {
+  animation: kn-float 7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kn-float,
+  .kn-float-slow {
+    animation: none;
+  }
+}
+
+
+/* =========================================================
+   Dark mode (the site's .dark class on <html>)
+   Needed because index.css force-lightens text-slate-* in dark mode,
+   which would be invisible on light lavender brand backgrounds.
+   ========================================================= */
+.dark .bg-brand-50,
+.dark .bg-brand-100 {
+  background-color: #1a1530 !important;
+}
+.dark .bg-brand-soft {
+  background: #0b1120 !important;
+}
+.dark .border-brand-100,
+.dark .border-brand-200 {
+  border-color: #2f2559 !important;
+}
+.dark .ring-brand-200 {
+  --tw-ring-color: #2f2559 !important;
+}
+.dark .text-brand-700,
+.dark .text-brand-800,
+.dark .text-brand-900 {
+  color: #d6c6ff !important;
+}
+.dark .card-brand {
+  background: #151f32;
+  border-color: #2f2559;
+}
+.dark .btn-ghost-brand {
+  background: transparent;
+  color: #d6c6ff;
+  border-color: #5b3fa6;
+}
+.dark .btn-ghost-brand:hover {
+  background: rgba(154, 112, 245, 0.15);
+}
+.dark .eyebrow {
+  background: rgba(154, 112, 245, 0.18);
+  color: #d6c6ff;
+  border-color: rgba(154, 112, 245, 0.35);
+}
+
+/* ---------- Dark mode: site-wide brand tints (replaces the old green UI accents) ---------- */
+.dark .text-brand-500,
+.dark .text-brand-600 {
+  color: #b99dff !important;
+}
+.dark .bg-brand-200 {
+  background-color: #2f2559 !important;
+}
+.dark .bg-brand-50\/30,
+.dark .bg-brand-50\/40,
+.dark .bg-brand-50\/50,
+.dark .bg-brand-50\/60,
+.dark .bg-brand-50\/70 {
+  background-color: rgba(123, 71, 227, 0.14) !important;
+}
+.dark .hover\:bg-brand-50:hover,
+.dark .hover\:bg-brand-100:hover,
+.dark .hover\:bg-brand-50\/30:hover,
+.dark .hover\:bg-brand-50\/40:hover {
+  background-color: rgba(154, 112, 245, 0.18) !important;
+}
+.dark .text-brand-950 {
+  color: #ebe3ff !important;
+}
+
+
+/* =========================================================
+   Hero "product screenshot" card + floating chips.
+   Plain classes (no Tailwind utilities) so the site's global
+   dark-mode overrides can't turn the card dark / unreadable.
+   ========================================================= */
+.kn-mock {
+  background: #ffffff;
+  color: #1e1b2e;
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 30px 60px -20px rgba(27, 11, 69, 0.55);
+}
+.kn-mock-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #2d1568;
+}
+.kn-mock-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.kn-mock-stat {
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+.kn-mock-in {
+  background: #ecfdf5;
+  color: #047857;
+}
+.kn-mock-out {
+  background: #fff1f2;
+  color: #be123c;
+}
+.kn-mock-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.kn-mock-amount {
+  margin-top: 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+.kn-mock-list {
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+  border: 1px solid #ebe3ff;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.kn-mock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: #ffffff;
+}
+.kn-mock-row + .kn-mock-row {
+  border-top: 1px solid #ebe3ff;
+}
+.kn-mock-avatar {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #ebe3ff;
+  color: #4f23a8;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.kn-mock-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.kn-mock-note {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.kn-mock-plus {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #059669;
+  white-space: nowrap;
+}
+.kn-mock-minus {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #e11d48;
+  white-space: nowrap;
+}
+.kn-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 0.55rem 0.8rem;
+  box-shadow: 0 18px 36px -14px rgba(27, 11, 69, 0.55);
+}
+.kn-chip-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: #ebe3ff;
+  color: #4f23a8;
+}
+.kn-chip-icon-green {
+  background: #d1fae5;
+  color: #047857;
+}
+.kn-chip-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.kn-chip-sub {
+  font-size: 11px;
+  color: #64748b;
+}

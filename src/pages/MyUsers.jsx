@@ -128,7 +128,7 @@ const MyUsers = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Users className="text-emerald-600" size={24} />
+              <Users className="text-brand-600" size={24} />
               <h1 className="text-2xl font-bold text-slate-800">My Users</h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">
@@ -140,7 +140,7 @@ const MyUsers = () => {
             type="button"
             onClick={loadUsers}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -154,7 +154,7 @@ const MyUsers = () => {
             onClick={() => setActiveTab("active")}
             className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
               activeTab === "active"
-                ? "border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl"
+                ? "border-brand-600 text-brand-700 bg-brand-50/50 rounded-t-xl"
                 : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
             }`}
           >
@@ -163,7 +163,7 @@ const MyUsers = () => {
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                 activeTab === "active"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-brand-600 text-white"
                   : "bg-slate-100 text-slate-600"
               }`}
             >
@@ -210,7 +210,7 @@ const MyUsers = () => {
                   ? "Search deleted users by name, email, phone, business, reason, or deleted by..."
                   : "Search active users by name, email, phone, business, GSTIN or PAN..."
               }
-              className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
         </div>
@@ -225,7 +225,7 @@ const MyUsers = () => {
             <button
               type="button"
               onClick={() => setSuccessNotification("")}
-              className="text-emerald-700 hover:text-emerald-900 font-bold text-xs"
+              className="text-emerald-700 hover:text-brand-900 font-bold text-xs"
             >
               Dismiss
             </button>
@@ -243,7 +243,7 @@ const MyUsers = () => {
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="min-w-[1650px] w-full text-left text-sm">
             <thead>
-              <tr className={activeTab === "deleted" ? "bg-slate-800 text-white" : "bg-emerald-600 text-white"}>
+              <tr className={activeTab === "deleted" ? "bg-slate-800 text-white" : "bg-brand-600 text-white"}>
                 <th className="px-4 py-3 font-semibold">Account ID</th>
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Email</th>
@@ -305,7 +305,7 @@ const MyUsers = () => {
                   <tr
                     key={user.id}
                     onClick={() => navigate(`/my-users/${user.id}`)}
-                    className="cursor-pointer transition hover:bg-emerald-50/40"
+                    className="cursor-pointer transition hover:bg-brand-50/40"
                   >
                     <td className="whitespace-nowrap px-4 py-3 font-semibold text-slate-700">
                       #{user.id}
@@ -324,7 +324,7 @@ const MyUsers = () => {
                     </td>
 
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold capitalize text-emerald-700">
+                      <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold capitalize text-brand-700">
                         {user.role || "user"}
                       </span>
                     </td>
@@ -353,7 +353,7 @@ const MyUsers = () => {
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
                             user.status === "active"
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-brand-100 text-brand-800"
                               : "bg-amber-100 text-amber-800"
                           }`}
                         >
@@ -380,8 +380,8 @@ const MyUsers = () => {
                           {user.subscription?.status === "active" ? (
                             <div className="flex flex-col">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-bold text-brand-800">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
                                   {user.subscription.plan_name || "Active"}
                                   {user.subscription.is_complimentary ? " (Complimentary)" : ""}
                                 </span>
@@ -462,7 +462,7 @@ const MyUsers = () => {
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                             user.activity_status === "logged_in"
-                              ? "bg-emerald-50 text-emerald-700"
+                              ? "bg-brand-50 text-brand-700"
                               : "bg-slate-100 text-slate-500"
                           }`}
                         >
@@ -484,7 +484,7 @@ const MyUsers = () => {
                           type="button"
                           onClick={() => navigate(`/my-users/${user.id}`)}
                           title="View Historical Ledger & Overview"
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600 focus:outline-none"
+                          className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-brand-50 hover:text-brand-600 focus:outline-none"
                         >
                           <Eye size={16} />
                         </button>
@@ -513,7 +513,7 @@ const MyUsers = () => {
                               setRestoreModalOpen(true);
                             }}
                             title="Restore User Account"
-                            className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none"
+                            className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-brand-50 hover:text-brand-700 focus:outline-none"
                           >
                             <RotateCcw size={16} />
                           </button>

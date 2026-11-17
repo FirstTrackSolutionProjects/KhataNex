@@ -51,8 +51,8 @@ const BottomNav = () => {
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center min-w-[48px] px-1.5 py-1.5 text-[9px] font-medium transition-colors duration-200 flex-1 ${
                   isActive
-                    ? "text-emerald-600 border-t-2 border-emerald-600"
-                    : "text-slate-500 hover:text-emerald-500"
+                    ? "text-brand-600 border-t-2 border-brand-600"
+                    : "text-slate-500 hover:text-brand-500"
                 }`
               }
             >

@@ -49,14 +49,14 @@ export default function RestoreUserModal({ isOpen, onClose, user, onSuccess }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-emerald-50/70 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-brand-50/70 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
               <RotateCcw size={22} />
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Restore User Account</h3>
-              <p className="text-xs text-emerald-700 font-medium">Reactivate Account &amp; Restore Access</p>
+              <p className="text-xs text-brand-700 font-medium">Reactivate Account &amp; Restore Access</p>
             </div>
           </div>
           <button
@@ -113,12 +113,12 @@ export default function RestoreUserModal({ isOpen, onClose, user, onSuccess }) {
           </div>
 
           {/* Policy Information */}
-          <div className="rounded-xl bg-emerald-50/70 border border-emerald-200/80 p-3.5 text-xs text-emerald-950 space-y-1">
-            <p className="font-bold flex items-center gap-1.5 text-emerald-900">
-              <ShieldCheck size={15} className="text-emerald-600 shrink-0" />
+          <div className="rounded-xl bg-brand-50/70 border border-brand-200/80 p-3.5 text-xs text-brand-950 space-y-1">
+            <p className="font-bold flex items-center gap-1.5 text-brand-900">
+              <ShieldCheck size={15} className="text-brand-600 shrink-0" />
               Restoration Behavior
             </p>
-            <p className="text-[11px] leading-relaxed text-emerald-800">
+            <p className="text-[11px] leading-relaxed text-brand-800">
               Restoring this user will change their status back to <strong>Active</strong>, reinstate login permissions, and automatically reactivate any staff employee accounts belonging to this business owner. All historical financial records, invoices, and ledger entries remain intact.
             </p>
           </div>
@@ -133,7 +133,7 @@ export default function RestoreUserModal({ isOpen, onClose, user, onSuccess }) {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Account reinstated upon customer request / verification complete"
-              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               required
             />
           </div>
@@ -151,7 +151,7 @@ export default function RestoreUserModal({ isOpen, onClose, user, onSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

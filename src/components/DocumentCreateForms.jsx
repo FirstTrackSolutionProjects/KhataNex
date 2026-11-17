@@ -18,7 +18,7 @@ const Field = ({ label, ...props }) => (
     </span>
     <input
       {...props}
-      className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 ${
+      className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100 ${
         props.className || ""
       }`}
     />
@@ -32,7 +32,7 @@ const Select = ({ label, children, ...props }) => (
     </span>
     <select
       {...props}
-      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
     >
       {children}
     </select>
@@ -71,7 +71,7 @@ function CustomerChoice({ customers, mode, setMode, customerId, setCustomerId, m
           onClick={() => setMode("existing")}
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             mode === "existing"
-              ? "bg-indigo-600 text-white"
+              ? "bg-brand-600 text-white"
               : "bg-gray-100 text-gray-600"
           }`}
         >
@@ -83,7 +83,7 @@ function CustomerChoice({ customers, mode, setMode, customerId, setCustomerId, m
           onClick={() => setMode("manual")}
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             mode === "manual"
-              ? "bg-indigo-600 text-white"
+              ? "bg-brand-600 text-white"
               : "bg-gray-100 text-gray-600"
           }`}
         >
@@ -242,7 +242,7 @@ function ItemRows({ items, setItems }) {
       <button
         type="button"
         onClick={add}
-        className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+        className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
       >
         <Plus size={16} />
         Add Item
@@ -446,7 +446,7 @@ export function QuotationForm({ customers, onCancel, onCreated }) {
               value={terms}
               onChange={(e) => setTerms(e.target.value)}
               rows={4}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               placeholder="Payment and quotation terms..."
             />
           </label>
@@ -459,7 +459,7 @@ export function QuotationForm({ customers, onCancel, onCreated }) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               placeholder="Optional notes..."
             />
           </label>
@@ -645,7 +645,7 @@ export function MoneyReceiptForm({ customers, banking, documents, onCancel, onCr
         </div>
 
         {selectedInvoice && (
-          <div className="grid gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4 md:grid-cols-3">
+          <div className="grid gap-3 rounded-xl border border-brand-100 bg-brand-50 p-4 md:grid-cols-3">
             <div>
               <p className="text-xs text-gray-500">Invoice</p>
               <p className="font-semibold text-gray-900">
@@ -723,7 +723,7 @@ export function MoneyReceiptForm({ customers, banking, documents, onCancel, onCr
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               placeholder="Payment description..."
             />
           </label>
@@ -736,7 +736,7 @@ export function MoneyReceiptForm({ customers, banking, documents, onCancel, onCr
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               placeholder="Optional notes..."
             />
           </label>

@@ -29,7 +29,7 @@ export default function MobileHeader() {
           className="flex items-center gap-2.5 min-w-0 transition hover:opacity-90"
         >
           {/* Logo */}
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-purple-700 shadow-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-800 shadow-sm">
             <img
               src="/images/Logo.jpeg"
               alt="KhataNex Logo"
@@ -39,7 +39,7 @@ export default function MobileHeader() {
 
           {/* Brand Titles */}
           <div className="flex flex-col min-w-0">
-            <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-purple-600 via-yellow-400 to-yellow-600 bg-clip-text text-transparent leading-none truncate">
+            <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-brand-700 via-brand-500 to-accent-500 bg-clip-text text-transparent leading-none truncate">
               KHATANEX
             </span>
             <span className="text-[8px] font-semibold text-slate-400 leading-tight">
@@ -54,7 +54,7 @@ export default function MobileHeader() {
         {/* Public Landing Home Shortcut */}
         <Link
           to="/"
-          className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-emerald-600 active:scale-95"
+          className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-brand-600 active:scale-95"
           aria-label="Home"
           title="Home"
         >
@@ -64,7 +64,7 @@ export default function MobileHeader() {
         {/* Profile Shortcut */}
         <Link
           to="/profile"
-          className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-emerald-600 active:scale-95"
+          className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-brand-600 active:scale-95"
           aria-label="User Profile"
           title="User Profile"
         >

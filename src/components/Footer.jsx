@@ -17,7 +17,7 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 text-slate-300">
+    <footer className="bg-brand-950 text-slate-300">
 
       {/* =========================================
           MAIN FOOTER
@@ -54,9 +54,9 @@ const Footer = () => {
     className="
       text-xl font-extrabold tracking-wide
       bg-gradient-to-r
-      from-emerald-400
-      via-teal-300
-      to-cyan-400
+      from-brand-300
+      via-brand-200
+      to-accent-300
       bg-clip-text
       text-transparent
     "
@@ -64,7 +64,7 @@ const Footer = () => {
     KHATANEX
   </h2>
 
-  <p className="text-[10px] font-medium text-emerald-400">
+  <p className="text-[10px] font-medium text-brand-300">
     Smart Khata. Simple Business.
   </p>
 </div>
@@ -89,7 +89,7 @@ const Footer = () => {
                 aria-label="Facebook"
                 className="
                   flex h-10 w-10 items-center justify-center
-                  rounded-xl bg-slate-900
+                  rounded-xl bg-brand-900
                   text-slate-400
                   transition-all duration-300
                   hover:-translate-y-1
@@ -106,7 +106,7 @@ const Footer = () => {
                 aria-label="Instagram"
                 className="
                   flex h-10 w-10 items-center justify-center
-                  rounded-xl bg-slate-900
+                  rounded-xl bg-brand-900
                   text-slate-400
                   transition-all duration-300
                   hover:-translate-y-1
@@ -123,7 +123,7 @@ const Footer = () => {
                 aria-label="Twitter"
                 className="
                   flex h-10 w-10 items-center justify-center
-                  rounded-xl bg-slate-900
+                  rounded-xl bg-brand-900
                   text-slate-400
                   transition-all duration-300
                   hover:-translate-y-1
@@ -140,7 +140,7 @@ const Footer = () => {
                 aria-label="LinkedIn"
                 className="
                   flex h-10 w-10 items-center justify-center
-                  rounded-xl bg-slate-900
+                  rounded-xl bg-brand-900
                   text-slate-400
                   transition-all duration-300
                   hover:-translate-y-1
@@ -170,7 +170,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/"
-                  className="group flex items-center gap-1 transition-colors hover:text-emerald-400"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
                 >
                   Home
 
@@ -184,7 +184,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/about"
-                  className="group flex items-center gap-1 transition-colors hover:text-emerald-400"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
                 >
                   About
 
@@ -198,7 +198,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/blog"
-                  className="group flex items-center gap-1 transition-colors hover:text-emerald-400"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
                 >
                   Blog
 
@@ -212,7 +212,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="group flex items-center gap-1 transition-colors hover:text-emerald-400"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
                 >
                   Contact
 
@@ -226,9 +226,23 @@ const Footer = () => {
               <li>
                 <Link
                   to="/services"
-                  className="group flex items-center gap-1 transition-colors hover:text-emerald-400"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
                 >
                   Services
+
+                  <ArrowUpRight
+                    size={13}
+                    className="opacity-0 transition group-hover:opacity-100"
+                  />
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/pricing"
+                  className="group flex items-center gap-1 transition-colors hover:text-accent-300"
+                >
+                  Pricing
 
                   <ArrowUpRight
                     size={13}
@@ -256,7 +270,7 @@ const Footer = () => {
     <li>
       <Link
         to="/digital-khata"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Digital Khata
 
@@ -270,7 +284,7 @@ const Footer = () => {
     <li>
       <Link
         to="/customer-management"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Customer Management
 
@@ -284,7 +298,7 @@ const Footer = () => {
     <li>
       <Link
         to="/payments"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Payment Tracking
 
@@ -298,7 +312,7 @@ const Footer = () => {
     <li>
       <Link
         to="/invoices"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Invoice Management
 
@@ -312,7 +326,7 @@ const Footer = () => {
     <li>
       <Link
         to="/inventory"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Inventory Management
 
@@ -326,7 +340,7 @@ const Footer = () => {
     <li>
       <Link
         to="/reports"
-        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-emerald-400"
+        className="group flex items-center gap-1 text-slate-400 transition-colors hover:text-accent-300"
       >
         Business Reports
 
@@ -356,7 +370,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="transition-colors hover:text-emerald-400"
+                  className="transition-colors hover:text-accent-300"
                 >
                   FAQ
                 </Link>
@@ -365,7 +379,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/privacy-policy"
-                  className="transition-colors hover:text-emerald-400"
+                  className="transition-colors hover:text-accent-300"
                 >
                   Privacy Policy
                 </Link>
@@ -374,7 +388,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/terms-of-use"
-                  className="transition-colors hover:text-emerald-400"
+                  className="transition-colors hover:text-accent-300"
                 >
                   Terms Of Use
                 </Link>
@@ -383,7 +397,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/refund-cancellation"
-                  className="transition-colors hover:text-emerald-400"
+                  className="transition-colors hover:text-accent-300"
                 >
                   Refund & Cancellation
                 </Link>
@@ -410,7 +424,7 @@ const Footer = () => {
 
                 <MapPin
                   size={19}
-                  className="mt-0.5 shrink-0 text-emerald-500"
+                  className="mt-0.5 shrink-0 text-accent-400"
                 />
 
                 <span className="leading-6 text-slate-400">
@@ -427,12 +441,12 @@ const Footer = () => {
 
                 <Phone
                   size={18}
-                  className="shrink-0 text-emerald-500"
+                  className="shrink-0 text-accent-400"
                 />
 
                 <a
                   href="tel:++91 9040170727"
-                  className="text-slate-400 transition-colors hover:text-emerald-400"
+                  className="text-slate-400 transition-colors hover:text-accent-300"
                 >
                    +91 9040170727
                 </a>
@@ -445,12 +459,12 @@ const Footer = () => {
 
                 <Mail
                   size={18}
-                  className="mt-0.5 shrink-0 text-emerald-500"
+                  className="mt-0.5 shrink-0 text-accent-400"
                 />
 
                 <a
                   href="mailto:support@khatanex.in"
-                  className="break-all text-slate-400 transition-colors hover:text-emerald-400"
+                  className="break-all text-slate-400 transition-colors hover:text-accent-300"
                 >
                   support@khatanex.in
                 </a>
@@ -469,7 +483,7 @@ const Footer = () => {
       {/* =========================================
           BOTTOM FOOTER
       ========================================== */}
-      <div className="border-t border-slate-800">
+      <div className="border-t border-brand-900">
 
         <div
           className="
@@ -490,7 +504,7 @@ const Footer = () => {
 
           <span className="block w-full break-words sm:w-auto">
             © 2026 KhataNex by{" "}
-            <span className="font-semibold text-brand-400">
+            <span className="font-semibold text-brand-300">
               First Track Solution Technologies
             </span>
             . All rights reserved.

@@ -132,7 +132,7 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
           >
 
             {/* Logo */}
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-purple-700 shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-800 shadow-sm">
               <img
                 src="/images/Logo.jpeg"
                 alt="KHATANEX Logo"
@@ -143,7 +143,7 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
 
             {/* Brand */}
             <div>
-            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-700 via-brand-500 to-accent-500 bg-clip-text text-transparent">
               KHATANEX
              </h1>
 
@@ -176,9 +176,9 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
         {/* =====================================
             BUSINESS CARD
         ====================================== */}
-        <div className="mx-4 mt-5 shrink-0 rounded-2xl bg-emerald-50 p-4">
+        <div className="mx-4 mt-5 shrink-0 rounded-2xl bg-brand-50 p-4">
 
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
             {isSuperadmin ? "Super Admin" : "Business"}
           </p>
 
@@ -227,8 +227,8 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
 
                     ${
                       isActive
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                        : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                        ? "bg-brand-600 text-white shadow-md shadow-brand-600/20"
+                        : "text-slate-600 hover:bg-brand-50 hover:text-brand-700"
                     }
                     `
                   }
@@ -266,8 +266,8 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
 
               ${
                 isActive
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                  ? "bg-brand-600 text-white shadow-md shadow-brand-600/20"
+                  : "text-slate-600 hover:bg-brand-50 hover:text-brand-700"
               }
               `
             }
@@ -292,8 +292,8 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
 
               ${
                 isActive
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                  ? "bg-brand-600 text-white shadow-md shadow-brand-600/20"
+                  : "text-slate-600 hover:bg-brand-50 hover:text-brand-700"
               }
               `
             }
@@ -318,8 +318,8 @@ const Sidebar = ({ isOpen, open, onClose, onCancel, isRootLayout = false }) => {
 
               ${
                 isActive
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                  : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                  ? "bg-brand-600 text-white shadow-md shadow-brand-600/20"
+                  : "text-slate-600 hover:bg-brand-50 hover:text-brand-700"
               }
               `
             }

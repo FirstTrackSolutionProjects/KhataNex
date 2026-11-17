@@ -362,7 +362,7 @@ const Purchases = () => {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
           <p className="text-xs font-medium text-slate-500">Total Purchases</p>
           <p className="mt-1 text-xl font-bold text-slate-900">{formatCurrency(stats.totalAmount)}</p>
-          <p className="mt-0.5 text-[11px] text-emerald-600 font-medium">Billed to date</p>
+          <p className="mt-0.5 text-[11px] text-brand-600 font-medium">Billed to date</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
@@ -373,7 +373,7 @@ const Purchases = () => {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
           <p className="text-xs font-medium text-slate-500">GST Input Tax</p>
-          <p className="mt-1 text-xl font-bold text-emerald-700">{formatCurrency(stats.totalTax)}</p>
+          <p className="mt-1 text-xl font-bold text-brand-700">{formatCurrency(stats.totalTax)}</p>
           <p className="mt-0.5 text-[11px] text-slate-400">Eligible ITC</p>
         </div>
 
@@ -393,7 +393,7 @@ const Purchases = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by vendor, bill #, or item name..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 shadow-xs outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 shadow-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
           {search && (
             <button
@@ -419,7 +419,7 @@ const Purchases = () => {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
             <p className="mt-3 text-sm">Loading purchase bills...</p>
           </div>
         ) : filteredPurchases.length === 0 ? (
@@ -437,7 +437,7 @@ const Purchases = () => {
               <button
                 type="button"
                 onClick={handleOpenNew}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
               >
                 <Plus size={15} />
                 Record First Bill
@@ -651,7 +651,7 @@ const Purchases = () => {
                       value={form.bill_number}
                       onChange={(e) => setForm({ ...form, bill_number: e.target.value })}
                       placeholder="e.g. INV-9841"
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-100"
                     />
                   </div>
 
@@ -663,7 +663,7 @@ const Purchases = () => {
                       value={form.vendor_name}
                       onChange={(e) => setForm({ ...form, vendor_name: e.target.value })}
                       placeholder="e.g. Acme Supplies Pvt Ltd"
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-100"
                     />
                   </div>
 
@@ -674,7 +674,7 @@ const Purchases = () => {
                       required
                       value={form.bill_date}
                       onChange={(e) => setForm({ ...form, bill_date: e.target.value })}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-100"
                     />
                   </div>
                 </div>
@@ -686,7 +686,7 @@ const Purchases = () => {
                     <button
                       type="button"
                       onClick={addItemRow}
-                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                      className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100"
                     >
                       <Plus size={14} /> Add Item
                     </button>
@@ -710,7 +710,7 @@ const Purchases = () => {
                                 value={it.item_name}
                                 onChange={(e) => updateItemField(idx, "item_name", e.target.value)}
                                 placeholder="Product or service name"
-                                className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-emerald-500"
+                                className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-brand-500"
                               />
                             </div>
 
@@ -723,7 +723,7 @@ const Purchases = () => {
                                 step="any"
                                 value={it.quantity}
                                 onChange={(e) => updateItemField(idx, "quantity", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none focus:border-emerald-500"
+                                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none focus:border-brand-500"
                               />
                             </div>
 
@@ -736,13 +736,13 @@ const Purchases = () => {
                                 step="any"
                                 value={it.price}
                                 onChange={(e) => updateItemField(idx, "price", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none focus:border-emerald-500"
+                                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none focus:border-brand-500"
                               />
                             </div>
 
                             {/* Selling Price */}
                             <div className="col-span-6 sm:col-span-2">
-                              <label className="mb-1 block text-[11px] font-semibold text-emerald-700">
+                              <label className="mb-1 block text-[11px] font-semibold text-brand-700">
                                 Sell Price (₹)
                               </label>
                               <input
@@ -752,7 +752,7 @@ const Purchases = () => {
                                 placeholder={it.price ? String(it.price) : "0.00"}
                                 value={it.selling_price || ""}
                                 onChange={(e) => updateItemField(idx, "selling_price", e.target.value)}
-                                className="w-full rounded-lg border border-emerald-300 bg-emerald-50/40 px-2 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-emerald-500"
+                                className="w-full rounded-lg border border-brand-300 bg-brand-50/40 px-2 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-brand-500"
                               />
                             </div>
 
@@ -762,7 +762,7 @@ const Purchases = () => {
                               <select
                                 value={it.gst_rate}
                                 onChange={(e) => updateItemField(idx, "gst_rate", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-emerald-500"
+                                className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-brand-500"
                               >
                                 <option value="0">0%</option>
                                 <option value="5">5%</option>
@@ -806,7 +806,7 @@ const Purchases = () => {
                     </div>
                     <div className="flex w-64 justify-between text-sm font-bold text-slate-900 border-t border-slate-100 pt-1">
                       <span>Grand Total:</span>
-                      <span className="text-emerald-700">{formatCurrency(calculatedTotals.grandTotal)}</span>
+                      <span className="text-brand-700">{formatCurrency(calculatedTotals.grandTotal)}</span>
                     </div>
                   </div>
                 </div>
@@ -818,7 +818,7 @@ const Purchases = () => {
                       type="checkbox"
                       checked={form.update_inventory}
                       onChange={(e) => setForm({ ...form, update_inventory: e.target.checked })}
-                      className="rounded text-emerald-600 focus:ring-emerald-500"
+                      className="rounded text-brand-600 focus:ring-brand-500"
                     />
                     <span>Automatically add / update items into Inventory Stock</span>
                   </label>
@@ -837,7 +837,7 @@ const Purchases = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                  className="rounded-xl bg-brand-600 px-5 py-2 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   {saving ? "Saving..." : editingId ? "Update Bill" : "Save Purchase Bill"}
                 </button>
@@ -914,7 +914,7 @@ const Purchases = () => {
                 </div>
                 <div className="flex w-56 justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-1">
                   <span>Total Amount:</span>
-                  <span className="text-emerald-700">{formatCurrency(viewBill.total_amount || 0)}</span>
+                  <span className="text-brand-700">{formatCurrency(viewBill.total_amount || 0)}</span>
                 </div>
               </div>
             </div>

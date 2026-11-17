@@ -85,7 +85,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-sky-700/40 bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 shadow-lg">
+    <nav className="sticky top-0 z-50 w-full border-b border-brand-950/40 bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 shadow-lg">
 
       {/* =========================================
           NAVBAR MAIN
@@ -115,7 +115,7 @@ const Navbar = () => {
               KHATANEX
             </h1>
 
-            <p className="hidden sm:block text-[10px] font-medium text-emerald-100">
+            <p className="hidden sm:block text-[10px] font-medium text-brand-100">
               Smart Khata. Simple Business.
             </p>
           </div>
@@ -259,6 +259,33 @@ const Navbar = () => {
             }
           >
             SERVICES
+          </NavLink>
+
+          {/* PRICING */}
+          <NavLink
+            to="/pricing"
+            className={({ isActive }) =>
+              `relative text-white font-bold cursor-pointer
+              hover:text-yellow-200
+              transition duration-300
+              after:content-['']
+              after:absolute
+              after:left-0
+              after:-bottom-1
+              after:h-[2px]
+              after:bg-yellow-300
+              after:transition-all
+              after:duration-300
+              hover:after:w-full
+              ${
+                isActive
+                  ? "after:w-full"
+                  : "after:w-0"
+              }
+              text-sm xl:text-base`
+            }
+          >
+            PRICING
           </NavLink>
 
           {/* =====================================
@@ -412,7 +439,7 @@ const Navbar = () => {
                   className="sm:w-5 sm:h-5"
                 />
 
-                <span className="absolute right-1 top-1 h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full bg-red-400 ring-2 ring-sky-600" />
+                <span className="absolute right-1 top-1 h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full bg-red-400 ring-2 ring-brand-800" />
               </button>
 
               {/* PROFILE DROPDOWN */}
@@ -426,7 +453,7 @@ const Navbar = () => {
               {/* LOGIN */}
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-sky-700 shadow-md transition hover:bg-sky-50 hover:shadow-lg active:scale-95"
+                className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-brand-700 shadow-md transition hover:bg-brand-50 hover:shadow-lg active:scale-95"
               >
                 Login
               </Link>
@@ -464,7 +491,7 @@ const Navbar = () => {
           MOBILE MENU
       ========================================== */}
       {isMenuOpen && (
-        <div className="absolute right-0 top-full z-50 w-3/4 min-w-[220px] max-w-[320px] max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-white/10 bg-emerald-800 px-4 py-4 shadow-xl lg:hidden">
+        <div className="absolute right-0 top-full z-50 w-3/4 min-w-[220px] max-w-[320px] max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-white/10 bg-brand-900 px-4 py-4 shadow-xl lg:hidden">
 
           <div className="flex flex-col gap-1">
 
@@ -478,7 +505,7 @@ const Navbar = () => {
               onClick={() =>
                 setIsMenuOpen(false)
               }
-              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
             >
               HOME
             </Link>
@@ -489,7 +516,7 @@ const Navbar = () => {
               onClick={() =>
                 setIsMenuOpen(false)
               }
-              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
             >
               ABOUT
             </Link>
@@ -500,7 +527,7 @@ const Navbar = () => {
               onClick={() =>
                 setIsMenuOpen(false)
               }
-              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
             >
               BLOG
             </Link>
@@ -511,7 +538,7 @@ const Navbar = () => {
               onClick={() =>
                 setIsMenuOpen(false)
               }
-              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
             >
               CONTACT
             </Link>
@@ -522,9 +549,20 @@ const Navbar = () => {
               onClick={() =>
                 setIsMenuOpen(false)
               }
-              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
             >
               SERVICES
+            </Link>
+
+            {/* PRICING */}
+            <Link
+              to="/pricing"
+              onClick={() =>
+                setIsMenuOpen(false)
+              }
+              className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
+            >
+              PRICING
             </Link>
 
             {/* =====================================
@@ -540,7 +578,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Dashboard
                 </Link>
@@ -551,7 +589,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Customers
                 </Link>
@@ -562,7 +600,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Khata
                 </Link>
@@ -573,7 +611,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Payments
                 </Link>
@@ -584,7 +622,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Reports
                 </Link>
@@ -595,7 +633,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-cyan-300"
+                  className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-accent-300"
                 >
                   Profile
                 </Link>
@@ -608,7 +646,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5">
 
                   {/* USER AVATAR */}
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-white font-bold text-sm">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-500 text-white font-bold text-sm">
                     {user?.name
                       ? user.name
                           .charAt(0)
@@ -659,7 +697,7 @@ const Navbar = () => {
                   }
                   className="flex items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500">
                     <User size={17} />
                   </div>
 
@@ -672,7 +710,7 @@ const Navbar = () => {
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
-                  className="mt-2 block rounded-xl bg-white px-4 py-3 text-sm font-semibold text-sky-700 text-center transition hover:bg-slate-100"
+                  className="mt-2 block rounded-xl bg-white px-4 py-3 text-sm font-semibold text-brand-700 text-center transition hover:bg-slate-100"
                 >
                   Sign Up
                 </Link>

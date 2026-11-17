@@ -41,7 +41,7 @@ import DeleteUserModal from "../components/DeleteUserModal";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const formatRupees = (paise) => {
   const rupees = Number(paise || 0) / 100;
@@ -853,7 +853,7 @@ export default function BillingDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${
                   isActive
-                    ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20"
+                    ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                     : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
                 }`}
               >
@@ -874,7 +874,7 @@ export default function BillingDashboard() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-bold uppercase tracking-wider">Active Subscriptions</span>
-                    <CheckCircle2 size={18} className="text-emerald-600" />
+                    <CheckCircle2 size={18} className="text-brand-600" />
                   </div>
                   <p className="mt-3 text-3xl font-extrabold text-slate-900">{metrics.activeSubscriptions}</p>
                   <p className="mt-1 text-xs text-slate-500">Users with valid current access</p>
@@ -910,9 +910,9 @@ export default function BillingDashboard() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-bold uppercase tracking-wider">Renewed Accounts</span>
-                    <TrendingUp size={18} className="text-emerald-600" />
+                    <TrendingUp size={18} className="text-brand-600" />
                   </div>
-                  <p className="mt-3 text-3xl font-extrabold text-emerald-600">{metrics.renewedSubscriptions}</p>
+                  <p className="mt-3 text-3xl font-extrabold text-brand-600">{metrics.renewedSubscriptions}</p>
                   <p className="mt-1 text-xs text-slate-500">Customers with &gt; 1 term</p>
                 </div>
 
@@ -940,7 +940,7 @@ export default function BillingDashboard() {
               </div>
             ) : (
               <div className="flex h-32 items-center justify-center">
-                <RefreshCw className="h-6 w-6 animate-spin text-emerald-600" />
+                <RefreshCw className="h-6 w-6 animate-spin text-brand-600" />
               </div>
             )}
           </div>
@@ -969,8 +969,8 @@ export default function BillingDashboard() {
                         onClick={() => handleSelectCohortMonth(c.month)}
                         className={`rounded-xl p-4 text-center cursor-pointer border-2 transition ${
                           isSelected
-                            ? "border-emerald-600 bg-emerald-50/50 shadow-sm"
-                            : "border-slate-200 bg-slate-50 hover:border-emerald-300"
+                            ? "border-brand-600 bg-brand-50/50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:border-brand-300"
                         }`}
                       >
                         <p className="text-xs font-bold text-slate-500 uppercase">{c.month}</p>
@@ -997,7 +997,7 @@ export default function BillingDashboard() {
                   <button
                     type="button"
                     onClick={() => handleOpenCohortCampaign(selectedCohortMonth)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-700 transition shadow-sm"
                   >
                     <Gift size={14} />
                     <span>Create Campaign Coupon</span>
@@ -1006,7 +1006,7 @@ export default function BillingDashboard() {
 
                 {loadingCohortUsers ? (
                   <div className="flex h-24 items-center justify-center">
-                    <RefreshCw className="h-5 w-5 animate-spin text-emerald-600" />
+                    <RefreshCw className="h-5 w-5 animate-spin text-brand-600" />
                   </div>
                 ) : cohortUsers.length === 0 ? (
                   <p className="py-4 text-center text-xs text-slate-400">No users found for this month.</p>
@@ -1070,7 +1070,7 @@ export default function BillingDashboard() {
                 <button
                   type="button"
                   onClick={handleStartCreatePlan}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-700 shadow-sm transition"
                 >
                   <Plus size={14} />
                   <span>Create Plan</span>
@@ -1101,7 +1101,7 @@ export default function BillingDashboard() {
                             <span className="font-bold text-slate-900 block">{p.name}</span>
                             {p.is_highlighted === 1 && <Crown size={14} className="text-amber-500 fill-amber-400" />}
                           </div>
-                          {p.summary && <span className="text-[11px] font-semibold text-emerald-700 block line-clamp-1">{p.summary}</span>}
+                          {p.summary && <span className="text-[11px] font-semibold text-brand-700 block line-clamp-1">{p.summary}</span>}
                           {p.description && <span className="text-[11px] text-slate-400 block line-clamp-1">{p.description}</span>}
                         </td>
                         <td className="py-3.5 px-4">
@@ -1109,7 +1109,7 @@ export default function BillingDashboard() {
                           <span className="block text-[11px] text-slate-400">{p.duration_months} Month(s)</span>
                         </td>
                         <td className="py-3.5 px-4 font-semibold text-slate-900">₹{formatRupees(p.price_paise)}</td>
-                        <td className="py-3.5 px-4 font-semibold text-emerald-600">
+                        <td className="py-3.5 px-4 font-semibold text-brand-600">
                           ₹{formatRupees(p.introductory_price_paise)}
                         </td>
                         <td className="py-3.5 px-4">
@@ -1125,7 +1125,7 @@ export default function BillingDashboard() {
                         <td className="py-3.5 px-4">
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              p.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                              p.is_active ? "bg-brand-100 text-brand-800" : "bg-slate-100 text-slate-500"
                             }`}
                           >
                             {p.is_active ? "Active" : "Disabled"}
@@ -1177,7 +1177,7 @@ export default function BillingDashboard() {
                             value={planForm.code}
                             onChange={(e) => setPlanForm({ ...planForm, code: e.target.value.toLowerCase() })}
                             placeholder="e.g. quarterly or lifetime"
-                            className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-emerald-600 focus:outline-none"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-brand-600 focus:outline-none"
                             required
                           />
                         </div>
@@ -1191,7 +1191,7 @@ export default function BillingDashboard() {
                             value={planForm.name}
                             onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
                             placeholder="e.g. Monthly Plan"
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none font-medium"
                             required
                           />
                         </div>
@@ -1201,7 +1201,7 @@ export default function BillingDashboard() {
                           <select
                             value={planForm.billing_interval}
                             onChange={(e) => setPlanForm({ ...planForm, billing_interval: e.target.value })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none font-medium"
                           >
                             <option value="monthly">Monthly</option>
                             <option value="half_yearly">Half-Yearly (6 Months)</option>
@@ -1219,7 +1219,7 @@ export default function BillingDashboard() {
                             max="120"
                             value={planForm.duration_months}
                             onChange={(e) => setPlanForm({ ...planForm, duration_months: e.target.value })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                             required
                           />
                         </div>
@@ -1231,7 +1231,7 @@ export default function BillingDashboard() {
                             step="0.01"
                             value={planForm.price_rupees}
                             onChange={(e) => setPlanForm({ ...planForm, price_rupees: e.target.value })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-semibold text-slate-900"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none font-semibold text-slate-900"
                             required
                           />
                         </div>
@@ -1243,7 +1243,7 @@ export default function BillingDashboard() {
                             step="0.01"
                             value={planForm.introductory_price_rupees}
                             onChange={(e) => setPlanForm({ ...planForm, introductory_price_rupees: e.target.value })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-semibold text-emerald-600"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none font-semibold text-brand-600"
                             required
                           />
                         </div>
@@ -1257,7 +1257,7 @@ export default function BillingDashboard() {
                             value={planForm.promotional_badge}
                             onChange={(e) => setPlanForm({ ...planForm, promotional_badge: e.target.value })}
                             placeholder="e.g. Save 46% or Best Value"
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           />
                         </div>
 
@@ -1268,7 +1268,7 @@ export default function BillingDashboard() {
                             value={planForm.summary}
                             onChange={(e) => setPlanForm({ ...planForm, summary: e.target.value })}
                             placeholder="e.g. Includes 1 Extra Month Free"
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           />
                         </div>
                       </div>
@@ -1280,7 +1280,7 @@ export default function BillingDashboard() {
                           value={planForm.description}
                           onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
                           placeholder="e.g. Full ledger access with multi-device sync"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
 
@@ -1292,7 +1292,7 @@ export default function BillingDashboard() {
                             type="number"
                             value={planForm.display_order}
                             onChange={(e) => setPlanForm({ ...planForm, display_order: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           />
                         </div>
 
@@ -1316,7 +1316,7 @@ export default function BillingDashboard() {
                           <select
                             value={planForm.is_active}
                             onChange={(e) => setPlanForm({ ...planForm, is_active: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none font-medium"
+                            className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none font-medium"
                           >
                             <option value={1}>Active</option>
                             <option value={0}>Disabled</option>
@@ -1345,7 +1345,7 @@ export default function BillingDashboard() {
                               }
                             }}
                             placeholder="Type feature (e.g. Unlimited GST Invoices) and press Add"
-                            className="flex-1 rounded-xl border border-slate-300 p-2 bg-white focus:border-emerald-600 focus:outline-none text-xs"
+                            className="flex-1 rounded-xl border border-slate-300 p-2 bg-white focus:border-brand-600 focus:outline-none text-xs"
                           />
                           <button
                             type="button"
@@ -1404,7 +1404,7 @@ export default function BillingDashboard() {
                             <span>{planForm.promotional_badge || "BEST VALUE"}</span>
                           </div>
                         ) : planForm.promotional_badge ? (
-                          <div className="absolute top-3 right-3 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-white">
+                          <div className="absolute top-3 right-3 rounded-full bg-brand-600 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-white">
                             {planForm.promotional_badge}
                           </div>
                         ) : null}
@@ -1420,7 +1420,7 @@ export default function BillingDashboard() {
                           </p>
 
                           {planForm.summary && (
-                            <div className="mt-2 rounded-lg bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                            <div className="mt-2 rounded-lg bg-brand-950/80 border border-brand-800 px-2.5 py-1 text-[11px] font-semibold text-brand-300">
                               {planForm.summary}
                             </div>
                           )}
@@ -1439,7 +1439,7 @@ export default function BillingDashboard() {
                             </span>
                           </div>
 
-                          <p className="text-[11px] font-semibold text-emerald-400 mt-1">
+                          <p className="text-[11px] font-semibold text-brand-400 mt-1">
                             No hidden fees
                           </p>
 
@@ -1447,7 +1447,7 @@ export default function BillingDashboard() {
                           <ul className="mt-4 space-y-2 text-xs text-slate-300">
                             {(planForm.features || []).map((feat, i) => (
                               <li key={i} className="flex items-center gap-2">
-                                <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                                <CheckCircle2 size={14} className="text-brand-400 shrink-0" />
                                 <span className="line-clamp-1">{feat}</span>
                               </li>
                             ))}
@@ -1459,7 +1459,7 @@ export default function BillingDashboard() {
                             className={`w-full py-2.5 text-center text-xs font-bold rounded-xl transition ${
                               planForm.is_highlighted === 1
                                 ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow"
-                                : "bg-emerald-600 text-white"
+                                : "bg-brand-600 text-white"
                             }`}
                           >
                             Choose {planForm.name || "Plan"}
@@ -1481,7 +1481,7 @@ export default function BillingDashboard() {
                     <button
                       type="submit"
                       form="plan-config-form"
-                      className="rounded-xl bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700 text-xs shadow-sm transition"
+                      className="rounded-xl bg-brand-600 px-5 py-2 font-bold text-white hover:bg-brand-700 text-xs shadow-sm transition"
                     >
                       {planForm.id ? "Save & Publish Changes" : "Create Plan"}
                     </button>
@@ -1508,7 +1508,7 @@ export default function BillingDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowCouponModal(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700 transition shadow-sm"
                 >
                   <Plus size={15} />
                   <span>Create Coupon</span>
@@ -1524,7 +1524,7 @@ export default function BillingDashboard() {
                     value={couponSearch}
                     onChange={(e) => setCouponSearch(e.target.value)}
                     placeholder="Search by code, campaign name, or description..."
-                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-brand-600 focus:outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -1532,7 +1532,7 @@ export default function BillingDashboard() {
                   <select
                     value={couponStatusFilter}
                     onChange={(e) => setCouponStatusFilter(e.target.value)}
-                    className="rounded-xl border border-slate-300 px-3 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                    className="rounded-xl border border-slate-300 px-3 py-2 text-xs focus:border-brand-600 focus:outline-none"
                   >
                     <option value="all">All Statuses</option>
                     <option value="active">Active Only</option>
@@ -1573,7 +1573,7 @@ export default function BillingDashboard() {
                         return (
                           <tr key={c.id}>
                             <td className="py-3 px-3">
-                              <span className="font-mono font-bold text-emerald-700 block">{c.code}</span>
+                              <span className="font-mono font-bold text-brand-700 block">{c.code}</span>
                               {c.name && <span className="font-semibold text-slate-800 text-[11px] block">{c.name}</span>}
                               {c.description && (
                                 <span className="text-[10px] text-slate-400 block line-clamp-1">{c.description}</span>
@@ -1606,12 +1606,12 @@ export default function BillingDashboard() {
                             <td className="py-3 px-3 space-y-1">
                               <span
                                 className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                  c.is_active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                                  c.is_active ? "bg-brand-100 text-brand-800" : "bg-slate-100 text-slate-500"
                                 }`}
                               >
                                 {c.is_active ? "Active" : "Disabled"}
                               </span>
-                              <span className="block rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
+                              <span className="block rounded bg-brand-50 text-brand-800 border border-brand-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
                                 Atomically Enforced
                               </span>
                             </td>
@@ -1670,7 +1670,7 @@ export default function BillingDashboard() {
                           value={couponForm.code}
                           onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
                           placeholder="e.g. FESTIVE50"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -1679,7 +1679,7 @@ export default function BillingDashboard() {
                         <select
                           value={couponForm.discount_type}
                           onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         >
                           <option value="percent">Percentage (%)</option>
                           <option value="flat">Flat Amount (₹)</option>
@@ -1695,7 +1695,7 @@ export default function BillingDashboard() {
                           value={couponForm.name}
                           onChange={(e) => setCouponForm({ ...couponForm, name: e.target.value })}
                           placeholder="e.g. Diwali Super Saver"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1705,7 +1705,7 @@ export default function BillingDashboard() {
                           value={couponForm.description}
                           onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
                           placeholder="e.g. Applicable on all 1-year plans"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1721,7 +1721,7 @@ export default function BillingDashboard() {
                           value={couponForm.discount_value}
                           onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })}
                           placeholder={couponForm.discount_type === "percent" ? "20" : "120"}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -1733,7 +1733,7 @@ export default function BillingDashboard() {
                           value={couponForm.max_discount_rupees}
                           onChange={(e) => setCouponForm({ ...couponForm, max_discount_rupees: e.target.value })}
                           placeholder="e.g. 500"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1746,7 +1746,7 @@ export default function BillingDashboard() {
                           value={couponForm.max_redemptions}
                           onChange={(e) => setCouponForm({ ...couponForm, max_redemptions: e.target.value })}
                           placeholder="e.g. 100 (blank = unlimited)"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1755,7 +1755,7 @@ export default function BillingDashboard() {
                           type="number"
                           value={couponForm.per_user_limit}
                           onChange={(e) => setCouponForm({ ...couponForm, per_user_limit: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1767,7 +1767,7 @@ export default function BillingDashboard() {
                           type="date"
                           value={couponForm.valid_until}
                           onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1777,7 +1777,7 @@ export default function BillingDashboard() {
                           value={couponForm.target_cohort}
                           onChange={(e) => setCouponForm({ ...couponForm, target_cohort: e.target.value })}
                           placeholder="e.g. 2026-10"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1792,7 +1792,7 @@ export default function BillingDashboard() {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
+                        className="rounded-xl bg-brand-600 px-4 py-2 font-bold text-white hover:bg-brand-700 shadow-sm"
                       >
                         Create Coupon
                       </button>
@@ -1829,7 +1829,7 @@ export default function BillingDashboard() {
                         <select
                           value={couponForm.discount_type}
                           onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         >
                           <option value="percent">Percentage (%)</option>
                           <option value="flat">Flat Amount (₹)</option>
@@ -1844,7 +1844,7 @@ export default function BillingDashboard() {
                           type="text"
                           value={couponForm.name}
                           onChange={(e) => setCouponForm({ ...couponForm, name: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1853,7 +1853,7 @@ export default function BillingDashboard() {
                           type="text"
                           value={couponForm.description}
                           onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1868,7 +1868,7 @@ export default function BillingDashboard() {
                           step="1"
                           value={couponForm.discount_value}
                           onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -1879,7 +1879,7 @@ export default function BillingDashboard() {
                           step="1"
                           value={couponForm.max_discount_rupees}
                           onChange={(e) => setCouponForm({ ...couponForm, max_discount_rupees: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1892,7 +1892,7 @@ export default function BillingDashboard() {
                           value={couponForm.max_redemptions}
                           onChange={(e) => setCouponForm({ ...couponForm, max_redemptions: e.target.value })}
                           placeholder="Blank = unlimited"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1901,7 +1901,7 @@ export default function BillingDashboard() {
                           type="number"
                           value={couponForm.per_user_limit}
                           onChange={(e) => setCouponForm({ ...couponForm, per_user_limit: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1913,7 +1913,7 @@ export default function BillingDashboard() {
                           type="date"
                           value={couponForm.valid_until}
                           onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -1922,7 +1922,7 @@ export default function BillingDashboard() {
                           type="text"
                           value={couponForm.target_cohort}
                           onChange={(e) => setCouponForm({ ...couponForm, target_cohort: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1937,7 +1937,7 @@ export default function BillingDashboard() {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
+                        className="rounded-xl bg-brand-600 px-4 py-2 font-bold text-white hover:bg-brand-700 shadow-sm"
                       >
                         Save Changes
                       </button>
@@ -1968,7 +1968,7 @@ export default function BillingDashboard() {
                 <button
                   type="button"
                   onClick={handleStartCreatePromo}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-sm"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700 transition shadow-sm"
                 >
                   <Plus size={15} />
                   <span>Create Campaign</span>
@@ -2012,7 +2012,7 @@ export default function BillingDashboard() {
                             <td className="py-3 px-3">
                               <span className="font-bold text-slate-900 block">{p.name}</span>
                               {p.code && (
-                                <span className="font-mono text-emerald-700 text-[11px] font-semibold">{p.code}</span>
+                                <span className="font-mono text-brand-700 text-[11px] font-semibold">{p.code}</span>
                               )}
                               {p.plan_code && (
                                 <span className="text-[10px] text-slate-400 block">Plan: {p.plan_code}</span>
@@ -2068,7 +2068,7 @@ export default function BillingDashboard() {
                               <span
                                 className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                                   isLive
-                                    ? "bg-emerald-100 text-emerald-800"
+                                    ? "bg-brand-100 text-brand-800"
                                     : isPending
                                     ? "bg-amber-100 text-amber-800"
                                     : isExpired
@@ -2078,7 +2078,7 @@ export default function BillingDashboard() {
                               >
                                 {isLive ? "Live" : isPending ? "Scheduled" : isExpired ? "Expired" : "Disabled"}
                               </span>
-                              <span className="block rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
+                              <span className="block rounded bg-brand-50 text-brand-800 border border-brand-200 px-1.5 py-0.5 text-[9px] font-bold tracking-tight w-fit">
                                 Atomically Enforced
                               </span>
                             </td>
@@ -2140,7 +2140,7 @@ export default function BillingDashboard() {
                           value={promoForm.name}
                           onChange={(e) => setPromoForm({ ...promoForm, name: e.target.value })}
                           placeholder="e.g. Diwali Flash Sale"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -2151,7 +2151,7 @@ export default function BillingDashboard() {
                           value={promoForm.code}
                           onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })}
                           placeholder="e.g. DIWALI2026"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 uppercase font-medium focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -2162,7 +2162,7 @@ export default function BillingDashboard() {
                         <select
                           value={promoForm.discount_type}
                           onChange={(e) => setPromoForm({ ...promoForm, discount_type: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         >
                           <option value="percent">Percentage (%)</option>
                           <option value="flat">Flat Amount (₹)</option>
@@ -2178,7 +2178,7 @@ export default function BillingDashboard() {
                           value={promoForm.discount_value}
                           onChange={(e) => setPromoForm({ ...promoForm, discount_value: e.target.value })}
                           placeholder={promoForm.discount_type === "percent" ? "30" : "500"}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -2193,7 +2193,7 @@ export default function BillingDashboard() {
                           value={promoForm.max_discount_rupees}
                           onChange={(e) => setPromoForm({ ...promoForm, max_discount_rupees: e.target.value })}
                           placeholder="e.g. 1000"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -2201,7 +2201,7 @@ export default function BillingDashboard() {
                         <select
                           value={promoForm.plan_code}
                           onChange={(e) => setPromoForm({ ...promoForm, plan_code: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         >
                           <option value="">All Subscription Plans</option>
                           {plans.map((p) => (
@@ -2220,7 +2220,7 @@ export default function BillingDashboard() {
                           type="datetime-local"
                           value={promoForm.starts_at}
                           onChange={(e) => setPromoForm({ ...promoForm, starts_at: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -2230,7 +2230,7 @@ export default function BillingDashboard() {
                           type="datetime-local"
                           value={promoForm.ends_at}
                           onChange={(e) => setPromoForm({ ...promoForm, ends_at: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                           required
                         />
                       </div>
@@ -2242,7 +2242,7 @@ export default function BillingDashboard() {
                         <select
                           value={promoForm.user_eligibility}
                           onChange={(e) => setPromoForm({ ...promoForm, user_eligibility: e.target.value })}
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         >
                           <option value="all">All Users</option>
                           <option value="new_user">New Users Only</option>
@@ -2257,7 +2257,7 @@ export default function BillingDashboard() {
                           value={promoForm.target_cohort}
                           onChange={(e) => setPromoForm({ ...promoForm, target_cohort: e.target.value })}
                           placeholder="e.g. 2026-10"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -2270,7 +2270,7 @@ export default function BillingDashboard() {
                           value={promoForm.max_redemptions}
                           onChange={(e) => setPromoForm({ ...promoForm, max_redemptions: e.target.value })}
                           placeholder="Blank = unlimited"
-                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                         />
                       </div>
                       <div className="flex items-center pt-5">
@@ -2281,7 +2281,7 @@ export default function BillingDashboard() {
                             onChange={(e) =>
                               setPromoForm({ ...promoForm, can_stack_with_coupon: e.target.checked ? 1 : 0 })
                             }
-                            className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                            className="h-4 w-4 rounded text-brand-600 focus:ring-brand-500"
                           />
                           <span className="font-semibold text-slate-700">Allow Stacking with Coupons</span>
                         </label>
@@ -2298,7 +2298,7 @@ export default function BillingDashboard() {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm"
+                        className="rounded-xl bg-brand-600 px-4 py-2 font-bold text-white hover:bg-brand-700 shadow-sm"
                       >
                         {promoForm.id ? "Save Changes" : "Launch Promotion"}
                       </button>
@@ -2330,7 +2330,7 @@ export default function BillingDashboard() {
                     value={orderSearch}
                     onChange={(e) => setOrderSearch(e.target.value)}
                     placeholder="Search order or customer..."
-                    className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
+                    className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs focus:border-brand-600 focus:outline-none"
                   />
                   <select
                     value={orderStatusFilter}
@@ -2338,7 +2338,7 @@ export default function BillingDashboard() {
                       setOrderStatusFilter(e.target.value);
                       loadOrders(1);
                     }}
-                    className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
+                    className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs focus:border-brand-600 focus:outline-none"
                   >
                     <option value="">All Statuses</option>
                     <option value="paid">Paid</option>
@@ -2373,7 +2373,7 @@ export default function BillingDashboard() {
                       <tr key={o.id}>
                         <td className="py-3 px-3">
                           <p className="font-mono font-bold text-slate-900">{o.order_number}</p>
-                          {o.invoice_number && <p className="text-[10px] text-emerald-600 font-semibold">{o.invoice_number}</p>}
+                          {o.invoice_number && <p className="text-[10px] text-brand-600 font-semibold">{o.invoice_number}</p>}
                         </td>
                         <td className="py-3 px-3">
                           <p className="font-semibold text-slate-800">{o.user_name}</p>
@@ -2401,7 +2401,7 @@ export default function BillingDashboard() {
                             <button
                               type="button"
                               onClick={() => handleDownloadInvoice(o.id, o.invoice_number)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                              className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100"
                             >
                               <Download size={12} />
                               <span>PDF</span>
@@ -2590,7 +2590,7 @@ export default function BillingDashboard() {
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
                     placeholder="Enter ID, Name, Business, Phone, or Email..."
-                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs focus:border-brand-600 focus:outline-none"
                   />
                 </div>
                 <button
@@ -2634,7 +2634,7 @@ export default function BillingDashboard() {
                             {u.email} · {u.phone || "No phone"} · {u.business_name || "No Business"}
                           </p>
                           {u.subscription_plan_name && (
-                            <p className="text-[10px] text-emerald-700 font-semibold mt-0.5">
+                            <p className="text-[10px] text-brand-700 font-semibold mt-0.5">
                               Plan: {u.subscription_plan_name} (Expires: {formatDate(u.subscription_ends_at)})
                             </p>
                           )}
@@ -2643,7 +2643,7 @@ export default function BillingDashboard() {
                         <button
                           type="button"
                           onClick={() => handleSelectUser(u.id)}
-                          className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition shadow-xs"
+                          className="rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100 transition shadow-xs"
                         >
                           Inspect & Manage
                         </button>
@@ -2664,7 +2664,7 @@ export default function BillingDashboard() {
                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                             lookedUpUser.user.has_used_intro_offer
                               ? "bg-amber-100 text-amber-800"
-                              : "bg-emerald-100 text-emerald-800"
+                              : "bg-brand-100 text-brand-800"
                           }`}
                         >
                           {lookedUpUser.user.has_used_intro_offer ? "Intro Offer: Used" : "Intro Offer: Eligible"}
@@ -2700,7 +2700,7 @@ export default function BillingDashboard() {
                       <button
                         type="button"
                         onClick={() => setShowGrantModal(true)}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700 shadow-sm"
                       >
                         <Gift size={14} />
                         <span>Grant Complimentary Plan</span>
@@ -2755,7 +2755,7 @@ export default function BillingDashboard() {
                                   <span
                                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                                       new Date(s.ends_at) > new Date()
-                                        ? "bg-emerald-100 text-emerald-800"
+                                        ? "bg-brand-100 text-brand-800"
                                         : "bg-slate-100 text-slate-500"
                                     }`}
                                   >
@@ -2796,7 +2796,7 @@ export default function BillingDashboard() {
                       <select
                         value={grantForm.plan_code}
                         onChange={(e) => setGrantForm({ ...grantForm, plan_code: e.target.value })}
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                       >
                         {plans.map((p) => (
                           <option key={p.code} value={p.code}>
@@ -2813,7 +2813,7 @@ export default function BillingDashboard() {
                         value={grantForm.notes}
                         onChange={(e) => setGrantForm({ ...grantForm, notes: e.target.value })}
                         placeholder="e.g. Grandfathered legacy user or customer care support"
-                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-emerald-600 focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                       />
                     </div>
 
@@ -2827,7 +2827,7 @@ export default function BillingDashboard() {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+                        className="rounded-xl bg-brand-600 px-4 py-2 font-bold text-white hover:bg-brand-700"
                       >
                         Confirm Grant
                       </button>
@@ -2849,7 +2849,7 @@ export default function BillingDashboard() {
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <Key size={18} className="text-emerald-600" />
+                    <Key size={18} className="text-brand-600" />
                     <span>Payment Gateway Provider Status</span>
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -2861,11 +2861,11 @@ export default function BillingDashboard() {
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
                       gatewayStatus?.isConfigured
-                        ? "bg-emerald-100 text-emerald-800"
+                        ? "bg-brand-100 text-brand-800"
                         : "bg-amber-100 text-amber-800"
                     }`}
                   >
-                    <span className={`h-2 w-2 rounded-full ${gatewayStatus?.isConfigured ? "bg-emerald-500" : "bg-amber-500"}`} />
+                    <span className={`h-2 w-2 rounded-full ${gatewayStatus?.isConfigured ? "bg-brand-500" : "bg-amber-500"}`} />
                     <span>{gatewayStatus?.mode?.toUpperCase() || "UNCONFIGURED"}</span>
                   </span>
                 </div>
@@ -2897,8 +2897,8 @@ export default function BillingDashboard() {
                   <p className="mt-1 text-base font-bold text-slate-900 flex items-center gap-1.5">
                     {gatewayStatus?.hasWebhookSecret ? (
                       <>
-                        <ShieldCheck size={16} className="text-emerald-600" />
-                        <span className="text-emerald-700">Configured (Protected)</span>
+                        <ShieldCheck size={16} className="text-brand-600" />
+                        <span className="text-brand-700">Configured (Protected)</span>
                       </>
                     ) : (
                       <>
@@ -2914,7 +2914,7 @@ export default function BillingDashboard() {
               </div>
 
               <div className="mt-4 rounded-xl bg-slate-100 p-3.5 text-xs text-slate-600 flex items-center gap-2.5">
-                <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
+                <ShieldCheck size={18} className="text-brand-600 shrink-0" />
                 <span>
                   <strong>Security Guard:</strong> Live production environments strictly reject mock payment adapters. Razorpay secrets and webhook secrets are stored in protected environment variables and are never displayed or exposed over API.
                 </span>
@@ -2925,7 +2925,7 @@ export default function BillingDashboard() {
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="border-b border-slate-100 pb-4 mb-5">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Sliders size={18} className="text-emerald-600" />
+                  <Sliders size={18} className="text-brand-600" />
                   <span>Platform Subscription Rules & Enforcement</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -2954,7 +2954,7 @@ export default function BillingDashboard() {
                             intro_offers_enabled: e.target.checked ? 1 : 0,
                           })
                         }
-                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                        className="h-4 w-4 rounded text-brand-600 focus:ring-brand-500"
                       />
                     </div>
                     <p className="text-[11px] text-slate-500">
@@ -2975,7 +2975,7 @@ export default function BillingDashboard() {
                           subscription_enforcement: e.target.value,
                         })
                       }
-                      className="w-full rounded-xl border border-slate-300 p-2 text-xs font-semibold focus:border-emerald-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs font-semibold focus:border-brand-600 focus:outline-none"
                     >
                       <option value="off">Off — Standard Free Access (Soft Banners Only)</option>
                       <option value="on">On — Strict Enforcement (Read-Only Writes for Unsubscribed)</option>
@@ -3000,7 +3000,7 @@ export default function BillingDashboard() {
                           tax_percent: e.target.value,
                         })
                       }
-                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-brand-600 focus:outline-none"
                       required
                     />
                     <p className="text-[11px] text-slate-500">
@@ -3021,7 +3021,7 @@ export default function BillingDashboard() {
                             tax_inclusive: e.target.checked ? 1 : 0,
                           })
                         }
-                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                        className="h-4 w-4 rounded text-brand-600 focus:ring-brand-500"
                       />
                     </div>
                     <p className="text-[11px] text-slate-500">
@@ -3042,7 +3042,7 @@ export default function BillingDashboard() {
                             reminders_enabled: e.target.checked ? 1 : 0,
                           })
                         }
-                        className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                        className="h-4 w-4 rounded text-brand-600 focus:ring-brand-500"
                       />
                     </div>
                     <p className="text-[11px] text-slate-500">
@@ -3065,7 +3065,7 @@ export default function BillingDashboard() {
                         })
                       }
                       placeholder="e.g. 7,3,1"
-                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2 text-xs focus:border-brand-600 focus:outline-none"
                     />
                     <p className="text-[11px] text-slate-500">
                       Comma-separated list of days before expiration to trigger automated notifications (e.g. "7,3,1").
@@ -3077,7 +3077,7 @@ export default function BillingDashboard() {
                   <button
                     type="submit"
                     disabled={loadingSettings}
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-brand-600/20 hover:bg-brand-700 transition disabled:opacity-50"
                   >
                     {loadingSettings ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check size={14} />}
                     <span>Save Platform Settings</span>
@@ -3089,7 +3089,7 @@ export default function BillingDashboard() {
             {/* Audit Log Trail */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-1">
-                <FileText size={18} className="text-emerald-600" />
+                <FileText size={18} className="text-brand-600" />
                 <span>Subscription Settings Audit Trail</span>
               </h3>
               <p className="text-xs text-slate-500 mb-4">

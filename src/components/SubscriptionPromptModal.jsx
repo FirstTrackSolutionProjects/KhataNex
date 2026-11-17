@@ -26,7 +26,7 @@ export default function SubscriptionPromptModal({ isOpen, onClose, featureName }
       >
         {/* Background Decorative Gradient */}
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-amber-500/10 dark:bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-brand-500/10 dark:bg-brand-400/10 rounded-full blur-2xl pointer-events-none" />
 
         {/* Close Button */}
         <button
@@ -76,18 +76,18 @@ export default function SubscriptionPromptModal({ isOpen, onClose, featureName }
                   <span>Linked Business: {ownerName}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-brand-500 flex-shrink-0" />
                   <span>Employees automatically inherit access once the owner renews</span>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-brand-500 flex-shrink-0" />
                   <span>Full access to Invoicing, Khata, Inventory & Banking</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-brand-500 flex-shrink-0" />
                   <span>Introductory discount available for eligible accounts</span>
                 </div>
               </>

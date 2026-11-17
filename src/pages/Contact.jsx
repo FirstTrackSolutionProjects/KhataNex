@@ -58,17 +58,17 @@ const Contact = () => {
       {/* =========================================
           HERO SECTION
       ========================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600">
+      <section className="relative overflow-hidden bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600">
 
         {/* Background decoration */}
         <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-24 -left-20 h-80 w-80 rounded-full bg-teal-300/10 blur-3xl" />
+        <div className="absolute -bottom-24 -left-20 h-80 w-80 rounded-full bg-brand-300/10 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
 
           <div className="max-w-3xl">
 
-            <span className="inline-flex rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-emerald-100">
+            <span className="inline-flex rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-brand-100">
               Contact KHATANEX
             </span>
 
@@ -77,7 +77,7 @@ const Contact = () => {
               <span className="text-yellow-300"> Help You</span>
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-emerald-50 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-brand-50 sm:text-lg">
               Have a question about KHATANEX? Need help with your
               business account? Our team is ready to help you manage
               your business more easily.
@@ -98,7 +98,7 @@ const Contact = () => {
           {/* Phone */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
               <Phone size={22} />
             </div>
 
@@ -112,7 +112,7 @@ const Contact = () => {
 
             <a
               href="tel:+91 9040170727"
-              className="mt-3 block text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+              className="mt-3 block text-sm font-semibold text-brand-600 hover:text-brand-700"
             >
               +91 9040170727
             </a>
@@ -136,7 +136,7 @@ const Contact = () => {
 
             <a
               href="mailto:support@khatanex.in"
-              className="mt-3 block break-all text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+              className="mt-3 block break-all text-sm font-semibold text-brand-600 hover:text-brand-700"
             >
               support@khatanex.in
             </a>
@@ -207,7 +207,7 @@ const Contact = () => {
 
             <div className="mb-7">
 
-              <span className="text-sm font-semibold uppercase tracking-wider text-emerald-600">
+              <span className="text-sm font-semibold uppercase tracking-wider text-brand-600">
                 Get In Touch
               </span>
 
@@ -228,7 +228,7 @@ const Contact = () => {
 
                 <CheckCircle
                   size={21}
-                  className="mt-0.5 shrink-0 text-emerald-600"
+                  className="mt-0.5 shrink-0 text-brand-600"
                 />
 
                 <div>
@@ -236,7 +236,7 @@ const Contact = () => {
                     Message sent successfully!
                   </p>
 
-                  <p className="mt-1 text-sm text-emerald-700">
+                  <p className="mt-1 text-sm text-brand-700">
                     Thank you for contacting KHATANEX. We'll get
                     back to you shortly.
                   </p>
@@ -264,7 +264,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter your name"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
 
@@ -279,7 +279,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
 
@@ -299,7 +299,7 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+91 XXXXX XXXXX"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
 
@@ -312,7 +312,7 @@ const Contact = () => {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
                   >
                    {
                     Object.entries(CONTACT_US_SUBJECT_ENUM).map(([key, value]) => (
@@ -338,7 +338,7 @@ const Contact = () => {
                   onChange={handleChange}
                   rows="6"
                   placeholder="Write your message here..."
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
                 />
               </div>
 
@@ -346,7 +346,7 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg sm:w-auto"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-700 to-brand-500 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:from-brand-800 hover:to-brand-600 hover:shadow-lg sm:w-auto"
               >
                 <Send size={18} />
                 {loading ? "Sending..." : "Send Message"}
@@ -362,7 +362,7 @@ const Contact = () => {
           <div className="space-y-6">
 
             {/* Support */}
-            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600 p-6 text-white shadow-lg sm:p-8">
+            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600 p-6 text-white shadow-lg sm:p-8">
 
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
                 <MessageCircle size={24} />
@@ -372,14 +372,14 @@ const Contact = () => {
                 Need Quick Help?
               </h2>
 
-              <p className="mt-3 text-sm leading-6 text-emerald-50">
+              <p className="mt-3 text-sm leading-6 text-brand-50">
                 Our customer support team is ready to help you
                 with your KHATANEX account and business needs.
               </p>
 
               <a
                 href="mailto:support@khatanex.com"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-50"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-brand-700 transition hover:bg-brand-50"
               >
                 <Mail size={17} />
                 Contact Support
@@ -401,7 +401,7 @@ const Contact = () => {
 
               <a
                 href="/faq"
-                className="mt-5 inline-flex text-sm font-bold text-emerald-600 hover:text-emerald-700"
+                className="mt-5 inline-flex text-sm font-bold text-brand-600 hover:text-brand-700"
               >
                 Visit FAQ →
               </a>
@@ -413,7 +413,7 @@ const Contact = () => {
 
               <div className="flex items-center gap-3">
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-600">
                   <Clock size={19} />
                 </div>
 
@@ -455,7 +455,7 @@ const Contact = () => {
 
           <a
             href="/dashboard"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-brand-700 hover:shadow-lg"
           >
             Go to Dashboard
             <ArrowUpRight size={17} />

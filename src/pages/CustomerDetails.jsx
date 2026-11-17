@@ -348,7 +348,7 @@ const CustomerDetails = () => {
 
             <Link
               to="/customers"
-              className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-emerald-600"
+              className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-brand-600"
             >
               <ArrowLeft size={18} />
               Customers
@@ -376,7 +376,7 @@ const CustomerDetails = () => {
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-xl font-bold text-emerald-700">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-xl font-bold text-brand-700">
                       {(customer.name || "U").charAt(0).toUpperCase()}
                     </div>
 
@@ -421,8 +421,8 @@ const CustomerDetails = () => {
                       disabled={!canWrite}
                       onClick={startEditing}
                       title={!canWrite ? subscriptionRequiredMessage : undefined}
-                      className={`flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white ${
-                        !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-700"
+                      className={`flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white ${
+                        !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-700"
                       }`}
                     >
                       <Pencil size={16} />
@@ -691,7 +691,7 @@ const CustomerDetails = () => {
                       onChange={(event) =>
                         updateForm(field, event.target.value)
                       }
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
                 ))}
@@ -729,7 +729,7 @@ const CustomerDetails = () => {
                               event.target.value
                             )
                           }
-                          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                         />
                       </div>
                     ))}
@@ -750,7 +750,7 @@ const CustomerDetails = () => {
                   type="submit"
                   disabled={!canWrite || saving}
                   title={!canWrite ? subscriptionRequiredMessage : undefined}
-                  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Save size={16} />
                   {saving ? "Saving..." : "Save Changes"}

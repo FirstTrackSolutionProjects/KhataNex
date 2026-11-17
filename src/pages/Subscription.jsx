@@ -23,7 +23,7 @@ import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import { getDownloadFilename } from "../utils/downloadFilename";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const formatRupees = (paise) => {
   const rupees = Number(paise || 0) / 100;
@@ -251,7 +251,7 @@ export default function Subscription() {
           contact: orderData.userPhone || user?.phone || "",
         },
         theme: {
-          color: "#059669",
+          color: "#4B1D9C",
         },
         handler: async function (response) {
           try {
@@ -377,7 +377,7 @@ export default function Subscription() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center lg:pl-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-emerald-600" />
+        <RefreshCw className="h-8 w-8 animate-spin text-brand-600" />
       </div>
     );
   }
@@ -403,7 +403,7 @@ export default function Subscription() {
 
           {/* Header */}
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+            <div className="inline-flex items-center gap-2 rounded-full bg-brand-100 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-800 px-3 py-1 text-xs font-semibold text-brand-800 dark:text-brand-300">
               <Sparkles size={14} />
               <span>KhataNex Premium Membership</span>
             </div>
@@ -435,10 +435,10 @@ export default function Subscription() {
 
         {/* Onboarding Welcome Hero */}
         {isOnboarding && (
-          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6 shadow-sm">
+          <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-brand-50 p-6 shadow-sm">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 text-xs font-bold text-brand-800">
                   <Sparkles size={14} /> Welcome to KhataNex
                 </span>
                 <h2 className="mt-2 text-2xl font-black text-slate-900 tracking-tight">
@@ -474,7 +474,7 @@ export default function Subscription() {
         {user?.role === "employee" ? (
           <div className="space-y-6">
             {activeSub ? (
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 p-6 text-white shadow-lg">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -486,10 +486,10 @@ export default function Subscription() {
                       </span>
                     </div>
                     <h2 className="text-2xl font-bold tracking-tight">{activeSub.plan_name}</h2>
-                    <p className="text-xs text-emerald-100">
+                    <p className="text-xs text-brand-100">
                       Covered by Business Owner: <span className="font-semibold text-white">{ownerInfo?.business_name || ownerInfo?.name || "Your Account Owner"}</span>
                     </p>
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-emerald-100 pt-1">
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-brand-100 pt-1">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} /> Started: {formatDate(activeSub.starts_at)}
                       </span>
@@ -502,14 +502,14 @@ export default function Subscription() {
                   <div className="flex items-center gap-3">
                     <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
                       <p className="text-2xl font-extrabold">{remainingDays}</p>
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-emerald-100">
+                      <p className="text-[11px] font-medium uppercase tracking-wider text-brand-100">
                         Days Remaining
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => navigate("/customers")}
-                      className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-emerald-800 shadow transition hover:bg-emerald-50"
+                      className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-brand-800 shadow transition hover:bg-brand-50"
                     >
                       Go to Dashboard
                     </button>
@@ -544,7 +544,7 @@ export default function Subscription() {
           <>
             {/* Active Subscription Banner */}
             {activeSub ? (
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 p-6 text-white shadow-lg">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -558,7 +558,7 @@ export default function Subscription() {
                   )}
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight">{activeSub.plan_name}</h2>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-emerald-100 pt-1">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-brand-100 pt-1">
                   <span className="flex items-center gap-1">
                     <Calendar size={14} /> Started: {formatDate(activeSub.starts_at)}
                   </span>
@@ -571,14 +571,14 @@ export default function Subscription() {
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
                   <p className="text-2xl font-extrabold">{remainingDays}</p>
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-emerald-100">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-brand-100">
                     Days Remaining
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate("/customers")}
-                  className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-emerald-800 shadow transition hover:bg-emerald-50"
+                  className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-brand-800 shadow transition hover:bg-brand-50"
                 >
                   Go to Dashboard
                 </button>
@@ -621,10 +621,10 @@ export default function Subscription() {
                     isSelected
                       ? isYearly
                         ? "border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-xl shadow-amber-500/10 scale-[1.02] ring-2 ring-amber-400/50"
-                        : "border-emerald-600 bg-white dark:bg-slate-900 shadow-xl shadow-emerald-600/10 scale-[1.02]"
+                        : "border-brand-600 bg-white dark:bg-slate-900 shadow-xl shadow-brand-600/10 scale-[1.02]"
                       : isYearly
                       ? "border-amber-300 dark:border-amber-500/40 bg-gradient-to-b from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 hover:border-amber-400 hover:shadow-md"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-md"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-md"
                   }`}
                 >
                   {/* Badges */}
@@ -634,11 +634,11 @@ export default function Subscription() {
                       <span>{p.promotional_badge || "BEST VALUE · 13 MONTHS"}</span>
                     </div>
                   ) : p.promotional_badge ? (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
                       {p.promotional_badge}
                     </div>
                   ) : hasIntro ? (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-sm">
                       Introductory Offer · Save ₹{formatRupees(p.savings_paise)}
                     </div>
                   ) : null}
@@ -654,7 +654,7 @@ export default function Subscription() {
                           isSelected
                             ? isYearly
                               ? "border-amber-500 bg-amber-500 text-slate-950"
-                              : "border-emerald-600 bg-emerald-600 text-white"
+                              : "border-brand-600 bg-brand-600 text-white"
                             : "border-slate-300 dark:border-slate-600"
                         }`}
                       >
@@ -674,7 +674,7 @@ export default function Subscription() {
 
                     {/* Plan Summary or Description */}
                     {p.summary ? (
-                      <div className="mt-2.5 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
+                      <div className="mt-2.5 rounded-lg bg-brand-50/80 dark:bg-brand-950/60 border border-brand-100 dark:border-brand-800 px-2.5 py-1 text-[11px] font-medium text-brand-800 dark:text-brand-300">
                         {p.summary}
                       </div>
                     ) : p.description ? (
@@ -705,7 +705,7 @@ export default function Subscription() {
                       </div>
                     )}
 
-                    <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                    <p className="text-[11px] font-semibold text-brand-700 dark:text-brand-400 mt-1">
                       No hidden fees
                     </p>
 
@@ -714,7 +714,7 @@ export default function Subscription() {
                       <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
                         {p.features.map((feat, i) => (
                           <li key={i} className="flex items-center gap-2">
-                            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-400 shrink-0" />
                             <span>{feat}</span>
                           </li>
                         ))}
@@ -722,19 +722,19 @@ export default function Subscription() {
                     ) : (
                       <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
                         <li className="flex items-center gap-2">
-                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-400 shrink-0" />
                           <span>Complete digital Khata ledger</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-400 shrink-0" />
                           <span>Unlimited GST invoices & receipts</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-400 shrink-0" />
                           <span>Customer dues & payment tracking</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-400 shrink-0" />
                           <span>Official GST tax invoice receipt</span>
                         </li>
                       </ul>
@@ -747,7 +747,7 @@ export default function Subscription() {
                         isSelected
                           ? isYearly
                             ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow"
-                            : "bg-emerald-600 text-white"
+                            : "bg-brand-600 text-white"
                           : isYearly
                           ? "bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 hover:bg-amber-200"
                           : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -794,8 +794,8 @@ export default function Subscription() {
                   Have a Promo / Referral Coupon?
                 </label>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3.5 py-2.5">
-                    <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                  <div className="flex items-center justify-between rounded-xl bg-brand-50 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-800 px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 text-brand-800 dark:text-brand-300 text-xs font-bold">
                       <Tag size={16} />
                       <span>Coupon applied: {appliedCoupon}</span>
                     </div>
@@ -814,12 +814,12 @@ export default function Subscription() {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       placeholder="ENTER COUPON CODE"
-                      className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs uppercase font-medium text-slate-900 dark:text-white focus:border-emerald-600 focus:outline-none"
+                      className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs uppercase font-medium text-slate-900 dark:text-white focus:border-brand-600 focus:outline-none"
                     />
                     <button
                       type="submit"
                       disabled={pricingLoading || !couponCode.trim()}
-                      className="rounded-xl bg-slate-800 dark:bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-900 dark:hover:bg-emerald-700 disabled:opacity-50"
+                      className="rounded-xl bg-slate-800 dark:bg-brand-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-900 dark:hover:bg-brand-700 disabled:opacity-50"
                     >
                       Apply
                     </button>
@@ -832,7 +832,7 @@ export default function Subscription() {
 
                 <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
                   <p className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
-                    <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                    <ShieldCheck size={14} className="text-brand-600 dark:text-brand-400" />
                     <span>Safe & Instant Activation</span>
                   </p>
                   <p>
@@ -849,14 +849,14 @@ export default function Subscription() {
                 </div>
 
                 {pricing.introductoryDiscountPaise > 0 && (
-                  <div className="flex justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <div className="flex justify-between text-xs font-semibold text-brand-600 dark:text-brand-400">
                     <span>Introductory Discount:</span>
                     <span>- ₹{formatRupees(pricing.introductoryDiscountPaise)}</span>
                   </div>
                 )}
 
                 {pricing.couponDiscountPaise > 0 && (
-                  <div className="flex justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <div className="flex justify-between text-xs font-semibold text-brand-600 dark:text-brand-400">
                     <span>Coupon Discount ({pricing.couponCode}):</span>
                     <span>- ₹{formatRupees(pricing.couponDiscountPaise)}</span>
                   </div>
@@ -881,7 +881,7 @@ export default function Subscription() {
                     <span className="text-sm font-bold text-slate-900 dark:text-white">Total Payable:</span>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">Final checkout price · All taxes included</p>
                   </div>
-                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-2xl font-black text-brand-600 dark:text-brand-400">
                     ₹{formatRupees(pricing.totalPaise)}
                   </span>
                 </div>
@@ -890,7 +890,7 @@ export default function Subscription() {
                   type="button"
                   onClick={handleSubscribe}
                   disabled={checkoutLoading || pricingLoading}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-md shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-50"
                 >
                   {checkoutLoading ? (
                     <RefreshCw className="h-5 w-5 animate-spin" />
@@ -945,7 +945,7 @@ export default function Subscription() {
                         <span
                           className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                             item.status === "paid"
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-brand-950 dark:text-emerald-300"
                               : item.status === "created"
                               ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
                               : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
@@ -960,7 +960,7 @@ export default function Subscription() {
                             <button
                               type="button"
                               onClick={() => handleDownloadInvoice(item.id, item.invoice_number)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition"
+                              className="inline-flex items-center gap-1 rounded-lg bg-brand-50 dark:bg-brand-950/60 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/60 transition"
                             >
                               <Download size={13} />
                               <span>Invoice</span>

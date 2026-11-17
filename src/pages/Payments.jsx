@@ -30,7 +30,7 @@ import { getDownloadFilename } from "../utils/downloadFilename";
 import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 import { useAuth } from "../context/AuthContext";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const CATEGORY_LABEL = {
   money_received: "Money Received",
@@ -57,7 +57,7 @@ const CATEGORY_STYLE = {
   paid_by_business: "bg-red-100 text-red-700",
   purchase_bill: "bg-amber-100 text-amber-700",
   advance_from_investor: "bg-blue-100 text-blue-700",
-  subscriptions: "bg-emerald-100 text-emerald-800 font-bold",
+  subscriptions: "bg-brand-100 text-brand-800 font-bold",
 };
 
 export const getEffectiveCategory = (p) => {
@@ -683,7 +683,7 @@ const Payments = () => {
                   <button
                     type="button"
                     onClick={() => handleAddMoneyReceiptToPayment(receipt)}
-                    className="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                    className="rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700"
                   >
                     Add to Payment
                   </button>
@@ -703,7 +703,7 @@ const Payments = () => {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                   <CheckCircle2 size={21} />
                 </div>
                 <div>
@@ -821,10 +821,10 @@ const Payments = () => {
                   className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
                     selectedCategory === tab.id
                       ? tab.isSuperadmin
-                        ? "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-brand-600 text-white shadow-sm"
                         : "bg-slate-900 text-white shadow-sm"
                       : tab.isSuperadmin
-                      ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                      ? "border border-brand-300 bg-brand-50 text-brand-800 hover:bg-brand-100"
                       : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                   }`}
                 >
@@ -844,9 +844,9 @@ const Payments = () => {
 
             {/* Transparent Accounting Principle Banner for Subscriptions */}
             {selectedCategory === "subscriptions" && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-brand-50/70 p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700">
+                  <div className="rounded-xl bg-brand-100 p-2.5 text-brand-700">
                     <ShieldCheck size={22} />
                   </div>
                   <div>
@@ -879,7 +879,7 @@ const Payments = () => {
                       ? "Search by subscriber name, email, order ID, or payment ID..."
                       : "Search payment by customer or party..."
                   }
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500"
                 />
               </div>
             </div>
@@ -966,7 +966,7 @@ const Payments = () => {
                           ₹{Number(payment.base_amount || payment.amount || 0).toLocaleString("en-IN")}
                         </td>
 
-                        <td className="px-5 py-4 text-sm font-medium text-emerald-600">
+                        <td className="px-5 py-4 text-sm font-medium text-brand-600">
                           {Number(payment.discount || 0) > 0
                             ? `-₹${Number(payment.discount).toLocaleString("en-IN")}`
                             : "—"}
@@ -976,7 +976,7 @@ const Payments = () => {
                           ₹{Number(payment.tax || 0).toLocaleString("en-IN")}
                         </td>
 
-                        <td className="px-5 py-4 text-sm font-bold text-emerald-600">
+                        <td className="px-5 py-4 text-sm font-bold text-brand-600">
                           ₹{Number(payment.amount || 0).toLocaleString("en-IN")}
                         </td>
 
@@ -1002,7 +1002,7 @@ const Payments = () => {
                           <button
                             type="button"
                             onClick={() => setViewingPayment(payment)}
-                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-emerald-600 transition"
+                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition"
                             title="View Details"
                           >
                             <Eye size={17} />
@@ -1013,7 +1013,7 @@ const Payments = () => {
                               onClick={() =>
                                 handleDownloadSubscriptionInvoice(payment.id, payment.invoice_number)
                               }
-                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition"
+                              className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700 hover:bg-brand-100 transition"
                               title="Download GST Invoice"
                             >
                               <Download size={13} />
@@ -1087,7 +1087,7 @@ const Payments = () => {
                           {payment.purpose || "—"}
                         </td>
 
-                        <td className="px-5 py-4 text-sm font-bold text-emerald-600">
+                        <td className="px-5 py-4 text-sm font-bold text-brand-600">
                           ₹{Number(payment.amount).toLocaleString("en-IN")}
                         </td>
 
@@ -1138,7 +1138,7 @@ const Payments = () => {
                             <button
                               type="button"
                               onClick={() => setViewingPayment(payment)}
-                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-emerald-600"
+                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-brand-600"
                               title="View Details"
                               aria-label="View Details"
                             >
@@ -1237,7 +1237,7 @@ const Payments = () => {
                   setSelectedPurchaseBill(null);
                 }
               }}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             >
               <option value="money_received">Money Received</option>
               <option value="due_received">Due Received</option>
@@ -1291,7 +1291,7 @@ const Payments = () => {
                     }));
                   }
                 }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-500"
               >
                 <option value="">-- Choose a recorded purchase bill --</option>
                 {purchaseBills.map((b) => {
@@ -1353,7 +1353,7 @@ const Payments = () => {
                         setForm((prev) => ({ ...prev, party_name: val }));
                       }}
                       placeholder="Search existing customer or type customer name..."
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-brand-500"
                     />
                   </div>
 
@@ -1372,7 +1372,7 @@ const Payments = () => {
                               handleSelectCustomer(cust);
                               setCustomerSearch("");
                             }}
-                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
+                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-brand-50"
                           >
                             <div>
                               <p className="font-semibold text-slate-800">
@@ -1382,7 +1382,7 @@ const Payments = () => {
                                 <p className="text-slate-400">{cust.phone}</p>
                               )}
                             </div>
-                            <span className="text-[10px] text-emerald-600 font-semibold">Select</span>
+                            <span className="text-[10px] text-brand-600 font-semibold">Select</span>
                           </button>
                         ))
                       )}
@@ -1390,16 +1390,16 @@ const Payments = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs">
+                <div className="flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs">
                   <div>
-                    <p className="font-semibold text-emerald-900">
+                    <p className="font-semibold text-brand-900">
                       {selectedCustomer.name || selectedCustomer.business_name}
                     </p>
                     {selectedCustomer.phone && (
-                      <p className="text-emerald-700">{selectedCustomer.phone}</p>
+                      <p className="text-brand-700">{selectedCustomer.phone}</p>
                     )}
                   </div>
-                  <span className="font-semibold text-emerald-700">Linked Customer</span>
+                  <span className="font-semibold text-brand-700">Linked Customer</span>
                 </div>
               )}
             </div>
@@ -1442,7 +1442,7 @@ const Payments = () => {
                         setForm((prev) => ({ ...prev, party_name: val }));
                       }}
                       placeholder="Search existing customer or type customer name..."
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-brand-500"
                     />
                   </div>
 
@@ -1461,7 +1461,7 @@ const Payments = () => {
                               handleSelectCustomer(cust);
                               setCustomerSearch("");
                             }}
-                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
+                            className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-brand-50"
                           >
                             <div>
                               <p className="font-semibold text-slate-800">
@@ -1471,7 +1471,7 @@ const Payments = () => {
                                 <p className="text-slate-400">{cust.phone}</p>
                               )}
                             </div>
-                            <span className="text-[10px] text-emerald-600 font-semibold">Select</span>
+                            <span className="text-[10px] text-brand-600 font-semibold">Select</span>
                           </button>
                         ))
                       )}
@@ -1479,16 +1479,16 @@ const Payments = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs">
+                <div className="flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs">
                   <div>
-                    <p className="font-semibold text-emerald-900">
+                    <p className="font-semibold text-brand-900">
                       {selectedCustomer.name || selectedCustomer.business_name}
                     </p>
                     {selectedCustomer.phone && (
-                      <p className="text-emerald-700">{selectedCustomer.phone}</p>
+                      <p className="text-brand-700">{selectedCustomer.phone}</p>
                     )}
                   </div>
-                  <span className="font-semibold text-emerald-700">Linked Customer</span>
+                  <span className="font-semibold text-brand-700">Linked Customer</span>
                 </div>
               )}
             </div>
@@ -1527,7 +1527,7 @@ const Payments = () => {
                       value={customerSearch}
                       onChange={(e) => setCustomerSearch(e.target.value)}
                       placeholder="Search customer with dues..."
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500"
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-brand-500"
                     />
                   </div>
 
@@ -1545,7 +1545,7 @@ const Payments = () => {
                             handleSelectCustomer(cust);
                             setCustomerSearch("");
                           }}
-                          className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-emerald-50"
+                          className="flex w-full items-center justify-between p-2.5 text-left text-xs transition hover:bg-brand-50"
                         >
                           <div>
                             <p className="font-semibold text-slate-800">
@@ -1566,13 +1566,13 @@ const Payments = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs">
+                <div className="flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs">
                   <div>
-                    <p className="font-semibold text-emerald-900">
+                    <p className="font-semibold text-brand-900">
                       {selectedCustomer.name || selectedCustomer.business_name}
                     </p>
                     {selectedCustomer.phone && (
-                      <p className="text-emerald-700">{selectedCustomer.phone}</p>
+                      <p className="text-brand-700">{selectedCustomer.phone}</p>
                     )}
                   </div>
                   {Number(selectedCustomer.total_due || 0) > 0 && (
@@ -1613,7 +1613,7 @@ const Payments = () => {
                               type="checkbox"
                               checked={due.selected}
                               onChange={() => handleDueCheckboxToggle(due.id)}
-                              className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                              className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                             />
                             <div className="truncate">
                               <p className="font-semibold text-slate-800 truncate">
@@ -1639,7 +1639,7 @@ const Payments = () => {
                               onChange={(e) =>
                                 handleDueAmountChange(due.id, e.target.value)
                               }
-                              className="w-20 rounded border border-slate-200 px-2 py-1 text-xs outline-none focus:border-emerald-500 disabled:opacity-50 text-right font-medium"
+                              className="w-20 rounded border border-slate-200 px-2 py-1 text-xs outline-none focus:border-brand-500 disabled:opacity-50 text-right font-medium"
                             />
                           </div>
                         </div>
@@ -1669,7 +1669,7 @@ const Payments = () => {
                     ? "Name of vendor, supplier, or payee"
                     : "Name of vendor or payee"
                 }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           )}
@@ -1685,7 +1685,7 @@ const Payments = () => {
               value={form.purpose}
               onChange={(e) => setForm({ ...form, purpose: e.target.value })}
               placeholder="What is this payment for?"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -1703,7 +1703,7 @@ const Payments = () => {
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 placeholder="0.00"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
 
@@ -1716,7 +1716,7 @@ const Payments = () => {
                 onChange={(e) =>
                   setForm({ ...form, payment_mode: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               >
                 <option value="cash">Cash</option>
                 <option value="online">Online / UPI</option>
@@ -1728,7 +1728,7 @@ const Payments = () => {
             type="submit"
             disabled={!canWrite || saving}
             title={!canWrite ? subscriptionRequiredMessage : undefined}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : (editingPayment ? "Update Payment" : "Record Payment")}
           </button>
@@ -1744,8 +1744,8 @@ const Payments = () => {
         {viewingPayment && (
           <div className="space-y-5">
             {/* Amount Banner */}
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+            <div className="rounded-2xl border border-brand-100 bg-brand-50/70 p-5 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">
                 Payment Amount
               </p>
               <p className="mt-1 text-3xl font-extrabold text-slate-900">
@@ -1825,7 +1825,7 @@ const Payments = () => {
                     <span>₹{Number(viewingPayment.base_amount || viewingPayment.amount || 0).toLocaleString("en-IN")}</span>
                   </div>
                   {Number(viewingPayment.discount || 0) > 0 && (
-                    <div className="flex justify-between font-semibold text-emerald-600">
+                    <div className="flex justify-between font-semibold text-brand-600">
                       <span>Discount Granted:</span>
                       <span>-₹{Number(viewingPayment.discount).toLocaleString("en-IN")}</span>
                     </div>
@@ -1841,7 +1841,7 @@ const Payments = () => {
                 </div>
 
                 {/* Transparent Accounting Principle Box */}
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                <div className="rounded-xl border border-brand-200 bg-brand-50/70 p-4">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
                     <ShieldCheck size={16} />
                     <span>Payment Gateway Verified Collection</span>
@@ -1859,7 +1859,7 @@ const Payments = () => {
                       onClick={() =>
                         handleDownloadSubscriptionInvoice(viewingPayment.id, viewingPayment.invoice_number)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700 transition"
                     >
                       <Download size={14} />
                       <span>Download Invoice PDF</span>

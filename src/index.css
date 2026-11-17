@@ -1,5 +1,35 @@
 @import "tailwindcss";
+@import "./brand.css";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* =====================================
+   KhataNex brand theme (Tailwind v4 — theme lives in CSS, not tailwind.config.js)
+   Sampled from the logo: deep violet #4B1D9C -> indigo #2D1A8A, white mark.
+   ===================================== */
+@theme {
+  --color-brand-50: #f5f1ff;
+  --color-brand-100: #ebe3ff;
+  --color-brand-200: #d6c6ff;
+  --color-brand-300: #b99dff;
+  --color-brand-400: #9a70f5;
+  --color-brand-500: #7b47e3;
+  --color-brand-600: #6330c8;
+  --color-brand-700: #4f23a8;
+  --color-brand-800: #3d1b86;
+  --color-brand-900: #2d1568;
+  --color-brand-950: #1b0b45;
+
+  --color-accent-300: #ffd27a;
+  --color-accent-400: #ffbf47;
+  --color-accent-500: #f5a524;
+  --color-accent-600: #d98a0b;
+
+  --font-display: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --shadow-brand: 0 8px 24px -8px rgba(75, 29, 156, 0.35);
+  --shadow-brand-lg: 0 30px 60px -20px rgba(45, 26, 138, 0.45);
+}
 
 /* Mobile responsiveness improvements */
 * {

@@ -98,19 +98,19 @@ const Services = () => {
 
   const colorClasses = {
     emerald: {
-      icon: "bg-emerald-100 text-emerald-600",
-      hover: "group-hover:border-emerald-300",
-      check: "text-emerald-500",
+      icon: "bg-brand-100 text-brand-600",
+      hover: "group-hover:border-brand-300",
+      check: "text-brand-500",
     },
     blue: {
-      icon: "bg-blue-100 text-blue-600",
-      hover: "group-hover:border-blue-300",
-      check: "text-blue-500",
+      icon: "bg-brand-100 text-brand-600",
+      hover: "group-hover:border-brand-300",
+      check: "text-brand-500",
     },
     purple: {
-      icon: "bg-purple-100 text-purple-600",
-      hover: "group-hover:border-purple-300",
-      check: "text-purple-500",
+      icon: "bg-brand-100 text-brand-600",
+      hover: "group-hover:border-brand-300",
+      check: "text-brand-500",
     },
     orange: {
       icon: "bg-orange-100 text-orange-600",
@@ -123,9 +123,9 @@ const Services = () => {
       check: "text-rose-500",
     },
     cyan: {
-      icon: "bg-cyan-100 text-cyan-600",
-      hover: "group-hover:border-cyan-300",
-      check: "text-cyan-500",
+      icon: "bg-brand-100 text-brand-600",
+      hover: "group-hover:border-brand-300",
+      check: "text-brand-500",
     },
   };
 
@@ -135,18 +135,18 @@ const Services = () => {
       {/* =========================================
           HERO SECTION
       ========================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600">
+      <section className="relative overflow-hidden bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600">
 
         {/* Background Decorations */}
         <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-        <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-teal-300/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-brand-300/10 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
 
           <div className="mx-auto max-w-3xl text-center">
 
-            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-100">
+            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-brand-100">
               Our Services
             </span>
 
@@ -155,7 +155,7 @@ const Services = () => {
               <span className="text-yellow-300"> Manage Your Business</span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-emerald-50 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-brand-50 sm:text-lg">
               KHATANEX provides simple and powerful tools to manage
               your customers, khata, payments, invoices, inventory
               and business reports from one place.
@@ -173,7 +173,7 @@ const Services = () => {
 
         <div className="mx-auto max-w-3xl text-center">
 
-          <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+          <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
             Simple Business Management
           </span>
 
@@ -249,7 +249,7 @@ const Services = () => {
 
                   <Link
                     to="/contact"
-                    className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 transition hover:text-emerald-700"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-brand-600 transition hover:text-brand-700"
                   >
                     Learn More
                     <ArrowRight
@@ -280,7 +280,7 @@ const Services = () => {
             {/* Left */}
             <div>
 
-              <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+              <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
                 Why KHATANEX?
               </span>
 
@@ -296,7 +296,7 @@ const Services = () => {
 
               <Link
                 to="/contact"
-                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
+                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-brand-700"
               >
                 Talk to Our Team
                 <ArrowRight size={17} />
@@ -310,7 +310,7 @@ const Services = () => {
               {/* Secure */}
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
 
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                   <ShieldCheck size={23} />
                 </div>
 
@@ -327,7 +327,7 @@ const Services = () => {
               {/* Mobile */}
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
 
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                   <Smartphone size={23} />
                 </div>
 
@@ -373,13 +373,13 @@ const Services = () => {
 
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
 
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 px-6 py-12 text-center shadow-xl sm:px-10">
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600 px-6 py-12 text-center shadow-xl sm:px-10">
 
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
               Ready to Simplify Your Business?
             </h2>
 
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-emerald-50 sm:text-base">
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-brand-50 sm:text-base">
               Start managing your customers, transactions, payments
               and business records with KHATANEX.
             </p>
@@ -388,7 +388,7 @@ const Services = () => {
 
               <Link
                 to="/dashboard"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-700 transition hover:bg-brand-50"
               >
                 Go to Dashboard
                 <ArrowRight size={17} />

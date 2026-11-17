@@ -303,7 +303,7 @@ export default function MyEmployeeDetails() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center lg:pl-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-purple-600" />
+        <RefreshCw className="h-8 w-8 animate-spin text-brand-600" />
       </div>
     );
   }
@@ -318,7 +318,7 @@ export default function MyEmployeeDetails() {
           <button
             type="button"
             onClick={() => navigate("/my-employees")}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-purple-700"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-brand-700"
           >
             <ArrowLeft size={14} />
             <span>Back to My Employees</span>
@@ -368,20 +368,20 @@ export default function MyEmployeeDetails() {
                     {employee.name || "Employee Profile"}
                   </h1>
                   {employee.employee_code && (
-                    <span className="rounded-md bg-purple-100 px-2 py-0.5 font-mono text-xs font-bold text-purple-800">
+                    <span className="rounded-md bg-brand-100 px-2 py-0.5 font-mono text-xs font-bold text-brand-800">
                       {employee.employee_code}
                     </span>
                   )}
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                       employee.status === "active"
-                        ? "bg-emerald-100 text-emerald-800"
+                        ? "bg-brand-100 text-brand-800"
                         : "bg-slate-200 text-slate-600"
                     }`}
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
-                        employee.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+                        employee.status === "active" ? "bg-brand-500" : "bg-slate-400"
                       }`}
                     />
                     {employee.status === "active" ? "Active" : "Inactive"}
@@ -401,7 +401,7 @@ export default function MyEmployeeDetails() {
                 className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition ${
                   employee.status === "active"
                     ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                    : "border-brand-200 bg-brand-50 text-brand-800 hover:bg-brand-100"
                 }`}
               >
                 {employee.status === "active" ? "Deactivate Account" : "Activate Account"}
@@ -412,7 +412,7 @@ export default function MyEmployeeDetails() {
                 icon={Edit}
                 size="sm"
                 onClick={handleOpenEdit}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2"
+                className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2"
               >
                 Edit Details & Access
               </Button>
@@ -442,13 +442,13 @@ export default function MyEmployeeDetails() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
                 <span>Support Tickets Handled</span>
-                <MessageSquare size={16} className="text-purple-600" />
+                <MessageSquare size={16} className="text-brand-600" />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-3xl font-black text-slate-900">
                   {employee.tickets_handled || 0}
                 </span>
-                <span className="text-xs font-medium text-emerald-600">
+                <span className="text-xs font-medium text-brand-600">
                   ({employee.tickets_resolved || 0} resolved)
                 </span>
               </div>
@@ -461,7 +461,7 @@ export default function MyEmployeeDetails() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
                 <span>Module Authorizations</span>
-                <Layers size={16} className="text-emerald-600" />
+                <Layers size={16} className="text-brand-600" />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-3xl font-black text-slate-900">
@@ -478,13 +478,13 @@ export default function MyEmployeeDetails() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
                 <span>Roster Activity</span>
-                <Activity size={16} className="text-blue-600" />
+                <Activity size={16} className="text-brand-600" />
               </div>
               <div className="mt-2 flex items-center gap-2">
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
                     employee.activity_status === "logged_in"
-                      ? "bg-emerald-500 animate-ping"
+                      ? "bg-brand-500 animate-ping"
                       : "bg-slate-300"
                   }`}
                 />
@@ -512,7 +512,7 @@ export default function MyEmployeeDetails() {
                       <img
                         src={fileUrl(employee.profile_photo_path)}
                         alt={employee.name || "Employee photo"}
-                        className="h-24 w-24 rounded-2xl object-cover border-2 border-purple-200 shadow"
+                        className="h-24 w-24 rounded-2xl object-cover border-2 border-brand-200 shadow"
                         onError={(e) => {
                           e.target.style.display = "none";
                           e.target.nextSibling.style.display = "flex";
@@ -520,7 +520,7 @@ export default function MyEmployeeDetails() {
                       />
                     ) : null}
                     <div
-                      className={`h-24 w-24 rounded-2xl bg-purple-100 text-purple-700 font-black text-2xl flex items-center justify-center border-2 border-purple-200 shadow ${
+                      className={`h-24 w-24 rounded-2xl bg-brand-100 text-brand-700 font-black text-2xl flex items-center justify-center border-2 border-brand-200 shadow ${
                         employee.profile_photo_path ? "hidden" : "flex"
                       }`}
                     >
@@ -529,7 +529,7 @@ export default function MyEmployeeDetails() {
                   </div>
 
                   <h3 className="font-bold text-slate-900 text-lg">{employee.name || "Staff Member"}</h3>
-                  <p className="text-xs font-semibold text-purple-700">{employee.employee_title || "Operations Executive"}</p>
+                  <p className="text-xs font-semibold text-brand-700">{employee.employee_title || "Operations Executive"}</p>
                   <p className="text-xs text-slate-400 mt-0.5">{employee.email}</p>
                 </div>
 
@@ -584,7 +584,7 @@ export default function MyEmployeeDetails() {
                   <button
                     type="button"
                     onClick={handleOpenEdit}
-                    className="text-xs font-semibold text-purple-600 hover:text-purple-800"
+                    className="text-xs font-semibold text-brand-600 hover:text-brand-800"
                   >
                     Edit Access
                   </button>
@@ -598,12 +598,12 @@ export default function MyEmployeeDetails() {
                         key={mod.id}
                         className={`flex items-center gap-2 rounded-xl p-2.5 border transition ${
                           isAssigned
-                            ? "border-emerald-200 bg-emerald-50/50 text-slate-900"
+                            ? "border-brand-200 bg-brand-50/50 text-slate-900"
                             : "border-slate-100 bg-slate-50/60 text-slate-400"
                         }`}
                       >
                         {isAssigned ? (
-                          <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                          <CheckCircle2 size={15} className="text-brand-600 shrink-0" />
                         ) : (
                           <XCircle size={15} className="text-slate-300 shrink-0" />
                         )}
@@ -736,7 +736,7 @@ export default function MyEmployeeDetails() {
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <History size={16} className="text-purple-600" />
+                    <History size={16} className="text-brand-600" />
                     <h3 className="font-bold text-slate-900 text-base">Account Audit History</h3>
                   </div>
                   <span className="text-xs text-slate-400">Expand any event for drill-down breakdown</span>
@@ -769,14 +769,14 @@ export default function MyEmployeeDetails() {
                       return (
                         <div
                           key={log.id}
-                          className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs hover:border-purple-200 transition space-y-2.5"
+                          className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs hover:border-brand-200 transition space-y-2.5"
                         >
                           <div
                             onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
                             className="flex items-center justify-between cursor-pointer select-none"
                           >
                             <div className="flex items-center gap-2.5 flex-wrap">
-                              <span className="rounded-lg bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-900 uppercase tracking-wider">
+                              <span className="rounded-lg bg-brand-100 px-2.5 py-0.5 text-[10px] font-bold text-brand-900 uppercase tracking-wider">
                                 {log.action.replace(/_/g, " ")}
                               </span>
                               {log.target_type && (
@@ -795,7 +795,7 @@ export default function MyEmployeeDetails() {
                                 </span>
                               )}
                               {totalAmount !== undefined && totalAmount !== null && Number(totalAmount) > 0 && (
-                                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                <span className="text-xs font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md">
                                   ₹{Number(totalAmount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               )}
@@ -892,7 +892,7 @@ export default function MyEmployeeDetails() {
                                     href={fileUrl(docPdfUrl)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+                                    className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-brand-700 transition"
                                   >
                                     <FileText size={14} />
                                     <span>View Official PDF</span>
@@ -951,10 +951,10 @@ export default function MyEmployeeDetails() {
                     <img
                       src={photoPreview}
                       alt="Preview"
-                      className="h-16 w-16 rounded-xl object-cover border border-purple-300 shadow-sm"
+                      className="h-16 w-16 rounded-xl object-cover border border-brand-300 shadow-sm"
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xl border border-purple-200">
+                    <div className="h-16 w-16 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xl border border-brand-200">
                       {formData.name ? formData.name.charAt(0).toUpperCase() : "E"}
                     </div>
                   )}
@@ -993,7 +993,7 @@ export default function MyEmployeeDetails() {
 
               {/* Credentials & Contact */}
               <div className="space-y-3">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700">
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700">
                   1. Credentials & Contact
                 </h4>
 
@@ -1005,7 +1005,7 @@ export default function MyEmployeeDetails() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. Rahul Sharma"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                       required
                     />
                   </div>
@@ -1030,7 +1030,7 @@ export default function MyEmployeeDetails() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="Leave blank to keep"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 pr-9 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 pr-9 focus:border-brand-600 focus:outline-none"
                     />
                     <button
                       type="button"
@@ -1048,7 +1048,7 @@ export default function MyEmployeeDetails() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="Mobile number"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -1059,7 +1059,7 @@ export default function MyEmployeeDetails() {
                       value={formData.emergency_contact}
                       onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
                       placeholder="Contact name & number"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1067,7 +1067,7 @@ export default function MyEmployeeDetails() {
 
               {/* Role & Identification */}
               <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700">
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700">
                   2. Role & Identification
                 </h4>
 
@@ -1078,7 +1078,7 @@ export default function MyEmployeeDetails() {
                       type="text"
                       value={formData.employee_code}
                       onChange={(e) => setFormData({ ...formData, employee_code: e.target.value })}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 font-mono focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -1089,7 +1089,7 @@ export default function MyEmployeeDetails() {
                       value={formData.employee_title}
                       onChange={(e) => setFormData({ ...formData, employee_title: e.target.value })}
                       placeholder="e.g. Support Specialist"
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
 
@@ -1099,7 +1099,7 @@ export default function MyEmployeeDetails() {
                       type="date"
                       value={formData.joining_date}
                       onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-purple-600 focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 p-2.5 focus:border-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1107,7 +1107,7 @@ export default function MyEmployeeDetails() {
 
               {/* Module Permissions */}
               <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-purple-700">
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-brand-700">
                   3. Module Access & Operation Permissions
                 </h4>
 
@@ -1121,7 +1121,7 @@ export default function MyEmployeeDetails() {
                         key={mod.id}
                         className={`rounded-xl border p-3 transition ${
                           isChecked
-                            ? "border-purple-200 bg-purple-50/50 text-purple-950"
+                            ? "border-brand-200 bg-brand-50/50 text-brand-950"
                             : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600"
                         }`}
                       >
@@ -1133,13 +1133,13 @@ export default function MyEmployeeDetails() {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => {}}
-                            className="mt-0.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500 pointer-events-none"
+                            className="mt-0.5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 pointer-events-none"
                           />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-xs">{mod.label}</span>
                               {isChecked && (
-                                <span className="text-[10px] font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+                                <span className="text-[10px] font-semibold text-brand-700 bg-brand-100 px-2 py-0.5 rounded-md">
                                   Enabled
                                 </span>
                               )}
@@ -1150,8 +1150,8 @@ export default function MyEmployeeDetails() {
 
                         {/* Granular Operation Checkboxes when module is checked */}
                         {isChecked && (
-                          <div className="mt-2.5 pt-2.5 border-t border-purple-100 pl-6 flex flex-wrap gap-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 self-center mr-1">
+                          <div className="mt-2.5 pt-2.5 border-t border-brand-100 pl-6 flex flex-wrap gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-800 self-center mr-1">
                               Operations:
                             </span>
                             {ops.map((op) => {
@@ -1162,15 +1162,15 @@ export default function MyEmployeeDetails() {
                                   key={op}
                                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold cursor-pointer select-none transition ${
                                     opChecked
-                                      ? "bg-white border-purple-300 text-purple-800 shadow-2xs"
-                                      : "bg-purple-50/30 border-purple-100 text-slate-400 hover:text-slate-600"
+                                      ? "bg-white border-brand-300 text-brand-800 shadow-2xs"
+                                      : "bg-brand-50/30 border-brand-100 text-slate-400 hover:text-slate-600"
                                   }`}
                                 >
                                   <input
                                     type="checkbox"
                                     checked={opChecked}
                                     onChange={() => handleOperationToggle(mod.id, op)}
-                                    className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                                    className="h-3.5 w-3.5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                                   />
                                   <span className="capitalize">{op}</span>
                                 </label>
@@ -1197,7 +1197,7 @@ export default function MyEmployeeDetails() {
                   variant="primary"
                   type="submit"
                   disabled={editLoading}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-5 py-2"
+                  className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-2"
                 >
                   {editLoading ? <RefreshCw size={14} className="animate-spin inline mr-1" /> : null}
                   <span>Save Changes</span>

@@ -46,7 +46,7 @@ const formatDate = (val) => {
 };
 
 const PAYMENT_MODE_LABELS = {
-  cash: { label: "Cash", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  cash: { label: "Cash", color: "bg-brand-50 text-brand-700 border-brand-200" },
   online: { label: "Online / UPI", color: "bg-blue-50 text-blue-700 border-blue-200" },
   bank_transfer: { label: "Bank Transfer", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   cheque: { label: "Cheque", color: "bg-purple-50 text-purple-700 border-purple-200" },
@@ -255,10 +255,10 @@ export default function Sales() {
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Invoiced Sales
             </span>
-            <p className="mt-2 text-2xl font-bold text-emerald-700">
+            <p className="mt-2 text-2xl font-bold text-brand-700">
               {money(metrics.invoiced_sales_amount)}
             </p>
-            <span className="mt-1 block text-xs text-emerald-600 font-medium">
+            <span className="mt-1 block text-xs text-brand-600 font-medium">
               {metrics.invoiced_sales_count} invoice{metrics.invoiced_sales_count === 1 ? "" : "s"} generated
             </span>
           </div>
@@ -299,7 +299,7 @@ export default function Sales() {
             </div>
             <button
               onClick={() => setActionSuccess(null)}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+              className="text-xs font-semibold text-emerald-700 hover:text-brand-900"
             >
               Dismiss
             </button>
@@ -327,7 +327,7 @@ export default function Sales() {
                 placeholder="Search sale #, customer, item..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               />
             </div>
 
@@ -336,7 +336,7 @@ export default function Sales() {
               <select
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               >
                 <option value="all">All Dates</option>
                 <option value="today">Today</option>
@@ -351,7 +351,7 @@ export default function Sales() {
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               >
                 <option value="all">All Payment Modes</option>
                 <option value="cash">Cash</option>
@@ -367,7 +367,7 @@ export default function Sales() {
               <select
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               >
                 <option value="all">All Payment Status</option>
                 <option value="paid">Fully Paid</option>
@@ -381,7 +381,7 @@ export default function Sales() {
               <select
                 value={invoiceStatus}
                 onChange={(e) => setInvoiceStatus(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               >
                 <option value="all">All Invoicing Status</option>
                 <option value="uninvoiced">Un-invoiced Only</option>
@@ -418,7 +418,7 @@ export default function Sales() {
                         className="text-slate-400 hover:text-slate-700"
                       >
                         {selectedSaleIds.size > 0 ? (
-                          <CheckSquare size={16} className="text-emerald-600" />
+                          <CheckSquare size={16} className="text-brand-600" />
                         ) : (
                           <Square size={16} />
                         )}
@@ -448,7 +448,7 @@ export default function Sales() {
                       <tr
                         key={sale.id}
                         className={`transition hover:bg-slate-50/80 ${
-                          isSelected ? "bg-emerald-50/40" : ""
+                          isSelected ? "bg-brand-50/40" : ""
                         }`}
                       >
                         {/* Select Checkbox */}
@@ -457,10 +457,10 @@ export default function Sales() {
                             <button
                               type="button"
                               onClick={() => handleToggleSelect(sale.id)}
-                              className="text-slate-400 hover:text-emerald-600"
+                              className="text-slate-400 hover:text-brand-600"
                             >
                               {isSelected ? (
-                                <CheckSquare size={16} className="text-emerald-600" />
+                                <CheckSquare size={16} className="text-brand-600" />
                               ) : (
                                 <Square size={16} />
                               )}
@@ -553,7 +553,7 @@ export default function Sales() {
                         <td className="px-4 py-3.5 text-center whitespace-nowrap">
                           {sale.invoice_id ? (
                             <div className="inline-flex items-center gap-1.5">
-                              <span className="rounded-lg bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-xs font-bold text-emerald-800">
+                              <span className="rounded-lg bg-brand-100 border border-brand-200 px-2 py-0.5 text-xs font-bold text-brand-800">
                                 {sale.invoice_number || `#INV-${sale.invoice_id}`}
                               </span>
                               {sale.invoice_pdf_path && (
@@ -563,7 +563,7 @@ export default function Sales() {
                                     handleDownloadInvoice(sale.invoice_pdf_path, sale.invoice_number)
                                   }
                                   title="Download PDF"
-                                  className="rounded-lg p-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 transition"
+                                  className="rounded-lg p-1 text-brand-600 hover:bg-brand-50 hover:text-brand-800 transition"
                                 >
                                   <Download size={14} />
                                 </button>
@@ -575,9 +575,9 @@ export default function Sales() {
                               disabled={isCurrentlyInvoicing}
                               onClick={() => handleCreateInvoiceForSale(sale)}
                               title="Create official Tax Invoice for this sale"
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 transition shadow-2xs disabled:opacity-50"
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-brand-500 hover:text-brand-700 transition shadow-2xs disabled:opacity-50"
                             >
-                              <FileText size={13} className="text-emerald-600" />
+                              <FileText size={13} className="text-brand-600" />
                               {isCurrentlyInvoicing ? "Creating..." : "Create Invoice"}
                             </button>
                           )}
@@ -615,9 +615,9 @@ export default function Sales() {
 
         {/* FLOATING BATCH INVOICE BAR */}
         {selectedSaleIds.size > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 rounded-2xl border border-emerald-300 bg-emerald-950 px-6 py-3.5 text-white shadow-2xl">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 rounded-2xl border border-brand-300 bg-brand-950 px-6 py-3.5 text-white shadow-2xl">
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-bold">
                 {selectedSaleIds.size}
               </span>
               <span className="text-sm font-medium">
@@ -635,7 +635,7 @@ export default function Sales() {
               </button>
               <button
                 onClick={() => setIsBatchModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 shadow-sm"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-brand-400 shadow-sm"
               >
                 <FileText size={15} />
                 Generate Consolidated Invoice
@@ -807,7 +807,7 @@ export default function Sales() {
                 </div>
                 <div className="flex justify-between font-bold text-slate-900 border-t border-slate-200 pt-2 text-sm">
                   <span>Grand Total:</span>
-                  <span className="text-emerald-700 text-base">{money(selectedSaleForView.amount)}</span>
+                  <span className="text-brand-700 text-base">{money(selectedSaleForView.amount)}</span>
                 </div>
               </div>
             </div>
@@ -822,14 +822,14 @@ export default function Sales() {
 
             {/* Linked Invoice Card */}
             {selectedSaleForView.invoice_id ? (
-              <div className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs">
+              <div className="flex items-center justify-between rounded-xl bg-brand-50 border border-brand-200 p-3 text-xs">
                 <div className="flex items-center gap-2">
-                  <FileText size={18} className="text-emerald-700" />
+                  <FileText size={18} className="text-brand-700" />
                   <div>
-                    <span className="text-emerald-900 font-bold block">
+                    <span className="text-brand-900 font-bold block">
                       Tax Invoice {selectedSaleForView.invoice_number || `#INV-${selectedSaleForView.invoice_id}`}
                     </span>
-                    <span className="text-emerald-700 text-[11px]">
+                    <span className="text-brand-700 text-[11px]">
                       Linked to official accounting ledger & Invoices register
                     </span>
                   </div>
@@ -843,7 +843,7 @@ export default function Sales() {
                         selectedSaleForView.invoice_number
                       )
                     }
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 shadow-xs"
                   >
                     <Download size={14} />
                     Download PDF
@@ -860,7 +860,7 @@ export default function Sales() {
                   type="button"
                   disabled={invoicingSaleId === selectedSaleForView.id}
                   onClick={() => handleCreateInvoiceForSale(selectedSaleForView)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 shadow-xs disabled:opacity-50"
                 >
                   <Plus size={14} />
                   {invoicingSaleId === selectedSaleForView.id ? "Generating..." : "Generate Invoice Now"}
@@ -906,7 +906,7 @@ export default function Sales() {
               </strong>{" "}
               ({saleToDelete.customer_name})?
             </p>
-            <p className="text-xs text-emerald-700 bg-emerald-50 rounded-xl p-3 border border-emerald-200">
+            <p className="text-xs text-brand-700 bg-brand-50 rounded-xl p-3 border border-brand-200">
               Inventory stock will automatically be restored for all goods items in this sale.
             </p>
             {saleToDelete.invoice_id && (

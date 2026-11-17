@@ -42,7 +42,7 @@ const GUIDED_CATEGORIES = [
     id: "invoices",
     label: "Invoices",
     icon: FileText,
-    color: "bg-blue-50 text-blue-600 border-blue-200 hover:border-blue-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Cannot generate invoice PDF",
       "GST calculation discrepancy",
@@ -54,7 +54,7 @@ const GUIDED_CATEGORIES = [
     id: "quotations",
     label: "Quotations",
     icon: FileCheck,
-    color: "bg-cyan-50 text-cyan-600 border-cyan-200 hover:border-cyan-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Quotation conversion to invoice",
       "Quotation template editing",
@@ -66,7 +66,7 @@ const GUIDED_CATEGORIES = [
     id: "receipts",
     label: "Money Receipts",
     icon: Receipt,
-    color: "bg-emerald-50 text-emerald-600 border-emerald-200 hover:border-emerald-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Receipt PDF download error",
       "Payment mode mismatch in receipt",
@@ -78,7 +78,7 @@ const GUIDED_CATEGORIES = [
     id: "khata",
     label: "Khata Ledger",
     icon: BookOpen,
-    color: "bg-purple-50 text-purple-600 border-purple-200 hover:border-purple-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Customer balance discrepancy",
       "Due amount not updating",
@@ -126,7 +126,7 @@ const GUIDED_CATEGORIES = [
     id: "banking",
     label: "Banking",
     icon: Landmark,
-    color: "bg-teal-50 text-teal-600 border-teal-200 hover:border-teal-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Bank account balance adjustment",
       "Transaction export inquiry",
@@ -138,7 +138,7 @@ const GUIDED_CATEGORIES = [
     id: "billing",
     label: "Billing & Subscription",
     icon: CreditCard,
-    color: "bg-violet-50 text-violet-600 border-violet-200 hover:border-violet-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Payment deducted but plan inactive",
       "Upgrade or renewal inquiry",
@@ -150,7 +150,7 @@ const GUIDED_CATEGORIES = [
     id: "account",
     label: "Account & Profile",
     icon: User,
-    color: "bg-indigo-50 text-indigo-600 border-indigo-200 hover:border-indigo-300",
+    color: "bg-brand-50 text-brand-600 border-brand-200 hover:border-brand-300",
     issues: [
       "Business profile update",
       "Phone or email change request",
@@ -188,7 +188,7 @@ const getStatusBadge = (status) => {
   switch (status) {
     case "open":
       return (
-        <span className="rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+        <span className="rounded-full bg-brand-100 text-brand-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
           Open
         </span>
       );
@@ -200,7 +200,7 @@ const getStatusBadge = (status) => {
       );
     case "in_progress":
       return (
-        <span className="rounded-full bg-purple-100 text-purple-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+        <span className="rounded-full bg-brand-100 text-brand-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
           In Progress
         </span>
       );
@@ -212,7 +212,7 @@ const getStatusBadge = (status) => {
       );
     case "resolved":
       return (
-        <span className="rounded-full bg-emerald-100 text-emerald-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+        <span className="rounded-full bg-brand-100 text-brand-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
           Resolved
         </span>
       );
@@ -424,7 +424,7 @@ export default function HelpCentre() {
 
       const token = getToken();
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5001"}/api/help-centre/tickets`,
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/help-centre/tickets`,
         {
           method: "POST",
           headers: {
@@ -466,7 +466,7 @@ export default function HelpCentre() {
 
       const token = getToken();
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5001"}/api/help-centre/tickets/${activeTicket.id}/messages`,
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/help-centre/tickets/${activeTicket.id}/messages`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -579,7 +579,7 @@ export default function HelpCentre() {
               <button
                 type="button"
                 onClick={() => openSubscriptionPrompt("Help Centre Support")}
-                className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-purple-700 transition"
+                className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-brand-700 transition"
               >
                 <span>View Plans</span>
                 <ChevronRight size={14} />
@@ -609,7 +609,7 @@ export default function HelpCentre() {
                     </button>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                        <span className="font-mono text-xs font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded">
                           {activeTicket.ticket_number || `#${activeTicket.id}`}
                         </span>
                         <h2 className="font-bold text-slate-900 text-sm sm:text-base">
@@ -632,7 +632,7 @@ export default function HelpCentre() {
                           type="button"
                           disabled={claiming}
                           onClick={() => handleClaimTicket(activeTicket.id)}
-                          className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-purple-700 shadow-sm transition disabled:opacity-60"
+                          className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-700 shadow-sm transition disabled:opacity-60"
                         >
                           <CheckCircle2 size={15} />
                           <span>{claiming ? "Claiming..." : "Claim Ticket"}</span>
@@ -648,7 +648,7 @@ export default function HelpCentre() {
                               activeTicket.assigned_employee_id !== user?.id))
                         }
                         onChange={(e) => handleUpdateStatus(e.target.value)}
-                        className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-600 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-600 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         title={
                           user?.role === "employee" && !activeTicket.assigned_employee_id
                             ? "You must claim this ticket before updating status"
@@ -668,13 +668,13 @@ export default function HelpCentre() {
                   ) : (
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-slate-500 hidden sm:flex items-center gap-1.5 font-medium">
-                        <Headphones size={15} className="text-purple-600" />
+                        <Headphones size={15} className="text-brand-600" />
                         <span>KhataNex Support Team</span>
                       </span>
                       <button
                         type="button"
                         onClick={handleStartNewConversation}
-                        className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 px-3 py-1.5 text-xs font-bold hover:bg-purple-100 transition shadow-2xs"
+                        className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50 text-brand-700 px-3 py-1.5 text-xs font-bold hover:bg-brand-100 transition shadow-2xs"
                         title="Start a separate conversation"
                       >
                         <Plus size={14} />
@@ -721,7 +721,7 @@ export default function HelpCentre() {
                             <span className="font-bold text-slate-700 flex items-center gap-1">
                               {!isStaff && !isCustomerSender ? (
                                 <>
-                                  <ShieldCheck size={13} className="text-purple-600" />
+                                  <ShieldCheck size={13} className="text-brand-600" />
                                   <span>KhataNex Support Team</span>
                                 </>
                               ) : isMe ? (
@@ -737,7 +737,7 @@ export default function HelpCentre() {
                           <div
                             className={`rounded-2xl px-4 py-3 max-w-lg text-xs leading-relaxed shadow-sm ${
                               isMe
-                                ? "bg-purple-600 text-white rounded-tr-sm"
+                                ? "bg-brand-600 text-white rounded-tr-sm"
                                 : "bg-white text-slate-800 border border-slate-200 rounded-tl-sm"
                             }`}
                           >
@@ -788,7 +788,7 @@ export default function HelpCentre() {
                             {activeFeedback || feedbackSuccess ? "Your Feedback & Rating" : "How was your support experience?"}
                           </h4>
                         </div>
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                        <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-[10px] font-bold text-brand-800 uppercase">
                           Resolved
                         </span>
                       </div>
@@ -812,7 +812,7 @@ export default function HelpCentre() {
                               "{activeFeedback?.comment || ratingComment}"
                             </p>
                           )}
-                          <p className="text-[11px] text-emerald-700 font-semibold pt-1">
+                          <p className="text-[11px] text-brand-700 font-semibold pt-1">
                             ✓ Thank you for taking the time to share your feedback!
                           </p>
                         </div>
@@ -878,12 +878,12 @@ export default function HelpCentre() {
                 {activeTicket.status !== "closed" && (!isRestricted || isStaff) && (
                   <form onSubmit={handleSendReply} className="border-t border-slate-200 p-3 sm:p-4 bg-white">
                     {replyFile && (
-                      <div className="flex items-center justify-between mb-2 rounded-xl bg-purple-50 border border-purple-200 px-3 py-1.5 text-xs text-purple-900">
+                      <div className="flex items-center justify-between mb-2 rounded-xl bg-brand-50 border border-brand-200 px-3 py-1.5 text-xs text-brand-900">
                         <span className="truncate max-w-xs">{replyFile.name}</span>
                         <button
                           type="button"
                           onClick={() => setReplyFile(null)}
-                          className="text-purple-600 hover:text-purple-900"
+                          className="text-brand-600 hover:text-brand-900"
                         >
                           <X size={14} />
                         </button>
@@ -905,13 +905,13 @@ export default function HelpCentre() {
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Type your message here..."
-                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs outline-none focus:border-purple-600 focus:bg-white transition min-h-[44px]"
+                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs outline-none focus:border-brand-600 focus:bg-white transition min-h-[44px]"
                       />
 
                       <button
                         type="submit"
                         disabled={sendingReply || (!replyText.trim() && !replyFile)}
-                        className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white hover:bg-purple-700 shadow-sm transition disabled:opacity-50"
+                        className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 shadow-sm transition disabled:opacity-50"
                         aria-label="Send reply"
                       >
                         {sendingReply ? <RefreshCw size={17} className="animate-spin" /> : <Send size={17} />}
@@ -938,7 +938,7 @@ export default function HelpCentre() {
                         onClick={() => setStaffTab(tab.id)}
                         className={`min-h-[40px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                           staffTab === tab.id
-                            ? "bg-purple-600 text-white shadow-sm"
+                            ? "bg-brand-600 text-white shadow-sm"
                             : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                         }`}
                       >
@@ -956,7 +956,7 @@ export default function HelpCentre() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search tickets..."
-                        className="min-h-[40px] rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs outline-none focus:border-purple-600"
+                        className="min-h-[40px] rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs outline-none focus:border-brand-600"
                       />
                     </div>
                     <button
@@ -1006,7 +1006,7 @@ export default function HelpCentre() {
                             className="hover:bg-slate-50/70 transition cursor-pointer"
                           >
                             <td className="py-3 px-4">
-                              <span className="font-mono text-[11px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">
+                              <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded">
                                 {t.ticket_number || `#${t.id}`}
                               </span>
                               <span className="block font-bold text-slate-900 mt-1">{t.subject}</span>
@@ -1039,7 +1039,7 @@ export default function HelpCentre() {
                                   e.stopPropagation();
                                   loadTicketDetails(t.id);
                                 }}
-                                className="min-h-[36px] px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-bold text-purple-700 hover:bg-purple-50 transition"
+                                className="min-h-[36px] px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-bold text-brand-700 hover:bg-brand-50 transition"
                               >
                                 View Chat
                               </button>
@@ -1062,7 +1062,7 @@ export default function HelpCentre() {
                       onClick={() => setCustomerView("chat")}
                       className={`min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                         customerView === "chat"
-                          ? "bg-purple-600 text-white shadow-sm"
+                          ? "bg-brand-600 text-white shadow-sm"
                           : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
@@ -1074,7 +1074,7 @@ export default function HelpCentre() {
                       onClick={() => setCustomerView("tickets")}
                       className={`min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                         customerView === "tickets"
-                          ? "bg-purple-600 text-white shadow-sm"
+                          ? "bg-brand-600 text-white shadow-sm"
                           : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
@@ -1112,7 +1112,7 @@ export default function HelpCentre() {
                       <button
                         type="button"
                         onClick={handleStartNewConversation}
-                        className="text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px]"
+                        className="text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px]"
                       >
                         <Plus size={14} />
                         <span>Start New Conversation</span>
@@ -1126,7 +1126,7 @@ export default function HelpCentre() {
                         onClick={() => setCustomerFilter("all")}
                         className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-bold transition ${
                           customerFilter === "all"
-                            ? "bg-purple-600 text-white shadow-xs"
+                            ? "bg-brand-600 text-white shadow-xs"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                       >
@@ -1137,7 +1137,7 @@ export default function HelpCentre() {
                         onClick={() => setCustomerFilter("active")}
                         className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
                           customerFilter === "active"
-                            ? "bg-purple-600 text-white shadow-xs"
+                            ? "bg-brand-600 text-white shadow-xs"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                       >
@@ -1151,7 +1151,7 @@ export default function HelpCentre() {
                         onClick={() => setCustomerFilter("resolved")}
                         className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
                           customerFilter === "resolved"
-                            ? "bg-purple-600 text-white shadow-xs"
+                            ? "bg-brand-600 text-white shadow-xs"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                       >
@@ -1174,7 +1174,7 @@ export default function HelpCentre() {
                         <button
                           type="button"
                           onClick={handleStartNewConversation}
-                          className="min-h-[44px] px-4 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-700 transition shadow-sm"
+                          className="min-h-[44px] px-4 py-2 rounded-xl bg-brand-600 text-white font-bold text-xs hover:bg-brand-700 transition shadow-sm"
                         >
                           Start Your First Chat
                         </button>
@@ -1190,11 +1190,11 @@ export default function HelpCentre() {
                           <div
                             key={t.id}
                             onClick={() => loadTicketDetails(t.id)}
-                            className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-purple-300 hover:shadow-md transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                            className="rounded-2xl border border-slate-200 bg-white p-4 hover:border-brand-300 hover:shadow-md transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                           >
                             <div className="space-y-1.5">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-mono text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                                <span className="font-mono text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded">
                                   {t.ticket_number || `#${t.id}`}
                                 </span>
                                 <h4 className="font-bold text-slate-900 text-sm">{t.subject}</h4>
@@ -1218,7 +1218,7 @@ export default function HelpCentre() {
                             <div className="flex items-center gap-2 shrink-0">
                               <button
                                 type="button"
-                                className="min-h-[44px] px-4 py-2 rounded-xl bg-purple-50 text-purple-700 font-bold text-xs hover:bg-purple-100 transition flex items-center gap-1.5"
+                                className="min-h-[44px] px-4 py-2 rounded-xl bg-brand-50 text-brand-700 font-bold text-xs hover:bg-brand-100 transition flex items-center gap-1.5"
                               >
                                 <span>{t.status === "resolved" || t.status === "closed" ? "View Chat" : "Resume Chat"}</span>
                                 <ChevronRight size={14} />
@@ -1235,7 +1235,7 @@ export default function HelpCentre() {
                     <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                       {/* Support Greeting Bubble */}
                       <div className="flex items-start gap-3 max-w-lg">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white shadow-xs">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-xs">
                           <Headphones size={18} />
                         </div>
                         <div className="space-y-1">
@@ -1259,8 +1259,8 @@ export default function HelpCentre() {
                       {/* Selected Topic Notice if any */}
                       {(selectedCategory || selectedIssue) && (
                         <div className="flex justify-center">
-                          <div className="inline-flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50/90 px-3.5 py-2 text-xs text-purple-900 shadow-2xs">
-                            <span className="font-bold text-purple-700">Selected Topic:</span>
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50/90 px-3.5 py-2 text-xs text-brand-900 shadow-2xs">
+                            <span className="font-bold text-brand-700">Selected Topic:</span>
                             <span>
                               {selectedCategory?.label}
                               {selectedIssue ? ` • ${selectedIssue}` : ""}
@@ -1271,7 +1271,7 @@ export default function HelpCentre() {
                                 setSelectedCategory(null);
                                 setSelectedIssue("");
                               }}
-                              className="text-purple-600 hover:text-purple-800 ml-1"
+                              className="text-brand-600 hover:text-brand-800 ml-1"
                               title="Clear topic"
                             >
                               <X size={13} />
@@ -1308,9 +1308,9 @@ export default function HelpCentre() {
                                     key={cat.id}
                                     type="button"
                                     onClick={() => handleSelectCategory(cat)}
-                                    className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1 text-xs font-semibold text-slate-700 hover:border-purple-300 hover:bg-purple-50/60 hover:text-purple-700 transition shadow-2xs"
+                                    className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50/60 hover:text-brand-700 transition shadow-2xs"
                                   >
-                                    <Icon size={14} className="text-purple-600 shrink-0" />
+                                    <Icon size={14} className="text-brand-600 shrink-0" />
                                     <span>{cat.label}</span>
                                   </button>
                                 );
@@ -1332,7 +1332,7 @@ export default function HelpCentre() {
                                   <ArrowLeft size={13} />
                                   <span>All Modules</span>
                                 </button>
-                                <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-bold text-purple-700">
+                                <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-bold text-brand-700">
                                   <span>{selectedCategory.label}</span>
                                 </div>
                               </div>
@@ -1358,8 +1358,8 @@ export default function HelpCentre() {
                                     onClick={() => handleSelectIssue(selectedCategory, issue)}
                                     className={`inline-flex min-h-[32px] shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border transition ${
                                       isSelected
-                                        ? "border-purple-600 bg-purple-600 text-white font-bold shadow-xs"
-                                        : "border-slate-200 bg-white text-slate-700 hover:border-purple-300 hover:bg-purple-50/50"
+                                        ? "border-brand-600 bg-brand-600 text-white font-bold shadow-xs"
+                                        : "border-slate-200 bg-white text-slate-700 hover:border-brand-300 hover:bg-brand-50/50"
                                     }`}
                                   >
                                     {isSelected && <Check size={12} />}
@@ -1378,7 +1378,7 @@ export default function HelpCentre() {
                           {/* Selected File Badge */}
                           {composerFile && (
                             <div className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-700">
-                              <Paperclip size={13} className="text-purple-600" />
+                              <Paperclip size={13} className="text-brand-600" />
                               <span className="truncate max-w-[200px] font-medium">
                                 {composerFile.name}
                               </span>
@@ -1395,7 +1395,7 @@ export default function HelpCentre() {
                           <div className="flex items-end gap-2">
                             {/* File Upload Button */}
                             <label
-                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-purple-600 cursor-pointer transition shadow-2xs"
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-brand-600 cursor-pointer transition shadow-2xs"
                               title="Attach Screenshot or Document"
                             >
                               <Paperclip size={18} />
@@ -1422,14 +1422,14 @@ export default function HelpCentre() {
                                   ? `Inquiry regarding "${selectedIssue}" (press Enter to send)...`
                                   : "Type your issue or question here..."
                               }
-                              className="flex-1 min-h-[44px] max-h-32 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 resize-none shadow-2xs"
+                              className="flex-1 min-h-[44px] max-h-32 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 resize-none shadow-2xs"
                             />
 
                             {/* Send Button */}
                             <button
                               type="submit"
                               disabled={composerLoading || (!composerMessage.trim() && !selectedIssue)}
-                              className="flex h-11 min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-purple-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-purple-700 transition disabled:opacity-40"
+                              className="flex h-11 min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-brand-700 transition disabled:opacity-40"
                             >
                               {composerLoading ? (
                                 <RefreshCw size={15} className="animate-spin" />

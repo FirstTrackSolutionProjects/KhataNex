@@ -215,7 +215,7 @@ const Banking = () => {
 
           <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+              <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                 <Landmark size={22} />
               </div>
 
@@ -242,7 +242,7 @@ const Banking = () => {
                 <select
                   value={selectedDefaultId}
                   onChange={(e) => setSelectedDefaultId(e.target.value)}
-                  className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 >
                   <option value="">Select a bank account...</option>
                   {banking.map((b) => (
@@ -294,7 +294,7 @@ const Banking = () => {
                 disabled={!canWrite}
                 title={!canWrite ? subscriptionRequiredMessage : undefined}
                 onClick={openAddModal}
-                className="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Add Bank Account
               </button>
@@ -308,7 +308,7 @@ const Banking = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                      <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                         <Landmark size={21} />
                       </div>
 
@@ -333,7 +333,7 @@ const Banking = () => {
                         className={`rounded-lg p-2 transition ${
                           !canWrite
                             ? "opacity-50 cursor-not-allowed text-slate-300"
-                            : "text-slate-400 hover:bg-slate-100 hover:text-emerald-600"
+                            : "text-slate-400 hover:bg-slate-100 hover:text-brand-600"
                         }`}
                         title={!canWrite ? subscriptionRequiredMessage : "Edit"}
                       >
@@ -359,7 +359,7 @@ const Banking = () => {
                   </div>
 
                   {Boolean(bank.is_default) && (
-                    <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
                       <CheckCircle2 size={14} />
                       Default for Documents
                     </div>
@@ -432,7 +432,7 @@ const Banking = () => {
               value={form.bank_name}
               onChange={(e) => updateField("bank_name", e.target.value)}
               placeholder="e.g. State Bank of India"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
@@ -447,7 +447,7 @@ const Banking = () => {
                 updateField("account_holder_name", e.target.value)
               }
               placeholder="Account holder name"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
@@ -462,7 +462,7 @@ const Banking = () => {
                 updateField("account_number", e.target.value)
               }
               placeholder="Account number"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
@@ -475,7 +475,7 @@ const Banking = () => {
               onChange={(e) =>
                 updateField("account_type", e.target.value)
               }
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500"
             >
               <option value="">Select account type</option>
               <option value="Savings">Savings</option>
@@ -495,7 +495,7 @@ const Banking = () => {
               value={form.branch}
               onChange={(e) => updateField("branch", e.target.value)}
               placeholder="Branch name"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
@@ -510,7 +510,7 @@ const Banking = () => {
                 updateField("ifsc_code", e.target.value.toUpperCase())
               }
               placeholder="e.g. SBIN0001234"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-brand-500"
             />
           </div>
 
@@ -521,7 +521,7 @@ const Banking = () => {
               onChange={(e) =>
                 updateField("is_default", e.target.checked)
               }
-              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
 
             <div>

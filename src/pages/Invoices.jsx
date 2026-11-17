@@ -26,7 +26,7 @@ import api, { secureFileObjectUrl, fetchSecureFile } from "../lib/api";
 import useSubscriptionAccess from "../hooks/useSubscriptionAccess";
 
 const EMAIL_STYLE = {
-  sent: "bg-emerald-100 text-emerald-700",
+  sent: "bg-brand-100 text-brand-700",
   failed: "bg-amber-100 text-amber-700",
   not_sent: "bg-slate-100 text-slate-600",
 };
@@ -170,7 +170,7 @@ const Field = ({
       className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none transition disabled:bg-slate-100 disabled:text-slate-500 ${
         error
           ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-          : "border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          : "border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       } ${className}`}
     />
     {errorText && (
@@ -201,7 +201,7 @@ const SelectField = ({
       onChange={(e) => onChange(e.target.value)}
       required={required}
       disabled={disabled}
-      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:text-slate-500"
+      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 disabled:text-slate-500"
     >
       {children}
     </select>
@@ -218,7 +218,7 @@ const Section = ({
   <section className="rounded-2xl border border-slate-200 bg-white">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600">
+        <div className="rounded-lg bg-brand-50 p-2 text-brand-600">
           <Icon size={18} />
         </div>
 
@@ -298,7 +298,7 @@ const CustomerAutocomplete = ({
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search name, business, phone, email or customer ID"
-          className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
         />
       </div>
 
@@ -317,7 +317,7 @@ const CustomerAutocomplete = ({
                   onSelect(customer);
                   setOpen(false);
                 }}
-                className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-emerald-50"
+                className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-brand-50"
               >
                 <div className="font-medium text-slate-900">
                   {customer.display_name ||
@@ -431,7 +431,7 @@ const ItemAutocomplete = ({
         }}
         onFocus={() => setOpen(true)}
         placeholder="Search inventory..."
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
       {open && (
@@ -449,7 +449,7 @@ const ItemAutocomplete = ({
                 onClick={() => setFilterType(id)}
                 className={`flex-1 rounded-md py-1 text-xs font-medium transition ${
                   filterType === id
-                    ? "bg-emerald-600 text-white shadow-xs"
+                    ? "bg-brand-600 text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-200/60"
                 }`}
               >
@@ -477,7 +477,7 @@ const ItemAutocomplete = ({
                     );
                     setOpen(false);
                   }}
-                  className="block w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-emerald-50"
+                  className="block w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-brand-50"
                 >
                   <div className="font-medium text-slate-900">
                     {product.product_name ||
@@ -689,7 +689,7 @@ const TotalsSection = ({ totals }) => (
           Grand Total
         </span>
 
-        <span className="text-2xl font-bold text-emerald-700">
+        <span className="text-2xl font-bold text-brand-700">
           {money(totals.total)}
         </span>
       </div>
@@ -1634,7 +1634,7 @@ const Invoices = () => {
                   setSearch(e.target.value)
                 }
                 placeholder="Search invoices by customer or invoice number..."
-                className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -1664,8 +1664,8 @@ const Invoices = () => {
                   disabled={!canWrite}
                   onClick={openCreateModal}
                   title={!canWrite ? subscriptionRequiredMessage : undefined}
-                  className={`mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition ${
-                    !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-700"
+                  className={`mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition ${
+                    !canWrite ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-700"
                   }`}
                 >
                   <Plus size={16} />
@@ -1676,7 +1676,7 @@ const Invoices = () => {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] text-left">
                   <thead>
-                    <tr className="bg-emerald-600 text-white">
+                    <tr className="bg-brand-600 text-white">
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
                         Invoice
                       </th>
@@ -1780,7 +1780,7 @@ const Invoices = () => {
                               <button
                                 type="button"
                                 onClick={() => handleOpenInvoicePreview(document)}
-                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
+                                className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-brand-600 transition"
                                 title="View Invoice"
                                 aria-label="View invoice"
                               >
@@ -1805,7 +1805,7 @@ const Invoices = () => {
                                       window.alert(err.message || "Could not download the invoice PDF.");
                                     }
                                   }}
-                                  className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-emerald-600 transition"
+                                  className="rounded-lg p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 hover:text-brand-600 transition"
                                   title="Download PDF"
                                 >
                                   <Download size={17} className="sm:w-5 sm:h-5" />
@@ -1816,7 +1816,7 @@ const Invoices = () => {
                                 disabled={!canWrite}
                                 onClick={() => openEditModal(document)}
                                 className={`rounded-lg p-2 sm:p-2.5 text-slate-600 transition ${
-                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-100 hover:text-emerald-600"
+                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-100 hover:text-brand-600"
                                 }`}
                                 title={!canWrite ? subscriptionRequiredMessage : "Edit Invoice"}
                                 aria-label="Edit invoice"
@@ -1853,7 +1853,7 @@ const Invoices = () => {
             <div className="sticky top-0 z-50 border-b border-slate-200 bg-white">
               <div className="flex items-center justify-between gap-4 px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
+                  <div className="rounded-xl bg-brand-50 p-2.5 text-brand-600">
                     <FileText size={21} />
                   </div>
 
@@ -1961,7 +1961,7 @@ const Invoices = () => {
                       className={`rounded-lg px-4 py-2 text-sm font-medium ${
                         customerMode ===
                         "existing"
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-brand-600 text-white"
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
@@ -1982,7 +1982,7 @@ const Invoices = () => {
                       className={`rounded-lg px-4 py-2 text-sm font-medium ${
                         customerMode ===
                         "manual"
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-brand-600 text-white"
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
@@ -2018,7 +2018,7 @@ const Invoices = () => {
                       />
 
                       {selectedCustomer && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                        <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
                           <div className="flex items-start justify-between gap-4">
                             <div>
                               <p className="font-semibold text-slate-900">
@@ -2036,7 +2036,7 @@ const Invoices = () => {
                               )}
                             </div>
 
-                            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700">
+                            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-700">
                               Selected
                             </span>
                           </div>
@@ -2194,7 +2194,7 @@ const Invoices = () => {
                                 e.target.checked
                               )
                             }
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                           />
 
                           <span>
@@ -2289,7 +2289,7 @@ const Invoices = () => {
                     <button
                       type="button"
                       onClick={addItemRow}
-                      className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                      className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700"
                     >
                       <Plus size={16} />
                       Add Item
@@ -2861,7 +2861,7 @@ const Invoices = () => {
                     }
                     rows={5}
                     placeholder="Enter invoice terms and conditions..."
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </Section>
 
@@ -2879,7 +2879,7 @@ const Invoices = () => {
                     }
                     rows={4}
                     placeholder="Add notes..."
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </Section>
               </div>
@@ -2898,7 +2898,7 @@ const Invoices = () => {
                     <button
                       type="submit"
                       disabled={saving || hasStockError}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Download size={17} />
 

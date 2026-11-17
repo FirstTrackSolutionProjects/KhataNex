@@ -38,7 +38,7 @@ const Blog = () => {
       date: "Aug 15, 2026",
       readTime: "5 min read",
       icon: BookOpen,
-      gradient: "from-emerald-500 to-teal-600",
+      gradient: "from-brand-500 to-brand-600",
     },
     {
       id: 2,
@@ -104,7 +104,7 @@ const Blog = () => {
       date: "Jul 25, 2026",
       readTime: "5 min read",
       icon: Users,
-      gradient: "from-emerald-500 to-green-600",
+      gradient: "from-brand-500 to-green-600",
     },
     {
       id: 8,
@@ -126,7 +126,7 @@ const Blog = () => {
       date: "Jul 18, 2026",
       readTime: "5 min read",
       icon: BookOpen,
-      gradient: "from-teal-500 to-emerald-600",
+      gradient: "from-brand-500 to-brand-600",
     },
   ];
 
@@ -156,12 +156,12 @@ const Blog = () => {
       {/* =====================================================
           HERO
       ====================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600">
 
         {/* Background Shapes */}
         <div className="absolute -left-20 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-        <div className="absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-teal-300/20 blur-3xl" />
+        <div className="absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-brand-300/20 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
 
@@ -181,7 +181,7 @@ const Blog = () => {
               </span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-emerald-50 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-brand-50 sm:text-lg">
               Discover practical business tips, digital khata
               insights, payment management ideas and simple ways
               to organize your business.
@@ -238,8 +238,8 @@ const Blog = () => {
                 onClick={() => setActiveCategory(category)}
                 className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
                   activeCategory === category
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                    ? "bg-brand-600 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700"
                 }`}
               >
                 {category}
@@ -261,7 +261,7 @@ const Blog = () => {
           <div className="mb-8 flex items-end justify-between">
 
             <div>
-              <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+              <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
                 Featured
               </span>
 
@@ -304,7 +304,7 @@ const Blog = () => {
 
                 <div className="flex flex-wrap items-center gap-3">
 
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                  <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
                     {featuredBlog.category}
                   </span>
 
@@ -330,7 +330,7 @@ const Blog = () => {
 
                 <Link
                   to={`/blog/${featuredBlog.id}`}
-                  className="mt-7 inline-flex w-fit items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+                  className="mt-7 inline-flex w-fit items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
                 >
                   Read Article
                   <ArrowRight size={17} />
@@ -357,7 +357,7 @@ const Blog = () => {
 
             <div>
 
-              <span className="text-sm font-bold uppercase tracking-wider text-emerald-600">
+              <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
                 Latest Articles
               </span>
 
@@ -386,7 +386,7 @@ const Blog = () => {
                 return (
                   <article
                     key={blog.id}
-                    className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl"
+                    className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl"
                   >
 
                     {/* Blog Visual */}
@@ -426,7 +426,7 @@ const Blog = () => {
                       </div>
 
                       {/* Title */}
-                      <h3 className="mt-4 line-clamp-2 text-lg font-bold leading-7 text-slate-900 transition group-hover:text-emerald-600">
+                      <h3 className="mt-4 line-clamp-2 text-lg font-bold leading-7 text-slate-900 transition group-hover:text-brand-600">
                         {blog.title}
                       </h3>
 
@@ -438,7 +438,7 @@ const Blog = () => {
                       {/* Read More */}
                       <Link
                         to={`/blog/${blog.id}`}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-emerald-600 transition hover:text-emerald-700"
+                        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-600 transition hover:text-brand-700"
                       >
                         Read More
                         <ArrowRight
@@ -477,7 +477,7 @@ const Blog = () => {
                   setSearchTerm("");
                   setActiveCategory("All");
                 }}
-                className="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700"
+                className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700"
               >
                 Clear Filters
               </button>
@@ -496,7 +496,7 @@ const Blog = () => {
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 px-6 py-12 text-center shadow-xl sm:px-12">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600 px-6 py-12 text-center shadow-xl sm:px-12">
 
             <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
 
@@ -512,14 +512,14 @@ const Blog = () => {
                 Want More Business Tips?
               </h2>
 
-              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-emerald-50 sm:text-base">
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-brand-50 sm:text-base">
                 Explore more practical ideas and insights to help
                 you manage and grow your business with confidence.
               </p>
 
               <Link
                 to="/contact"
-                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-700 shadow-lg transition hover:bg-emerald-50"
+                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-700 shadow-lg transition hover:bg-brand-50"
               >
                 Get in Touch
                 <ArrowRight size={17} />

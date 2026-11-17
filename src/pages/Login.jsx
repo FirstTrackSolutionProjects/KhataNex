@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BrandLogo from "../components/BrandLogo";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -107,15 +108,13 @@ const Login = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Left */}
-      <div className="hidden w-1/2 bg-emerald-600 lg:flex lg:items-center lg:justify-center">
+      <div className="hidden w-1/2 bg-brand-radial lg:flex lg:items-center lg:justify-center">
         <div className="max-w-md px-10 text-white">
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl font-bold text-emerald-600">
-            K
-          </div>
+          <BrandLogo size={72} className="mb-6 shadow-brand-lg ring-4 ring-white/25" />
           <h1 className="text-4xl font-bold">
             Welcome back to KHATANEX
           </h1>
-          <p className="mt-5 leading-7 text-emerald-50">
+          <p className="mt-5 leading-7 text-brand-50">
             Manage your customers, khata, payments, invoices and business
             records from one simple platform.
           </p>
@@ -129,23 +128,29 @@ const Login = () => {
           <div className="mb-6 flex items-center justify-between">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600"
             >
               <ArrowLeft size={18} />
               Back to Home
             </Link>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+              className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 transition hover:text-brand-700"
             >
               <Home size={18} />
             </Link>
           </div>
 
+          {/* Logo (shown on small screens, where the left panel is hidden) */}
+          <div className="mb-6 flex items-center justify-center gap-3 lg:hidden">
+            <BrandLogo size={48} rounded="rounded-xl" className="shadow-brand" />
+            <span className="font-display text-xl font-extrabold text-slate-900">KhataNex</span>
+          </div>
+
           {mfaChallenge.active ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
               <div className="mb-6 flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
                   <ShieldCheck size={32} />
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900">
@@ -185,7 +190,7 @@ const Login = () => {
                         value={mfaChallenge.code}
                         onChange={handleMfaChange}
                         placeholder="123456"
-                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-center font-mono text-lg font-bold tracking-widest outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-center font-mono text-lg font-bold tracking-widest outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                       />
                     </div>
                   </div>
@@ -207,7 +212,7 @@ const Login = () => {
                         value={mfaChallenge.recoveryCode}
                         onChange={handleMfaChange}
                         placeholder="e.g. A1B2-C3D4"
-                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 font-mono text-sm uppercase tracking-wider outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 font-mono text-sm uppercase tracking-wider outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                       />
                     </div>
                     <p className="mt-1 text-xs text-slate-400">
@@ -219,7 +224,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={submitting || (!mfaChallenge.useRecovery && mfaChallenge.code.length < 6) || (mfaChallenge.useRecovery && !mfaChallenge.recoveryCode.trim())}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   {submitting ? "Verifying..." : "Verify & Continue"}
                   <ArrowRight size={17} />
@@ -237,7 +242,7 @@ const Login = () => {
                       }));
                       setError("");
                     }}
-                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                    className="text-xs font-semibold text-brand-600 hover:text-brand-700"
                   >
                     {mfaChallenge.useRecovery
                       ? "← Use authenticator app code instead"
@@ -258,7 +263,7 @@ const Login = () => {
           ) : (
             <>
               <div className="mb-8 text-center lg:text-left">
-                <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white lg:hidden">
+                <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 font-bold text-white lg:hidden">
                   K
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900">
@@ -295,7 +300,7 @@ const Login = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Enter your email"
-                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
                 </div>
@@ -308,7 +313,7 @@ const Login = () => {
                     </label>
                     <Link
                       to="/forgot-password"
-                      className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                      className="text-xs font-medium text-brand-600 hover:text-brand-700"
                     >
                       Forgot Password?
                     </Link>
@@ -324,7 +329,7 @@ const Login = () => {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Enter your password"
-                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                     <button
                       type="button"
@@ -340,7 +345,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   {submitting ? "Logging in..." : "Login"}
                   <ArrowRight size={17} />
@@ -353,7 +358,7 @@ const Login = () => {
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="font-semibold text-emerald-600 hover:text-emerald-700"
+              className="font-semibold text-brand-600 hover:text-brand-700"
             >
               Create Account
             </Link>

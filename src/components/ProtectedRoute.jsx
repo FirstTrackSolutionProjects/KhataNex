@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, allowedRoles, requiredModule }) => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-brand-600 border-t-transparent"></div>
           <p className="mt-3 text-sm text-slate-500">Loading KhataNex...</p>
         </div>
       </div>

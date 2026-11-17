@@ -73,7 +73,7 @@ const Input = ({ label, value, onChange, placeholder, type = "text" }) => (
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
     />
   </div>
 );
@@ -86,7 +86,7 @@ const SelectButton = ({ label, value, onClick }) => (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left text-sm outline-none transition hover:border-emerald-400"
+      className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left text-sm outline-none transition hover:border-brand-400"
     >
       <span className="truncate text-slate-700">{value}</span>
       <ChevronDown size={17} className="shrink-0 text-slate-400" />
@@ -411,7 +411,7 @@ const Customers = () => {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                   <Users size={21} />
                 </div>
 
@@ -431,7 +431,7 @@ const Customers = () => {
                 Total Receivable
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-emerald-600">
+              <p className="mt-2 text-2xl font-bold text-brand-600">
                 {loading
                   ? "..."
                   : `₹${totalReceivable.toLocaleString("en-IN")}`}
@@ -461,7 +461,7 @@ const Customers = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search customer by name or phone..."
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -610,7 +610,7 @@ const Customers = () => {
                   <button
                     type="button"
                     onClick={() => setDrawer("mobileCountry")}
-                    className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm hover:border-emerald-400"
+                    className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm hover:border-brand-400"
                   >
                     {countries.find(
                       (c) => c.name === form.mobileCountry
@@ -632,7 +632,7 @@ const Customers = () => {
                       updateForm("mobile", e.target.value)
                     }
                     placeholder="Mobile number"
-                    className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
               </div>
@@ -671,14 +671,14 @@ const Customers = () => {
                   type="checkbox"
                   checked={form.billingSameAsBusiness}
                   onChange={(e) => toggleBillingSame(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
                 Same as business
               </label>
             </div>
 
             {form.billingSameAsBusiness ? (
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-700">
                 Billing address will use the business address.
               </div>
             ) : (
@@ -707,14 +707,14 @@ const Customers = () => {
                   type="checkbox"
                   checked={form.shippingSameAsBusiness}
                   onChange={(e) => toggleShippingSame(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
                 Same as business
               </label>
             </div>
 
             {form.shippingSameAsBusiness ? (
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-700">
                 Shipping address will use the business address.
               </div>
             ) : (
@@ -728,7 +728,7 @@ const Customers = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Saving..." : "Add Customer"}
           </button>
@@ -783,7 +783,7 @@ const Customers = () => {
                     onClick={() => selectDrawerValue(value)}
                     className={`mb-1 w-full rounded-xl px-4 py-3 text-left text-sm transition ${
                       selected
-                        ? "bg-emerald-50 font-semibold text-emerald-700"
+                        ? "bg-brand-50 font-semibold text-brand-700"
                         : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
@@ -830,7 +830,7 @@ const Customers = () => {
                   }}
                   className={`mb-1 w-full rounded-xl px-4 py-3 text-left text-sm ${
                     form.title === title
-                      ? "bg-emerald-50 font-semibold text-emerald-700"
+                      ? "bg-brand-50 font-semibold text-brand-700"
                       : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >

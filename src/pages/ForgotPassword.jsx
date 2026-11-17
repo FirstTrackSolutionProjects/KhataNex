@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BrandLogo from "../components/BrandLogo";
 import { Link } from "react-router-dom";
 import {
   Mail,
@@ -51,15 +52,13 @@ const ForgotPassword = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Left Branding Hero (Desktop) */}
-      <div className="hidden w-1/2 bg-emerald-600 lg:flex lg:items-center lg:justify-center">
+      <div className="hidden w-1/2 bg-brand-radial lg:flex lg:items-center lg:justify-center">
         <div className="max-w-md px-10 text-white">
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl font-bold text-emerald-600">
-            K
-          </div>
+          <BrandLogo size={72} className="mb-6 shadow-brand-lg ring-4 ring-white/25" />
           <h1 className="text-4xl font-bold">
             Account Security & Recovery
           </h1>
-          <p className="mt-5 leading-7 text-emerald-50">
+          <p className="mt-5 leading-7 text-brand-50">
             Recover access to your KhataNex business account quickly and securely.
             We will send single-use, encrypted password reset instructions to your email.
           </p>
@@ -73,14 +72,14 @@ const ForgotPassword = () => {
           <div className="mb-6 flex items-center justify-between">
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600"
             >
               <ArrowLeft size={18} />
               Back to Login
             </Link>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+              className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 transition hover:text-brand-700"
               title="Home"
             >
               <Home size={18} />
@@ -88,8 +87,9 @@ const ForgotPassword = () => {
           </div>
 
           <div className="mb-8 text-center lg:text-left">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white lg:hidden">
-              K
+            <div className="mx-auto mb-5 flex items-center justify-center gap-3 lg:hidden">
+              <BrandLogo size={48} rounded="rounded-xl" className="shadow-brand" />
+              <span className="font-display text-xl font-extrabold text-slate-900">KhataNex</span>
             </div>
             <h2 className="text-3xl font-bold text-slate-900">
               Forgot Password
@@ -102,7 +102,7 @@ const ForgotPassword = () => {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             {submitted ? (
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600">
                   <CheckCircle2 size={32} />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">
@@ -127,7 +127,7 @@ const ForgotPassword = () => {
                   </button>
                   <Link
                     to="/login"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
                   >
                     Return to Login
                     <ArrowRight size={16} />
@@ -162,7 +162,7 @@ const ForgotPassword = () => {
                       placeholder="name@business.com"
                       autoFocus
                       required
-                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                     />
                   </div>
                 </div>
@@ -170,7 +170,7 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   {submitting ? "Sending Reset Link..." : "Send Reset Link"}
                   <ArrowRight size={17} />
@@ -183,7 +183,7 @@ const ForgotPassword = () => {
             Remember your password?{" "}
             <Link
               to="/login"
-              className="font-semibold text-emerald-600 hover:text-emerald-700"
+              className="font-semibold text-brand-600 hover:text-brand-700"
             >
               Sign In
             </Link>

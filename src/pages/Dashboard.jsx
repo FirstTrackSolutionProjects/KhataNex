@@ -39,7 +39,7 @@ import ProfileDropdown from "../components/ProfileDropdown";
 import { useAuth } from "../context/AuthContext";
 import api, { getToken } from "../lib/api";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const formatMoney = (n) => `₹${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
@@ -328,10 +328,10 @@ export default function Dashboard() {
 
           <div className="flex shrink-0 items-center gap-2">
             {/* Live Online Badge */}
-            <div className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <div className="flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75"></span>
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-500"></span>
               </span>
               <span>
                 {loading ? "..." : `${stats?.onlineUsers ?? 0} Online`}
@@ -345,7 +345,7 @@ export default function Dashboard() {
               className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
               title="Refresh Metrics"
             >
-              <RefreshCw size={18} className={refreshing ? "animate-spin text-emerald-600" : ""} />
+              <RefreshCw size={18} className={refreshing ? "animate-spin text-brand-600" : ""} />
             </button>
 
             {/* Profile Dropdown */}
@@ -404,7 +404,7 @@ export default function Dashboard() {
                   onClick={() => setPeriod(tab.id)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                     period === tab.id
-                      ? "bg-emerald-600 text-white shadow-sm"
+                      ? "bg-brand-600 text-white shadow-sm"
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
@@ -441,13 +441,13 @@ export default function Dashboard() {
                   "All registered business owner accounts"
                 )
               }
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
+              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-400 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Total Users
                 </span>
-                <div className="rounded-xl bg-slate-100 p-2.5 text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition">
+                <div className="rounded-xl bg-slate-100 p-2.5 text-slate-700 group-hover:bg-brand-50 group-hover:text-brand-600 transition">
                   <Users size={20} />
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function Dashboard() {
                 </p>
                 <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
                   <span>Registered accounts</span>
-                  <span className="flex items-center gap-0.5 text-emerald-600 font-semibold group-hover:underline">
+                  <span className="flex items-center gap-0.5 text-brand-600 font-semibold group-hover:underline">
                     View list <ChevronRight size={13} />
                   </span>
                 </div>
@@ -473,25 +473,25 @@ export default function Dashboard() {
                   "Users active within the last 15 minutes"
                 )
               }
-              className="group cursor-pointer rounded-2xl border border-emerald-200 bg-emerald-50/40 p-5 shadow-sm transition hover:border-emerald-500 hover:shadow-md"
+              className="group cursor-pointer rounded-2xl border border-brand-200 bg-brand-50/40 p-5 shadow-sm transition hover:border-brand-500 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-800">
                   Online Presence
                 </span>
-                <div className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                <div className="flex items-center gap-1.5 rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-bold text-brand-800">
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75"></span>
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600"></span>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-600"></span>
                   </span>
                   <span>15m Active</span>
                 </div>
               </div>
               <div className="mt-3">
-                <p className="text-2xl font-black text-emerald-800">
+                <p className="text-2xl font-black text-brand-800">
                   {loading ? "..." : stats?.onlineUsers ?? 0}
                 </p>
-                <div className="mt-1 flex items-center justify-between text-xs text-emerald-700">
+                <div className="mt-1 flex items-center justify-between text-xs text-brand-700">
                   <span>Currently active users</span>
                   <span className="flex items-center gap-0.5 font-semibold group-hover:underline">
                     Drilldown <ChevronRight size={13} />
@@ -509,13 +509,13 @@ export default function Dashboard() {
                   "Users with an active subscription"
                 )
               }
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
+              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-400 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Subscribed Users
                 </span>
-                <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700">
+                <div className="rounded-xl bg-brand-100 p-2.5 text-brand-700">
                   <UserCheck size={20} />
                 </div>
               </div>
@@ -531,7 +531,7 @@ export default function Dashboard() {
                         )}% adoption rate`
                       : "Active subscriptions"}
                   </span>
-                  <span className="flex items-center gap-0.5 text-emerald-600 font-semibold group-hover:underline">
+                  <span className="flex items-center gap-0.5 text-brand-600 font-semibold group-hover:underline">
                     View <ChevronRight size={13} />
                   </span>
                 </div>
@@ -579,7 +579,7 @@ export default function Dashboard() {
                   "Subscriptions paid via payment gateway"
                 )
               }
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
+              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-400 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -643,18 +643,18 @@ export default function Dashboard() {
                   `Paid order revenue for period: ${period.replace("_", " ")}`
                 )
               }
-              className="group cursor-pointer rounded-2xl border-2 border-emerald-500 bg-white p-5 shadow-sm transition hover:shadow-lg"
+              className="group cursor-pointer rounded-2xl border-2 border-brand-500 bg-white p-5 shadow-sm transition hover:shadow-lg"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                   Collections ({period.replace("_", " ")})
                 </span>
-                <div className="rounded-xl bg-emerald-600 p-2.5 text-white shadow-sm shadow-emerald-500/20">
+                <div className="rounded-xl bg-brand-600 p-2.5 text-white shadow-sm shadow-brand-500/20">
                   <DollarSign size={20} />
                 </div>
               </div>
               <div className="mt-3">
-                <p className="text-2xl font-black text-emerald-700">
+                <p className="text-2xl font-black text-brand-700">
                   {loading ? "..." : formatMoney(stats?.subscriptionRevenue || 0)}
                 </p>
                 <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
@@ -675,7 +675,7 @@ export default function Dashboard() {
                   "All completed and fulfilled subscription orders"
                 )
               }
-              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
+              className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-400 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -810,7 +810,7 @@ export default function Dashboard() {
               className={`group cursor-pointer rounded-2xl border p-5 shadow-sm transition hover:shadow-md ${
                 (stats?.failedEmailDeliveries || 0) > 0
                   ? "border-rose-300 bg-rose-50/30 hover:border-rose-500"
-                  : "border-slate-200 bg-white hover:border-emerald-400"
+                  : "border-slate-200 bg-white hover:border-brand-400"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -844,7 +844,7 @@ export default function Dashboard() {
                   >
                     {stats?.failedEmailDeliveries || 0} failed · {stats?.pendingEmailDeliveries || 0} pending
                   </span>
-                  <span className="flex items-center gap-0.5 text-emerald-600 font-semibold group-hover:underline">
+                  <span className="flex items-center gap-0.5 text-brand-600 font-semibold group-hover:underline">
                     Queue <ChevronRight size={13} />
                   </span>
                 </div>
@@ -871,7 +871,7 @@ export default function Dashboard() {
                       "Complete historical subscription orders"
                     )
                   }
-                  className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition"
+                  className="rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100 transition"
                 >
                   View All Orders
                 </button>
@@ -912,7 +912,7 @@ export default function Dashboard() {
                               onClick={() => ord.user_id && navigate(`/my-users/${ord.user_id}`)}
                               className={`text-[11px] block truncate max-w-[160px] ${
                                 ord.user_id
-                                  ? "text-slate-600 hover:text-emerald-600 hover:underline cursor-pointer font-medium"
+                                  ? "text-slate-600 hover:text-brand-600 hover:underline cursor-pointer font-medium"
                                   : "text-slate-500"
                               }`}
                               title={ord.user_id ? "View Customer in My Users" : undefined}
@@ -955,7 +955,7 @@ export default function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => handleDownloadInvoice(ord.id, ord.invoice_number)}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                                className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700 hover:bg-brand-100 transition"
                                 title="Download GST Invoice"
                               >
                                 <Download size={12} />
@@ -983,10 +983,10 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/my-users")}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-emerald-100 p-2 text-emerald-700">
+                      <div className="rounded-lg bg-brand-100 p-2 text-brand-700">
                         <Users size={16} />
                       </div>
                       <div>
@@ -1000,7 +1000,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/billing-admin")}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
                       <div className="rounded-lg bg-blue-100 p-2 text-blue-700">
@@ -1017,7 +1017,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/payments")}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
                       <div className="rounded-lg bg-purple-100 p-2 text-purple-700">
@@ -1034,7 +1034,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/reports")}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
                       <div className="rounded-lg bg-amber-100 p-2 text-amber-700">
@@ -1051,10 +1051,10 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setAuditTrailModal((prev) => ({ ...prev, open: true }))}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-emerald-100 p-2 text-emerald-700">
+                      <div className="rounded-lg bg-brand-100 p-2 text-brand-700">
                         <ShieldCheck size={16} />
                       </div>
                       <div>
@@ -1145,12 +1145,12 @@ export default function Dashboard() {
                     value={drilldownSearch}
                     onChange={(e) => setDrilldownSearch(e.target.value)}
                     placeholder="Search by name, email, order ID, phone..."
-                    className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs focus:border-brand-500 focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+                  className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"
                 >
                   Search
                 </button>
@@ -1173,7 +1173,7 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto p-6">
               {drilldownLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                  <RefreshCw size={24} className="animate-spin text-emerald-600 mb-2" />
+                  <RefreshCw size={24} className="animate-spin text-brand-600 mb-2" />
                   <p className="text-xs">Loading records...</p>
                 </div>
               ) : drilldownError ? (
@@ -1252,7 +1252,7 @@ export default function Dashboard() {
                               <td className="py-3 px-3">
                                 <span
                                   onClick={() => navigate(`/my-users/${row.id || row.user_id}`)}
-                                  className="font-bold text-slate-900 block hover:text-emerald-600 hover:underline cursor-pointer"
+                                  className="font-bold text-slate-900 block hover:text-brand-600 hover:underline cursor-pointer"
                                   title="View Account in My Users"
                                 >
                                   {row.name || row.user_name}
@@ -1267,7 +1267,7 @@ export default function Dashboard() {
                               <td className="py-3 px-3">
                                 {row.plan_name ? (
                                   <div>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-brand-700">
                                       {row.plan_name}
                                     </span>
                                     <span className="block text-[10px] text-slate-400">
@@ -1280,7 +1280,7 @@ export default function Dashboard() {
                               </td>
                               <td className="py-3 px-3 text-slate-500">
                                 {row.minutes_ago !== undefined && row.minutes_ago !== null ? (
-                                  <span className="font-semibold text-emerald-700">
+                                  <span className="font-semibold text-brand-700">
                                     {row.minutes_ago === 0 ? "Just now" : `${row.minutes_ago}m ago`}
                                   </span>
                                 ) : (
@@ -1298,7 +1298,7 @@ export default function Dashboard() {
                                 <button
                                   type="button"
                                   onClick={() => navigate(`/my-users/${row.id || row.user_id}`)}
-                                  className="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
+                                  className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700 hover:bg-brand-100"
                                 >
                                   Profile
                                 </button>
@@ -1322,7 +1322,7 @@ export default function Dashboard() {
                               <td className="py-3 px-3">
                                 <span
                                   onClick={() => (row.user_id || row.id) && navigate(`/my-users/${row.user_id || row.id}`)}
-                                  className={`font-semibold block ${(row.user_id || row.id) ? "text-slate-800 hover:text-emerald-600 hover:underline cursor-pointer" : "text-slate-800"}`}
+                                  className={`font-semibold block ${(row.user_id || row.id) ? "text-slate-800 hover:text-brand-600 hover:underline cursor-pointer" : "text-slate-800"}`}
                                   title="View Account in My Users"
                                 >
                                   {row.user_name || row.name}
@@ -1360,7 +1360,7 @@ export default function Dashboard() {
                                   <button
                                     type="button"
                                     onClick={() => handleDownloadInvoice(row.id, row.invoice_number)}
-                                    className="rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100"
+                                    className="rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-bold text-brand-700 hover:bg-brand-100"
                                   >
                                     Invoice
                                   </button>
@@ -1375,7 +1375,7 @@ export default function Dashboard() {
                               <td className="py-3 px-3">
                                 <span
                                   onClick={() => (row.user_id || row.id) && navigate(`/my-users/${row.user_id || row.id}`)}
-                                  className="font-bold text-slate-900 block hover:text-emerald-600 hover:underline cursor-pointer"
+                                  className="font-bold text-slate-900 block hover:text-brand-600 hover:underline cursor-pointer"
                                   title="View Account in My Users"
                                 >
                                   {row.user_name || row.name}
@@ -1397,7 +1397,7 @@ export default function Dashboard() {
                                 <button
                                   type="button"
                                   onClick={() => (row.user_id || row.id) && navigate(`/my-users/${row.user_id || row.id}`)}
-                                  className="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
+                                  className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700 hover:bg-brand-100"
                                 >
                                   View Account
                                 </button>
@@ -1430,7 +1430,7 @@ export default function Dashboard() {
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                                     row.is_active
-                                      ? "bg-emerald-100 text-emerald-800"
+                                      ? "bg-brand-100 text-brand-800"
                                       : "bg-slate-100 text-slate-500"
                                   }`}
                                 >
@@ -1544,7 +1544,7 @@ export default function Dashboard() {
             {/* Drawer Header */}
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700">
+                <div className="rounded-xl bg-brand-100 p-2 text-brand-700">
                   <Users size={20} />
                 </div>
                 <div>
@@ -1569,7 +1569,7 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {userDetailModal.loading ? (
                 <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                  <RefreshCw size={24} className="animate-spin text-emerald-600 mb-2" />
+                  <RefreshCw size={24} className="animate-spin text-brand-600 mb-2" />
                   <p className="text-xs">Loading complete account dossier...</p>
                 </div>
               ) : userDetailModal.error ? (
@@ -1614,7 +1614,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <span className="text-slate-400 block">Last Active</span>
-                        <span className="font-semibold text-emerald-700">
+                        <span className="font-semibold text-brand-700">
                           {formatDateTime(userDetailModal.data.user.last_active_at)}
                         </span>
                       </div>
@@ -1636,7 +1636,7 @@ export default function Dashboard() {
                       <button
                         type="button"
                         onClick={() => navigate("/billing-admin")}
-                        className="text-xs font-bold text-emerald-600 hover:underline"
+                        className="text-xs font-bold text-brand-600 hover:underline"
                       >
                         Manage in Billing Admin
                       </button>
@@ -1652,11 +1652,11 @@ export default function Dashboard() {
                         {userDetailModal.data.subscriptions.map((sub) => (
                           <div
                             key={sub.id}
-                            className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3 text-xs"
+                            className="rounded-xl border border-brand-100 bg-brand-50/50 p-3 text-xs"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-emerald-900">{sub.plan_name}</span>
-                              <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-900 uppercase">
+                              <span className="font-bold text-brand-900">{sub.plan_name}</span>
+                              <span className="rounded-full bg-brand-200 px-2 py-0.5 text-[10px] font-bold text-brand-900 uppercase">
                                 {sub.status}
                               </span>
                             </div>
@@ -1723,7 +1723,7 @@ export default function Dashboard() {
                                     <button
                                       type="button"
                                       onClick={() => handleDownloadInvoice(ord.id, ord.invoice_number)}
-                                      className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100"
+                                      className="rounded bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-700 hover:bg-brand-100"
                                     >
                                       PDF
                                     </button>
@@ -1810,7 +1810,7 @@ export default function Dashboard() {
                   onClick={() => {
                     navigate(`/my-users/${userDetailModal.data.user.id}`);
                   }}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+                  className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"
                 >
                   Open in My Users
                 </button>
@@ -1858,7 +1858,7 @@ export default function Dashboard() {
                       loadAuditLogs(1, auditTrailModal.search);
                     }
                   }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs focus:border-brand-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -1898,7 +1898,7 @@ export default function Dashboard() {
                             <span className="rounded-md bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
                               {log.target_type || "general"} #{log.target_id || "—"}
                             </span>
-                            <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                            <span className="rounded-md bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800 uppercase">
                               {log.actor_role}
                             </span>
                           </div>

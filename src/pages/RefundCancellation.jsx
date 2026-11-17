@@ -258,7 +258,7 @@ const RefundCancellation = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-blue-600 to-cyan-500 py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600 py-20">
         {/* Decorative Circles */}
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
@@ -273,7 +273,7 @@ const RefundCancellation = () => {
             Refund & Cancellation
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-sky-50 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-brand-50 sm:text-lg">
             Learn about KhataNex cancellation requests, refund eligibility,
             payment issues, and refund processing.
           </p>
@@ -301,7 +301,7 @@ const RefundCancellation = () => {
                     <a
                       key={section.id}
                       href={`#${section.id}`}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-sky-50 hover:text-sky-600"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-brand-50 hover:text-brand-600"
                     >
                       <ChevronRight size={15} />
 
@@ -318,7 +318,7 @@ const RefundCancellation = () => {
             <main className="space-y-6">
 
               {/* Introduction */}
-              <div className="rounded-2xl border border-sky-100 bg-sky-50 p-6 sm:p-8">
+              <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-slate-900">
                   KhataNex Refund Policy
                 </h2>
@@ -346,7 +346,7 @@ const RefundCancellation = () => {
                     className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md sm:p-8"
                   >
                     <div className="mb-5 flex items-center gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-500">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500">
                         <Icon size={22} />
                       </div>
 
@@ -365,7 +365,7 @@ const RefundCancellation = () => {
               {/* Contact Card */}
               <div
                 id="contact"
-                className="scroll-mt-24 overflow-hidden rounded-3xl bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 p-8 shadow-xl shadow-sky-100 sm:p-10"
+                className="scroll-mt-24 overflow-hidden rounded-3xl bg-gradient-to-r from-brand-700 via-brand-600 to-brand-500 p-8 shadow-xl shadow-brand-100 sm:p-10"
               >
                 <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-sm">
@@ -377,14 +377,14 @@ const RefundCancellation = () => {
                       Need Help With a Refund?
                     </h2>
 
-                    <p className="mt-2 text-sm leading-6 text-sky-50 sm:text-base">
+                    <p className="mt-2 text-sm leading-6 text-brand-50 sm:text-base">
                       If you have a question about a payment, cancellation, or
                       refund request, please contact our support team.
                     </p>
 
                     <a
                       href="mailto:support@khatanex.in"
-                      className="mt-4 inline-flex items-center gap-2 font-semibold text-white underline underline-offset-4 transition hover:text-sky-100"
+                      className="mt-4 inline-flex items-center gap-2 font-semibold text-white underline underline-offset-4 transition hover:text-brand-100"
                     >
                       <Mail size={17} />
                       support@khatanex.in

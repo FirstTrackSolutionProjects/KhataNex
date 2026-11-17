@@ -158,7 +158,7 @@ const Settings = () => {
         type="button"
         onClick={() => toggleSetting(setting)}
         className={`relative h-6 w-11 rounded-full transition ${
-          settings[setting] ? "bg-emerald-600" : "bg-slate-300"
+          settings[setting] ? "bg-brand-600" : "bg-slate-300"
         }`}
       >
         <span
@@ -188,7 +188,7 @@ const Settings = () => {
             {/* General */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                   <SettingsIcon size={20} />
                 </div>
                 <div>
@@ -259,7 +259,7 @@ const Settings = () => {
                     className={`relative h-6 w-11 shrink-0 rounded-full transition ${
                       !canWrite ? "opacity-50 cursor-not-allowed" : ""
                     } ${
-                      watermarkEnabled ? "bg-emerald-600" : "bg-slate-300"
+                      watermarkEnabled ? "bg-brand-600" : "bg-slate-300"
                     }`}
                     aria-label="Toggle remove watermark"
                   >
@@ -274,7 +274,7 @@ const Settings = () => {
                 <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-xs">
                   <span
                     className={`inline-block h-2.5 w-2.5 rounded-full ${
-                      watermarkEnabled ? "bg-emerald-500" : "bg-amber-500"
+                      watermarkEnabled ? "bg-brand-500" : "bg-amber-500"
                     }`}
                   />
                   <span className="font-medium text-slate-700">
@@ -286,7 +286,7 @@ const Settings = () => {
                 </div>
 
                 {watermarkEnabled && (
-                  <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
+                  <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-brand-100 bg-brand-50/50 p-3">
                     <div>
                       <p className="text-xs font-semibold text-slate-800">
                         Regenerate Existing Documents
@@ -300,7 +300,7 @@ const Settings = () => {
                       disabled={regeneratingDocs || !canWrite}
                       title={!canWrite ? subscriptionRequiredMessage : undefined}
                       onClick={handleRegenerateDocuments}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RefreshCw size={13} className={regeneratingDocs ? "animate-spin" : ""} />
                       {regeneratingDocs ? "Regenerating..." : "Regenerate Documents"}
@@ -309,7 +309,7 @@ const Settings = () => {
                 )}
 
                 {watermarkStatusMsg && (
-                  <p className="mt-2 text-xs font-semibold text-emerald-600">
+                  <p className="mt-2 text-xs font-semibold text-brand-600">
                     {watermarkStatusMsg}
                   </p>
                 )}
@@ -336,7 +336,7 @@ const Settings = () => {
               <div className="mt-5">
                 <a
                   href="/forgot-password"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
                 >
                   <Lock size={16} />
                   Change / Reset Password

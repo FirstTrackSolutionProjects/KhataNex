@@ -129,7 +129,7 @@ const CustomerManagement = () => {
 
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
               <Users size={23} />
             </div>
 
@@ -149,12 +149,12 @@ const CustomerManagement = () => {
           onClick={() => setShowModal(true)}
           className="
             inline-flex items-center justify-center gap-2
-            rounded-xl bg-emerald-600
+            rounded-xl bg-brand-600
             px-5 py-3
             text-sm font-semibold text-white
             shadow-sm
             transition
-            hover:bg-emerald-700
+            hover:bg-brand-700
           "
         >
           <UserPlus size={18} />
@@ -181,7 +181,7 @@ const CustomerManagement = () => {
               </h2>
             </div>
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
               <Users size={22} />
             </div>
           </div>
@@ -193,7 +193,7 @@ const CustomerManagement = () => {
             To Receive
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-emerald-600">
+          <h2 className="mt-2 text-2xl font-bold text-brand-600">
             ₹8,500
           </h2>
 
@@ -272,10 +272,10 @@ const CustomerManagement = () => {
                 text-sm
                 outline-none
                 transition
-                focus:border-emerald-500
+                focus:border-brand-500
                 focus:bg-white
                 focus:ring-2
-                focus:ring-emerald-100
+                focus:ring-brand-100
               "
             />
 
@@ -336,7 +336,7 @@ const CustomerManagement = () => {
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 font-bold text-brand-700">
                         {customer.name.charAt(0)}
                       </div>
 
@@ -410,7 +410,7 @@ const CustomerManagement = () => {
                     <div className="flex justify-end gap-1">
 
                       <button
-                        className="rounded-lg p-2 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600"
+                        className="rounded-lg p-2 text-slate-500 hover:bg-brand-50 hover:text-brand-600"
                         title="View"
                       >
                         <Eye size={17} />
@@ -461,7 +461,7 @@ const CustomerManagement = () => {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 font-bold text-brand-700">
                     {customer.name.charAt(0)}
                   </div>
 
@@ -529,7 +529,7 @@ const CustomerManagement = () => {
 
                 <div className="flex gap-1">
 
-                  <button className="rounded-lg p-2 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600">
+                  <button className="rounded-lg p-2 text-slate-500 hover:bg-brand-50 hover:text-brand-600">
                     <Eye size={17} />
                   </button>
 
@@ -633,7 +633,7 @@ const CustomerManagement = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter customer name"
-                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
 
                 </div>
@@ -660,7 +660,7 @@ const CustomerManagement = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+91 XXXXX XXXXX"
-                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
 
                 </div>
@@ -687,7 +687,7 @@ const CustomerManagement = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="customer@email.com"
-                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
 
                 </div>
@@ -713,7 +713,7 @@ const CustomerManagement = () => {
                     }
                     className={`rounded-xl border p-3 text-sm font-semibold transition ${
                       formData.type === "Customer"
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                        ? "border-brand-500 bg-brand-50 text-brand-700"
                         : "border-slate-200 text-slate-500"
                     }`}
                   >
@@ -734,7 +734,7 @@ const CustomerManagement = () => {
                     }
                     className={`rounded-xl border p-3 text-sm font-semibold transition ${
                       formData.type === "Supplier"
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                        ? "border-brand-500 bg-brand-50 text-brand-700"
                         : "border-slate-200 text-slate-500"
                     }`}
                   >
@@ -762,7 +762,7 @@ const CustomerManagement = () => {
 
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+                  className="flex-1 rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
                 >
                   Add Customer
                 </button>

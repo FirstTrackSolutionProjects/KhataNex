@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BrandLogo from "../components/BrandLogo";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User,
@@ -70,20 +71,20 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
+    <div className="min-h-screen bg-brand-soft px-4 py-10">
       <div className="mx-auto max-w-lg">
         {/* Navigation */}
         <div className="mb-6 flex items-center justify-between">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-brand-600"
           >
             <ArrowLeft size={18} />
             Back to Home
           </Link>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+            className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 transition hover:text-brand-700"
           >
             <Home size={18} />
           </Link>
@@ -94,11 +95,9 @@ const Signup = () => {
             to="/"
             className="mx-auto mb-5 flex w-fit items-center gap-2"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white">
-              K
-            </div>
-            <span className="text-xl font-bold text-slate-900">
-              KHATANEX
+            <BrandLogo size={48} rounded="rounded-xl" className="shadow-brand" />
+            <span className="font-display text-xl font-extrabold text-slate-900">
+              KhataNex
             </span>
           </Link>
           <h1 className="text-3xl font-bold">
@@ -135,7 +134,7 @@ const Signup = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter your name"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -151,7 +150,7 @@ const Signup = () => {
               value={formData.businessName}
               onChange={handleChange}
               placeholder="Enter business name"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -171,7 +170,7 @@ const Signup = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter email"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -192,7 +191,7 @@ const Signup = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Enter phone number"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </div>
           </div>
@@ -214,7 +213,7 @@ const Signup = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Create password"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
               <button
                 type="button"
@@ -244,7 +243,7 @@ const Signup = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-11 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
               <button
                 type="button"
@@ -260,7 +259,7 @@ const Signup = () => {
           <label className="mt-5 flex items-start gap-2 text-xs text-slate-500">
             <input
               type="checkbox"
-              className="mt-0.5 accent-emerald-600"
+              className="mt-0.5 accent-brand-600"
             />
             <span>
               I agree to the Terms & Conditions and Privacy Policy.
@@ -270,7 +269,7 @@ const Signup = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
             {submitting ? "Creating account..." : "Create Account"}
             <ArrowRight size={17} />
@@ -281,7 +280,7 @@ const Signup = () => {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-semibold text-emerald-600"
+            className="font-semibold text-brand-600"
           >
             Login
           </Link>

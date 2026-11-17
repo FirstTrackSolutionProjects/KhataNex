@@ -166,7 +166,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-gray-50 disabled:text-gray-400"
+        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-gray-50 disabled:text-gray-400"
       />
     </label>
   );
@@ -187,7 +187,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -210,7 +210,7 @@ function Section({
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
             <Icon size={18} />
           </div>
 
@@ -294,7 +294,7 @@ function CustomerAutocomplete({
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search customer by name, email, phone or ID"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 pr-10 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 pr-10 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
         />
 
         {query && (
@@ -321,7 +321,7 @@ function CustomerAutocomplete({
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(customer)}
-              className="w-full border-b border-gray-50 px-4 py-3 text-left last:border-0 hover:bg-indigo-50"
+              className="w-full border-b border-gray-50 px-4 py-3 text-left last:border-0 hover:bg-brand-50"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -430,7 +430,7 @@ function ItemAutocomplete({ stock, item, onSelect }) {
         }}
         onFocus={() => setOpen(true)}
         placeholder="Search inventory item"
-        className="w-full rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-100"
+        className="w-full rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-100"
       />
 
       {open && (
@@ -448,7 +448,7 @@ function ItemAutocomplete({ stock, item, onSelect }) {
                 onClick={() => setFilterType(id)}
                 className={`flex-1 rounded py-1 text-xs font-medium transition ${
                   filterType === id
-                    ? "bg-emerald-600 text-white shadow-xs"
+                    ? "bg-brand-600 text-white shadow-xs"
                     : "text-gray-600 hover:bg-gray-200/60"
                 }`}
               >
@@ -469,7 +469,7 @@ function ItemAutocomplete({ stock, item, onSelect }) {
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => choose(product)}
-                  className="w-full border-b border-gray-50 px-3 py-2.5 text-left transition last:border-0 hover:bg-emerald-50"
+                  className="w-full border-b border-gray-50 px-3 py-2.5 text-left transition last:border-0 hover:bg-brand-50"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -483,7 +483,7 @@ function ItemAutocomplete({ stock, item, onSelect }) {
                       </p>
                     </div>
 
-                    <span className="whitespace-nowrap text-xs font-semibold text-emerald-700">
+                    <span className="whitespace-nowrap text-xs font-semibold text-brand-700">
                       {money(product.price)}
                     </span>
                   </div>
@@ -1102,7 +1102,7 @@ function QuotationForm({
             <div className="flex items-center gap-2">
               <FileText
                 size={20}
-                className="text-indigo-600"
+                className="text-brand-600"
               />
 
               <h2 className="text-lg font-semibold text-gray-900">
@@ -1189,7 +1189,7 @@ function QuotationForm({
                   }}
                   className={`rounded-lg px-4 py-2 text-sm font-medium ${
                     customerMode === "existing"
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-brand-600 text-white"
                       : "border border-gray-200 bg-white text-gray-600"
                   }`}
                 >
@@ -1206,7 +1206,7 @@ function QuotationForm({
                   }}
                   className={`rounded-lg px-4 py-2 text-sm font-medium ${
                     customerMode === "manual"
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-brand-600 text-white"
                       : "border border-gray-200 bg-white text-gray-600"
                   }`}
                 >
@@ -1508,7 +1508,7 @@ function QuotationForm({
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center gap-1.5 rounded-lg border border-indigo-200 px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+                  className="flex items-center gap-1.5 rounded-lg border border-brand-200 px-3 py-2 text-xs font-medium text-brand-600 hover:bg-brand-50"
                 >
                   <Plus size={15} />
                   Add Item
@@ -1574,7 +1574,7 @@ function QuotationForm({
                                 )
                               }
                               placeholder="Description"
-                              className="w-44 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-indigo-500"
+                              className="w-44 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-brand-500"
                             />
                           </td>
 
@@ -1589,7 +1589,7 @@ function QuotationForm({
                                 )
                               }
                               placeholder="HSN"
-                              className="w-24 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-indigo-500"
+                              className="w-24 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-brand-500"
                             />
                           </td>
 
@@ -1616,7 +1616,7 @@ function QuotationForm({
                                     className={`w-20 rounded-md border px-2.5 py-2 text-sm outline-none transition ${
                                       isOverStock
                                         ? "border-rose-400 bg-rose-50 text-rose-700 focus:border-rose-500"
-                                        : "border-gray-200 focus:border-indigo-500"
+                                        : "border-gray-200 focus:border-brand-500"
                                     }`}
                                   />
                                   {isOverStock && (
@@ -1642,7 +1642,7 @@ function QuotationForm({
                                   e.target.value
                                 )
                               }
-                              className="w-28 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-indigo-500"
+                              className="w-28 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-brand-500"
                             />
                           </td>
 
@@ -1659,7 +1659,7 @@ function QuotationForm({
                                   e.target.value
                                 )
                               }
-                              className="w-24 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-indigo-500"
+                              className="w-24 rounded-md border border-gray-200 px-2.5 py-2 text-sm outline-none focus:border-brand-500"
                             />
                           </td>
 
@@ -1718,7 +1718,7 @@ function QuotationForm({
                         }
                       }
                     }}
-                    className="h-[42px] w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    className="h-[42px] w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   >
                     <option value="gst">CGST + SGST</option>
                     <option value="igst">IGST</option>
@@ -1733,7 +1733,7 @@ function QuotationForm({
                   <select
                     value={gstRatePreset}
                     onChange={(e) => handleGstRateChange(e.target.value)}
-                    className="h-[42px] w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    className="h-[42px] w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   >
                     <option value="0">0%</option>
                     <option value="3">3%</option>
@@ -1812,7 +1812,7 @@ function QuotationForm({
                 }
                 rows={5}
                 placeholder="Enter quotation terms and conditions..."
-                className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </Section>
 
@@ -1826,7 +1826,7 @@ function QuotationForm({
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 placeholder="Additional notes..."
-                className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </Section>
 
@@ -2240,7 +2240,7 @@ const Quotations = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search quotation ID, customer name or amount..."
-                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </div>
 
@@ -2280,7 +2280,7 @@ const Quotations = () => {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-left">
                   <thead>
-                    <tr className="bg-emerald-600 text-white">
+                    <tr className="bg-brand-600 text-white">
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Document</th>
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Type</th>
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Customer</th>
@@ -2357,7 +2357,7 @@ const Quotations = () => {
                                 handleOpenQuotationPreview(document)
                               }
                               title="View Quotation"
-                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-brand-50 hover:text-brand-600 transition"
                             >
                               <Eye size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -2370,7 +2370,7 @@ const Quotations = () => {
                               }
                               title={!canWrite ? subscriptionRequiredMessage : "Edit Quotation"}
                               className={`rounded-lg p-2 sm:p-2.5 text-slate-500 transition ${
-                                !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-emerald-50 hover:text-emerald-600"
+                                !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-brand-50 hover:text-brand-600"
                               }`}
                             >
                               <Pencil size={16} className="sm:w-5 sm:h-5" />
@@ -2382,7 +2382,7 @@ const Quotations = () => {
                                 downloadDocument(document)
                               }
                               title="Download PDF"
-                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition"
+                              className="rounded-lg p-2 sm:p-2.5 text-slate-500 hover:bg-brand-50 hover:text-brand-600 transition"
                             >
                               <Download size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -2396,7 +2396,7 @@ const Quotations = () => {
                                 }
                                 title={!canWrite ? subscriptionRequiredMessage : "Resend email"}
                                 className={`rounded-lg p-2 sm:p-2.5 text-slate-500 transition ${
-                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-emerald-50 hover:text-emerald-600"
+                                  !canWrite ? "opacity-40 cursor-not-allowed" : "hover:bg-brand-50 hover:text-brand-600"
                                 }`}
                               >
                                 <Mail size={16} className="sm:w-5 sm:h-5" />

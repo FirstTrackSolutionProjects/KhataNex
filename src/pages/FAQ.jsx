@@ -84,20 +84,20 @@ const FAQ = () => {
   return (
     <section className="relative min-h-screen overflow-hidden bg-slate-50 py-20">
       {/* Background Decorations */}
-      <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl" />
+      <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
+      <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-200/40 blur-3xl" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto mb-14 max-w-3xl text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-600">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-600">
             <HelpCircle size={18} />
             Frequently Asked Questions
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
             Everything You Need to Know About{" "}
-            <span className="text-sky-500">KhataNex</span>
+            <span className="text-brand-500">KhataNex</span>
           </h1>
 
           <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">
@@ -117,8 +117,8 @@ const FAQ = () => {
                 key={index}
                 className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 ${
                   isOpen
-                    ? "border-sky-300 shadow-lg shadow-sky-100"
-                    : "border-slate-200 hover:border-sky-200 hover:shadow-md"
+                    ? "border-brand-300 shadow-lg shadow-brand-100"
+                    : "border-slate-200 hover:border-brand-200 hover:shadow-md"
                 }`}
               >
                 {/* Question */}
@@ -132,8 +132,8 @@ const FAQ = () => {
                     <div
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
                         isOpen
-                          ? "bg-sky-500 text-white"
-                          : "bg-sky-50 text-sky-500"
+                          ? "bg-brand-500 text-white"
+                          : "bg-brand-50 text-brand-500"
                       }`}
                     >
                       <Icon size={21} />
@@ -147,7 +147,7 @@ const FAQ = () => {
                   <div
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
                       isOpen
-                        ? "rotate-180 bg-sky-500 text-white"
+                        ? "rotate-180 bg-brand-500 text-white"
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -180,7 +180,7 @@ const FAQ = () => {
 
         {/* Bottom Contact Card */}
         <div className="mx-auto mt-16 max-w-4xl">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 px-6 py-10 text-center shadow-xl shadow-sky-200 sm:px-10">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-700 via-brand-600 to-brand-500 px-6 py-10 text-center shadow-xl shadow-brand-200 sm:px-10">
             {/* Decorative circles */}
             <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
             <div className="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-white/10" />
@@ -194,14 +194,14 @@ const FAQ = () => {
                 Still Have Questions?
               </h2>
 
-              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-sky-50 sm:text-base">
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-brand-50 sm:text-base">
                 Can't find the answer you're looking for? Our support team is
                 ready to help you with KhataNex.
               </p>
 
               <button
                 type="button"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-sky-600 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-sky-50"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-brand-600 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-brand-50"
               >
                 <MessageCircle size={19} />
                 Contact Support

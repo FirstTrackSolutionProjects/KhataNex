@@ -47,7 +47,7 @@ const getStockStatus = (quantity, itemType) => {
   if (q > 10) {
     return {
       label: "In Stock",
-      className: "bg-emerald-100 text-emerald-700",
+      className: "bg-brand-100 text-brand-700",
       isLow: false,
     };
   }
@@ -675,7 +675,7 @@ const Inventory = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+                <div className="rounded-xl bg-brand-100 p-3 text-brand-600">
                   <IndianRupee size={21} />
                 </div>
 
@@ -684,7 +684,7 @@ const Inventory = () => {
                     Stock Value
                   </p>
 
-                  <p className="text-2xl font-bold text-emerald-600">
+                  <p className="text-2xl font-bold text-brand-600">
                     {loading
                       ? "..."
                       : `₹${stockValue.toLocaleString(
@@ -731,7 +731,7 @@ const Inventory = () => {
                   }
                   className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                     productTypeFilter === value
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                      ? "border-brand-500 bg-brand-50 text-brand-700"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                   }`}
                 >
@@ -752,7 +752,7 @@ const Inventory = () => {
                   setSearch(e.target.value)
                 }
                 placeholder="Search products..."
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-emerald-500"
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500"
               />
             </div>
           </div>
@@ -885,8 +885,8 @@ const Inventory = () => {
                                 openEditProduct(product)
                               }
                               title={!canWrite ? subscriptionRequiredMessage : "Update"}
-                              className={`min-h-10 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold transition ${
-                                !canWrite ? "opacity-40 cursor-not-allowed text-emerald-400" : "text-emerald-700 hover:bg-emerald-100"
+                              className={`min-h-10 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-bold transition ${
+                                !canWrite ? "opacity-40 cursor-not-allowed text-brand-400" : "text-brand-700 hover:bg-brand-100"
                               }`}
                             >
                               Update
@@ -953,7 +953,7 @@ const Inventory = () => {
                     )
                   }
                   placeholder="Search previous purchase or enter item name manually"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
                 />
 
                 {productPurchaseSearch.trim() &&
@@ -974,7 +974,7 @@ const Inventory = () => {
                               item
                             )
                           }
-                          className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-emerald-50"
+                          className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-brand-50"
                         >
                           <div className="text-sm font-semibold text-slate-800">
                             {item.item_name ||
@@ -1029,7 +1029,7 @@ const Inventory = () => {
                     className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                       productForm.item_type ===
                       type
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                        ? "border-brand-500 bg-brand-50 text-brand-700"
                         : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                     }`}
                   >
@@ -1057,7 +1057,7 @@ const Inventory = () => {
                 )
               }
               placeholder="Product name"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
@@ -1081,7 +1081,7 @@ const Inventory = () => {
                         e.target.value
                       )
                     }
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-emerald-500"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-brand-500"
                   >
                     {UNIT_OPTIONS.map(
                       (unit) => (
@@ -1124,7 +1124,7 @@ const Inventory = () => {
                   )
                 }
                 placeholder="HSN / SAC code"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
               />
             </div>
           </div>
@@ -1148,7 +1148,7 @@ const Inventory = () => {
                     e.target.value
                   )
                 }
-                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-emerald-500"
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-brand-500"
               >
                 {GST_OPTIONS.map(
                   (rate) => (
@@ -1186,7 +1186,7 @@ const Inventory = () => {
                   )
                 }
                 placeholder="Enter GST %"
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
               />
             )}
           </div>
@@ -1209,7 +1209,7 @@ const Inventory = () => {
                 )
               }
               placeholder="0"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
             />
 
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -1223,7 +1223,7 @@ const Inventory = () => {
                 }
                 className={`rounded-xl border px-3 py-2.5 text-xs font-semibold ${
                   productForm.price_inclusive_gst
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    ? "border-brand-500 bg-brand-50 text-brand-700"
                     : "border-slate-200 text-slate-600"
                 }`}
               >
@@ -1240,7 +1240,7 @@ const Inventory = () => {
                 }
                 className={`rounded-xl border px-3 py-2.5 text-xs font-semibold ${
                   !productForm.price_inclusive_gst
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    ? "border-brand-500 bg-brand-50 text-brand-700"
                     : "border-slate-200 text-slate-600"
                 }`}
               >
@@ -1270,7 +1270,7 @@ const Inventory = () => {
                           <span>GST ({r}%):</span>
                           <span className="font-semibold text-slate-800">₹{gst.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between font-bold text-emerald-700 pt-1 border-t border-slate-200">
+                        <div className="flex justify-between font-bold text-brand-700 pt-1 border-t border-slate-200">
                           <span>Final Selling Price (Inclusive):</span>
                           <span>₹{p.toFixed(2)}</span>
                         </div>
@@ -1289,7 +1289,7 @@ const Inventory = () => {
                           <span>GST ({r}%):</span>
                           <span className="font-semibold text-slate-800">₹{gst.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between font-bold text-emerald-700 pt-1 border-t border-slate-200">
+                        <div className="flex justify-between font-bold text-brand-700 pt-1 border-t border-slate-200">
                           <span>Total Price with GST (Exclusive):</span>
                           <span>₹{total.toFixed(2)}</span>
                         </div>
@@ -1324,7 +1324,7 @@ const Inventory = () => {
                   )
                 }
                 placeholder="0"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
               />
 
               <p className="mt-1.5 text-xs text-slate-500">
@@ -1349,14 +1349,14 @@ const Inventory = () => {
                 )
               }
               placeholder="Product/service description"
-              className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+              className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={savingProduct}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
             {savingProduct
               ? editingProductId

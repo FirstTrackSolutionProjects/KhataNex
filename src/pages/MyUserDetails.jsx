@@ -783,10 +783,10 @@ const ActivityCard = ({
   <button
     type="button"
     onClick={onClick}
-    className="group flex min-h-[120px] w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-emerald-300 hover:bg-emerald-50/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+    className="group flex min-h-[120px] w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-brand-300 hover:bg-brand-50/30 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
   >
     <div className="min-w-0">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
         <Icon size={21} />
       </div>
 
@@ -802,7 +802,7 @@ const ActivityCard = ({
       )}
       <ChevronRight
         size={19}
-        className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-emerald-600"
+        className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-brand-600"
       />
     </div>
   </button>
@@ -987,18 +987,18 @@ const RecordModal = ({
 
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="min-w-full text-sm">
-              <thead className="bg-emerald-50">
+              <thead className="bg-brand-50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-emerald-800">
+                  <th className="px-4 py-3 text-left font-semibold text-brand-800">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-emerald-800">
+                  <th className="px-4 py-3 text-left font-semibold text-brand-800">
                     Item
                   </th>
-                  <th className="px-4 py-3 text-right font-semibold text-emerald-800">
+                  <th className="px-4 py-3 text-right font-semibold text-brand-800">
                     Amount
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-emerald-800">
+                  <th className="px-4 py-3 text-left font-semibold text-brand-800">
                     Payment
                   </th>
                 </tr>
@@ -1544,8 +1544,8 @@ const MyUserDetails = () => {
       title: "Total Sales",
       value: userMetrics.sales,
       icon: IndianRupee,
-      bg: "bg-emerald-100",
-      text: "text-emerald-600",
+      bg: "bg-brand-100",
+      text: "text-brand-600",
       valColor: "text-slate-900",
       subtext: "Total revenue",
     },
@@ -2296,7 +2296,7 @@ const MyUserDetails = () => {
     if (recordsLoading) {
       return (
         <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
-          <RefreshCw size={18} className="animate-spin text-emerald-600" />
+          <RefreshCw size={18} className="animate-spin text-brand-600" />
           Loading records...
         </div>
       );
@@ -2375,7 +2375,7 @@ const MyUserDetails = () => {
               value={recordSearch}
               onChange={(event) => setRecordSearch(event.target.value)}
               placeholder={`Search ${activeType === "inventory" || activeType === "stock" ? "inventory / stock" : activeType.replace("-", " ")}...`}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -2418,7 +2418,7 @@ const MyUserDetails = () => {
             filteredRecords.map((record) => (
               <div
                 key={`${record.source || activeType || "record"}-${record.type || record.entry_type || "item"}-${record.id}`}
-                className="flex w-full items-center justify-between gap-4 px-4 py-4 transition hover:bg-emerald-50/40"
+                className="flex w-full items-center justify-between gap-4 px-4 py-4 transition hover:bg-brand-50/40"
               >
                 <button
                   type="button"
@@ -2503,7 +2503,7 @@ const MyUserDetails = () => {
 
                   {record.total_paise !== undefined &&
                     ["billing", "subscriptions"].includes(activeType) && (
-                      <span className="text-sm font-semibold text-emerald-600 mr-1">
+                      <span className="text-sm font-semibold text-brand-600 mr-1">
                         {formatMoney(record.total_paise / 100)}
                       </span>
                     )}
@@ -2538,7 +2538,7 @@ const MyUserDetails = () => {
                         record
                       )
                     }
-                    className="rounded-lg p-1 text-slate-400 hover:text-emerald-600"
+                    className="rounded-lg p-1 text-slate-400 hover:text-brand-600"
                     title="View details"
                   >
                     <ChevronRight size={17} />
@@ -2574,7 +2574,7 @@ const MyUserDetails = () => {
         <button
           type="button"
           onClick={() => navigate("/my-users")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+          className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
         >
           <ArrowLeft size={17} />
           Back to My Users
@@ -2613,7 +2613,7 @@ const MyUserDetails = () => {
         <button
           type="button"
           onClick={() => navigate("/my-users")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+          className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
         >
           <ArrowLeft size={17} />
           Back to My Users
@@ -2622,7 +2622,7 @@ const MyUserDetails = () => {
         <button
           type="button"
           onClick={loadUser}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-brand-300 hover:text-brand-700"
         >
           <RefreshCw size={16} />
           Refresh
@@ -2660,7 +2660,7 @@ const MyUserDetails = () => {
               <button
                 type="button"
                 onClick={() => setRestoreModalOpen(true)}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-700 transition"
               >
                 <RotateCcw size={16} />
                 Restore Account
@@ -2679,7 +2679,7 @@ const MyUserDetails = () => {
                 onClick={() => logoUrl && setShowLogo(true)}
                 disabled={!logoUrl}
                 aria-label={logoUrl ? "View business logo" : "No business logo available"}
-                className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-default"
+                className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-default"
               >
                 {logoUrl ? (
                   <img
@@ -2697,7 +2697,7 @@ const MyUserDetails = () => {
                   {user.name || "Unnamed User"}
                 </h1>
 
-                <p className="mt-1 text-sm font-medium text-emerald-600">
+                <p className="mt-1 text-sm font-medium text-brand-600">
                   Business Owner
                 </p>
 
@@ -2709,7 +2709,7 @@ const MyUserDetails = () => {
                   <button
                     type="button"
                     onClick={() => setShowSignature(true)}
-                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-100"
                   >
                     <Eye size={15} />
                     View Signature
@@ -2755,17 +2755,17 @@ const MyUserDetails = () => {
                   <button
                     type="button"
                     onClick={() => setRestoreModalOpen(true)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100"
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-brand-300 bg-brand-50 px-4 py-3 text-left transition hover:bg-brand-100"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
                         <RotateCcw size={18} />
                       </span>
                       <span>
-                        <span className="block text-sm font-semibold text-emerald-800">
+                        <span className="block text-sm font-semibold text-brand-800">
                           Restore Account
                         </span>
-                        <span className="block text-xs text-emerald-700/80">
+                        <span className="block text-xs text-brand-700/80">
                           Reactivate account access and restore staff.
                         </span>
                       </span>
@@ -2782,17 +2782,17 @@ const MyUserDetails = () => {
                     <button
                       type="button"
                       onClick={openEditModal}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-left transition hover:bg-emerald-100/80"
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50/70 px-4 py-3 text-left transition hover:bg-brand-100/80"
                     >
                       <span className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
                           <Pencil size={18} />
                         </span>
                         <span>
-                          <span className="block text-sm font-semibold text-emerald-800">
+                          <span className="block text-sm font-semibold text-brand-800">
                             Edit Profile
                           </span>
-                          <span className="block text-xs text-emerald-700/80">
+                          <span className="block text-xs text-brand-700/80">
                             Update name, phone, business, GSTIN and contact details.
                           </span>
                         </span>
@@ -2826,17 +2826,17 @@ const MyUserDetails = () => {
                       type="button"
                       onClick={toggleAccountStatus}
                       disabled={statusLoading}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-left transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-brand-600">
                           <UserRound size={18} />
                         </span>
                         <span>
-                          <span className="block text-sm font-semibold text-emerald-700">
+                          <span className="block text-sm font-semibold text-brand-700">
                             {statusLoading ? "Reactivating..." : "Reactivate Account"}
                           </span>
-                          <span className="block text-xs text-emerald-600/80">
+                          <span className="block text-xs text-brand-600/80">
                             Restore this user's access.
                           </span>
                         </span>
@@ -2902,7 +2902,7 @@ const MyUserDetails = () => {
                     }
                   }}
                   disabled={!user.email}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Mail size={17} />
                   Send Email
@@ -2917,7 +2917,7 @@ const MyUserDetails = () => {
                     }
                   }}
                   disabled={!user.phone}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <MessageCircle size={17} />
                   Send WhatsApp
@@ -2942,8 +2942,8 @@ const MyUserDetails = () => {
                       </span>
                     ) : null}
                     {(user?.subscription || billingData?.user?.subscription)?.status === "active" ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-bold text-brand-800">
+                        <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
                         Active
                       </span>
                     ) : (user?.subscription || billingData?.user?.subscription)?.status === "expired" ? (
@@ -3160,7 +3160,7 @@ const MyUserDetails = () => {
                     className="rounded-2xl border border-slate-200 bg-white p-5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
                         <Icon size={20} />
                       </span>
                     </div>
@@ -3201,7 +3201,7 @@ const MyUserDetails = () => {
                   />
 
                   {activeType === "invoices" && (
-                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-brand-200 bg-white">
                       {renderRecordRows()}
                     </div>
                   )}
@@ -3222,7 +3222,7 @@ const MyUserDetails = () => {
                   />
 
                   {activeType === "quotations" && (
-                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-brand-200 bg-white">
                       {renderRecordRows()}
                     </div>
                   )}
@@ -3243,7 +3243,7 @@ const MyUserDetails = () => {
                   />
 
                   {activeType === "money-receipts" && (
-                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-brand-200 bg-white">
                       {renderRecordRows()}
                     </div>
                   )}
@@ -3270,7 +3270,7 @@ const MyUserDetails = () => {
                 <select
                   value={selectedBusinessSection}
                   onChange={(e) => handleBusinessSectionChange(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 >
                   <option value="">-- Choose Business Section --</option>
                   {canAccessSection("customers") && (
@@ -3386,13 +3386,13 @@ const MyUserDetails = () => {
             </div>
 
             {["customers", "khata", "payments", "purchase-bills", "purchase_bills", "inventory", "stock", "vehicles", "billing", "subscriptions"].includes(activeType) && (
-              <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+              <div className="mt-5 overflow-hidden rounded-2xl border border-brand-200 bg-white">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-5 py-3.5">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-800 capitalize">
                       {activeType === "inventory" || activeType === "stock" ? "Inventory / Stock" : activeType} Records
                     </span>
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
                       {records.length}
                     </span>
                   </div>
@@ -3412,7 +3412,7 @@ const MyUserDetails = () => {
             )}
 
             {showReports && (
-              <section className="mt-5 rounded-2xl border border-emerald-200 bg-white p-5">
+              <section className="mt-5 rounded-2xl border border-brand-200 bg-white p-5">
                 <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800">
@@ -3429,7 +3429,7 @@ const MyUserDetails = () => {
                       setShowReports(false);
                       setSelectedBusinessSection("");
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-emerald-300 hover:text-emerald-700"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-700"
                   >
                     <X size={15} />
                     Close
@@ -3439,7 +3439,7 @@ const MyUserDetails = () => {
                 {/* Period Controls Header */}
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center gap-2">
-                    <CalendarDays size={16} className="text-emerald-600" />
+                    <CalendarDays size={16} className="text-brand-600" />
                     <span className="text-xs font-semibold text-slate-700">Filter Period:</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -3466,7 +3466,7 @@ const MyUserDetails = () => {
                       onClick={() => setShowUserCustomCalendar(!showUserCustomCalendar)}
                       className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition flex items-center gap-1 ${
                         userReportPeriod === "custom" || showUserCustomCalendar
-                          ? "bg-emerald-600 text-white shadow-sm"
+                          ? "bg-brand-600 text-white shadow-sm"
                           : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
                       }`}
                       title="Custom date range"
@@ -3516,7 +3516,7 @@ const MyUserDetails = () => {
                           <div
                             key={card.key}
                             onClick={() => handleOpenUserDrilldown(card.key, card.title)}
-                            className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-emerald-500 hover:shadow-md"
+                            className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md"
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => {
@@ -3541,7 +3541,7 @@ const MyUserDetails = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="mt-2.5 sm:mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] font-medium text-slate-400 group-hover:text-emerald-600 transition">
+                            <div className="mt-2.5 sm:mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] font-medium text-slate-400 group-hover:text-brand-600 transition">
                               <span className="truncate pr-1">{card.subtext || "Click to drilldown"}</span>
                               <span className="font-bold shrink-0">→</span>
                             </div>
@@ -3563,8 +3563,8 @@ const MyUserDetails = () => {
                         </div>
 
                         <div className="flex items-center gap-4 text-xs font-semibold">
-                          <span className="flex items-center gap-1.5 text-emerald-700">
-                            <span className="h-3 w-3 rounded-md bg-emerald-500" /> Sales: {formatMoney(userMetrics.sales)}
+                          <span className="flex items-center gap-1.5 text-brand-700">
+                            <span className="h-3 w-3 rounded-md bg-brand-500" /> Sales: {formatMoney(userMetrics.sales)}
                           </span>
                           <span className="flex items-center gap-1.5 text-rose-700">
                             <span className="h-3 w-3 rounded-md bg-rose-500" /> Total Expense: {formatMoney(userMetrics.totalExpense)}
@@ -3585,11 +3585,11 @@ const MyUserDetails = () => {
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between text-xs font-semibold">
                                   <span className="text-slate-700">Total Sales</span>
-                                  <span className="text-emerald-600 font-bold">{formatMoney(userMetrics.sales)}</span>
+                                  <span className="text-brand-600 font-bold">{formatMoney(userMetrics.sales)}</span>
                                 </div>
                                 <div className="h-5 w-full overflow-hidden rounded-xl bg-slate-100">
                                   <div
-                                    className="h-full rounded-xl bg-emerald-500 transition-all duration-500"
+                                    className="h-full rounded-xl bg-brand-500 transition-all duration-500"
                                     style={{ width: `${Math.max(userMetrics.sales > 0 ? 3 : 0, salesPct)}%` }}
                                   />
                                 </div>
@@ -3641,7 +3641,7 @@ const MyUserDetails = () => {
                         setKhataFilter("credit");
                         loadRecords("khata");
                       }}
-                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-brand-300 hover:bg-brand-50"
                     >
                       <p className="text-xs text-slate-500 truncate">Credit Entries</p>
                       <p className="mt-1 text-xl font-bold text-emerald-600 truncate" title={actualCreditCount.toLocaleString("en-IN")}>
@@ -3672,7 +3672,7 @@ const MyUserDetails = () => {
                         setRecordSearch("");
                         loadRecords("customers");
                       }}
-                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+                      className="overflow-hidden min-w-0 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-brand-300 hover:bg-brand-50"
                     >
                       <p className="text-xs text-slate-500 truncate">Total Customers</p>
                       <p className="mt-1 text-xl font-bold text-slate-800 truncate" title={Number(overview?.customer_count || 0).toLocaleString("en-IN")}>
@@ -3823,7 +3823,7 @@ const MyUserDetails = () => {
                         )}
                       </p>
                     </div>
-                    <div className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <div className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
                       {filteredUserDrilldownTransactions.length} Transactions
                     </div>
                   </div>
@@ -3909,7 +3909,7 @@ const MyUserDetails = () => {
                       <div className="grid grid-cols-2 gap-3 text-sm pt-2">
                         <div className="flex justify-between border-b pb-1">
                           <span className="text-slate-600">Total Sales:</span>
-                          <span className="font-semibold text-emerald-600">
+                          <span className="font-semibold text-brand-600">
                             {formatMoney(userDrilldownData.total_sales)}
                           </span>
                         </div>
@@ -4097,7 +4097,7 @@ const MyUserDetails = () => {
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -4107,7 +4107,7 @@ const MyUserDetails = () => {
                     value={editForm.email}
                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -4119,7 +4119,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -4128,7 +4128,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.business_name}
                     onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -4141,7 +4141,7 @@ const MyUserDetails = () => {
                     placeholder="e.g. Retail, Service"
                     value={editForm.business_type}
                     onChange={(e) => setEditForm({ ...editForm, business_type: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -4150,7 +4150,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.gstin}
                     onChange={(e) => setEditForm({ ...editForm, gstin: e.target.value.toUpperCase() })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono"
                   />
                 </div>
                 <div>
@@ -4159,7 +4159,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.pan}
                     onChange={(e) => setEditForm({ ...editForm, pan: e.target.value.toUpperCase() })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono"
                   />
                 </div>
               </div>
@@ -4170,7 +4170,7 @@ const MyUserDetails = () => {
                   type="text"
                   value={editForm.address}
                   onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                 />
               </div>
 
@@ -4181,7 +4181,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.city}
                     onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -4190,7 +4190,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.state}
                     onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
                 <div>
@@ -4199,7 +4199,7 @@ const MyUserDetails = () => {
                     type="text"
                     value={editForm.pincode}
                     onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -4215,7 +4215,7 @@ const MyUserDetails = () => {
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                  className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700 disabled:opacity-60"
                 >
                   {editLoading ? "Saving..." : "Save Changes"}
                 </button>
@@ -4394,7 +4394,7 @@ const MyUserDetails = () => {
                       </div>
                       <div>
                         <span className="text-slate-500 block">Charged Amount:</span>
-                        <span className="font-bold text-emerald-600">
+                        <span className="font-bold text-brand-600">
                           ₹0.00 (Complimentary)
                         </span>
                       </div>

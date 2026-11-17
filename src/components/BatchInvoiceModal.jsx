@@ -54,19 +54,19 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
           </div>
         )}
 
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+        <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand-800">
               Selected Sales
             </span>
-            <span className="rounded-full bg-emerald-200/70 px-2.5 py-0.5 text-xs font-bold text-emerald-900">
+            <span className="rounded-full bg-brand-200/70 px-2.5 py-0.5 text-xs font-bold text-brand-900">
               {selectedSales.length} item{selectedSales.length > 1 ? "s" : ""}
             </span>
           </div>
           <p className="mt-1 text-sm font-bold text-slate-900">Customer: {customerName}</p>
-          <div className="mt-3 flex items-center justify-between border-t border-emerald-200/60 pt-2 text-sm">
+          <div className="mt-3 flex items-center justify-between border-t border-brand-200/60 pt-2 text-sm">
             <span className="text-slate-600">Total Taxable Subtotal:</span>
-            <span className="font-bold text-emerald-800">₹{totalAmount.toLocaleString("en-IN")}</span>
+            <span className="font-bold text-brand-800">₹{totalAmount.toLocaleString("en-IN")}</span>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
             <select
               value={gstRate}
               onChange={(e) => setGstRate(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             >
               <option value="0">0% (Nil / Exempt)</option>
               <option value="5">5% GST</option>
@@ -97,7 +97,7 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
               required
               value={invoiceDate}
               onChange={(e) => setInvoiceDate(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -110,13 +110,13 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
               placeholder="e.g. Consolidated monthly billing"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 flex items-center gap-2">
-          <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+          <CheckCircle2 size={16} className="text-brand-600 shrink-0" />
           <span>Generating this invoice will not deduct inventory a second time.</span>
         </div>
 
@@ -132,7 +132,7 @@ export default function BatchInvoiceModal({ isOpen, onClose, selectedSales = [],
             type="submit"
             disabled={submitting}
             onClick={handleSubmit}
-            className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+            className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-50"
           >
             {submitting ? "Generating..." : "Generate Official Invoice"}
           </button>

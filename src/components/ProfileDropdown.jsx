@@ -55,7 +55,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
         className={
           variant === "nav"
             ? "flex items-center gap-1 sm:gap-2 rounded-xl px-1 sm:px-2 py-1 transition hover:bg-white/10"
-            : "ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-200 sm:ml-2 sm:h-9 sm:w-9 shadow-sm"
+            : "ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 transition hover:bg-brand-200 sm:ml-2 sm:h-9 sm:w-9 shadow-sm"
         }
         aria-label="User Profile Menu"
         aria-expanded={isOpen}
@@ -69,7 +69,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
               <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[60px] sm:max-w-[120px]">
                 {user?.name || "User"}
               </p>
-              <p className="hidden md:block text-[10px] sm:text-xs text-emerald-100 truncate max-w-[80px] sm:max-w-[120px]">
+              <p className="hidden md:block text-[10px] sm:text-xs text-brand-100 truncate max-w-[80px] sm:max-w-[120px]">
                 {user?.role === "superadmin"
                   ? "Super Admin"
                   : user?.role === "employee"
@@ -79,7 +79,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
             </div>
             <ChevronDown
               size={14}
-              className="sm:w-4 sm:h-4 text-emerald-100 hidden xs:block"
+              className="sm:w-4 sm:h-4 text-brand-100 hidden xs:block"
             />
           </>
         ) : (
@@ -101,7 +101,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
           <button
             type="button"
             onClick={handleProfile}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-left font-medium"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition text-left font-medium"
           >
             <User size={16} />
             <span>Profile</span>
@@ -110,7 +110,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
           <button
             type="button"
             onClick={handleSettings}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-left font-medium"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition text-left font-medium"
           >
             <Settings size={16} />
             <span>Settings</span>
@@ -122,7 +122,7 @@ const ProfileDropdown = ({ variant = "default" }) => {
               setIsOpen(false);
               navigate(user?.role === "superadmin" ? "/billing" : "/subscription");
             }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-left font-medium"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition text-left font-medium"
           >
             <CreditCard size={16} />
             <span>{user?.role === "superadmin" ? "Billing Admin" : "Subscription"}</span>
